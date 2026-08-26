@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TallTreneren - Binær • Heksadesimal • Desimal</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f1f5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 16px;
+            color: #1e293b;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 24px 20px;
+            border-radius: 14px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+            text-align: center;
+            max-width: 560px;
+            width: 100%;
+            position: relative;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .title-group {
+            text-align: left;
+            user-select: none;
+            cursor: default;
+        }
+
+        .brand-title {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+        }
+
+        .brand-title span { color: #2563eb; }
+
+        .brand-subtitle {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .help-btn {
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .help-btn:hover {
+            background-color: #e2e8f0;
+            border-color: #94a3b8;
+        }
+
+        .level-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8fafc;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .level-badge {
+            font-weight: 700;
+            color: #2563eb;
+            background-color: #eff6ff;
+            padding: 3px 8px;
+            border-radius: 6px;
+            border: 1px solid #bfdbfe;
+        }
+
+        .streak-badge {
+            font-weight: 600;
+            color: #059669;
+        }
+
+        .problem-box {
+            margin: 18px 0;
+            text-align: center;
+        }
+
+        .topic-pill {
+            display: inline-block;
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid #bfdbfe;
+        }
+
+        .problem {
+            font-size: 24px;
+            font-weight: 700;
+            padding: 18px 14px;
+            background-color: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            color: #0f172a;
+            letter-spacing: 0.5px;
+            word-break: break-word;
+            margin: 0;
+        }
+
+        .problem .highlight-num {
+            color: #2563eb;
+            font-family: ui-monospace, monospace;
+            background: #eff6ff;
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 1px solid #bfdbfe;
+            display: inline-block;
+            margin: 0 4px;
+        }
+
+        .input-section {
+            margin: 18px 0 10px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #answer-input {
+            padding: 12px 16px;
+            font-size: 20px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            outline: none;
+            text-align: center;
+            font-weight: 700;
+            font-family: ui-monospace, monospace;
+            letter-spacing: 1px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        #answer-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .shortcut-btn {
+            padding: 8px 12px;
+            font-size: 15px;
+            font-weight: bold;
+            font-family: ui-monospace, monospace;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #334155;
+            min-width: 38px;
+            transition: all 0.15s ease;
+        }
+
+        .shortcut-btn:hover {
+            background-color: #e2e8f0;
+            border-color: #94a3b8;
+        }
+
+        #submit-btn {
+            padding: 10px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            flex-grow: 1;
+            transition: background-color 0.15s, transform 0.05s;
+        }
+
+        #submit-btn:hover { background-color: #1d4ed8; }
+        #submit-btn:active { transform: scale(0.98); }
+        #submit-btn.btn-next { background-color: #0f172a; }
+        #submit-btn.btn-next:hover { background-color: #1e293b; }
+
+        .feedback {
+            margin: 12px 0;
+            font-size: 16px;
+            font-weight: 600;
+            min-height: 24px;
+        }
+
+        .feedback.correct { color: #16a34a; }
+        .feedback.wrong { color: #dc2626; }
+
+        /* Analyse- og sammendragskort ved feil svar */
+        .review-card {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin: 10px 0;
+            text-align: left;
+        }
+
+        .review-title {
+            font-weight: 700;
+            color: #991b1b;
+            margin: 0 0 10px 0;
+            font-size: 15px;
+        }
+
+        .review-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 14px;
+        }
+
+        .review-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 6px;
+            background-color: #ffffff;
+            border: 1px solid #f1f5f9;
+        }
+
+        .review-row.wrong-row {
+            background-color: #fee2e2;
+            border-color: #fca5a5;
+            color: #991b1b;
+            font-weight: 600;
+        }
+
+        .review-row.correct-row {
+            background-color: #dcfce7;
+            border-color: #86efac;
+            color: #166534;
+            font-weight: 600;
+        }
+
+        .review-row .label {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .review-row.wrong-row .label { color: #991b1b; }
+        .review-row.correct-row .label { color: #166534; }
+
+        .review-row .val {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .review-explanation {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #475569;
+            background-color: #ffffff;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border-left: 3px solid #2563eb;
+            line-height: 1.5;
+        }
+
+        /* Nivå 1 Introkort / Referanse */
+        .level1-ref-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-top: 14px;
+            text-align: left;
+            font-size: 13px;
+            color: #334155;
+        }
+
+        .level1-ref-header {
+            font-size: 12.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #2563eb;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Modal styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(15, 23, 42, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .modal-content {
+            background-color: #ffffff;
+            padding: 24px;
+            border-radius: 14px;
+            max-width: 580px;
+            width: 100%;
+            text-align: left;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+        }
+
+        .modal-title {
+            margin: 0;
+            font-size: 19px;
+            color: #0f172a;
+            font-weight: 800;
+        }
+
+        .modal-body {
+            font-size: 14px;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .lesson-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin: 10px 0;
+        }
+
+        .lesson-card-header {
+            font-size: 12.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #2563eb;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .lesson-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin: 8px 0;
+            font-family: ui-monospace, monospace;
+        }
+
+        .lesson-table th, .lesson-table td {
+            padding: 6px 8px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .lesson-table th {
+            background-color: #f1f5f9;
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        .lesson-table tr:nth-child(even) { background-color: #f8fafc; }
+        .lesson-table .active-bit { background-color: #dbeafe; font-weight: 800; color: #1e40af; }
+
+        .tip-box {
+            background: #fefce8;
+            border: 1px solid #fde047;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #854d0e;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+
+        .modal-close-btn {
+            background-color: #2563eb;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 14px;
+            transition: background-color 0.15s;
+        }
+
+        .modal-close-btn:hover { background-color: #1d4ed8; }
+
+        /* Fyrverkeri Canvas */
+        #fireworks-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            display: none;
+        }
+
+        /* Diplom-overlay */
+        .diploma-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(15, 23, 42, 0.88);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 16px;
+            z-index: 10000;
+            overflow-y: auto;
+        }
+
+        .diploma-overlay.active { display: flex; }
+
+        .diploma-info-banner {
+            color: #f8fafc;
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid #475569;
+            border-radius: 10px;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            text-align: center;
+            max-width: 620px;
+            width: 100%;
+        }
+
+        .diploma-card {
+            background: #fffdfa;
+            border: 8px double #2563eb;
+            border-radius: 16px;
+            max-width: 620px;
+            width: 100%;
+            padding: 32px 24px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .diploma-seal { font-size: 44px; margin-bottom: 6px; }
+        .diploma-title { font-family: Georgia, serif; font-size: 28px; color: #1e3a8a; margin: 0; font-weight: bold; }
+        .diploma-subtitle { font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 4px 0 16px 0; }
+        .diploma-award-to { font-size: 13px; font-weight: 700; color: #475569; }
+        .diploma-name-input {
+            border: none;
+            border-bottom: 2px solid #2563eb;
+            background: transparent;
+            font-family: Georgia, serif;
+            font-size: 24px;
+            font-weight: bold;
+            color: #0f172a;
+            text-align: center;
+            width: 80%;
+            max-width: 380px;
+            margin: 8px auto 14px auto;
+            padding: 4px;
+            outline: none;
+            display: block;
+        }
+        .diploma-praise { font-family: Georgia, serif; font-style: italic; font-size: 18px; color: #2563eb; margin-bottom: 10px; }
+        .diploma-desc { font-size: 14px; line-height: 1.55; color: #334155; max-width: 480px; margin: 0 auto 20px auto; }
+        .diploma-footer { display: flex; justify-content: space-around; margin-top: 20px; }
+        .diploma-signature { display: flex; flex-direction: column; align-items: center; width: 140px; }
+        .signature-line { border-top: 1px solid #94a3b8; width: 100%; padding-top: 4px; font-size: 13px; color: #475569; font-weight: bold; }
+        .diploma-buttons { display: flex; gap: 10px; margin-top: 14px; }
+        .diploma-btn {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .diploma-btn-print { background-color: #2563eb; color: #ffffff; }
+        .diploma-btn-close { background-color: #64748b; color: #ffffff; }
+        .diploma-btn:hover { opacity: 0.9; }
+
+        /* Lærermeny */
+        .cheat-panel {
+            position: fixed;
+            bottom: 20px; right: 20px;
+            background: #1e293b;
+            color: #f8fafc;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            padding: 16px;
+            max-width: 320px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            display: none;
+            font-size: 13px;
+        }
+        .cheat-panel.active { display: block; }
+        .cheat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 700; color: #38bdf8; }
+        .cheat-close { background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; }
+        .cheat-sec-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin: 8px 0 4px 0; }
+        .cheat-lvl-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 8px; }
+        .cheat-lvl-btn {
+            background: #334155;
+            color: #f8fafc;
+            border: 1px solid #475569;
+            border-radius: 4px;
+            padding: 6px;
+            font-weight: 700;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .cheat-lvl-btn:hover { background: #475569; }
+        .cheat-lvl-btn.active { background: #2563eb; border-color: #60a5fa; }
+        .cheat-ans-box { background: #0f172a; border-radius: 6px; padding: 8px; margin-bottom: 8px; }
+        .cheat-ans-val { color: #4ade80; font-weight: 700; font-family: ui-monospace, monospace; }
+        .cheat-btn-row { display: flex; flex-direction: column; gap: 4px; }
+        .cheat-action-btn {
+            background: #334155;
+            color: #f8fafc;
+            border: 1px solid #475569;
+            border-radius: 4px;
+            padding: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .cheat-action-btn:hover { background: #475569; }
+        .cheat-action-btn.green { background: #166534; border-color: #22c55e; }
+        .cheat-action-btn.gold { background: #854d0e; border-color: #eab308; }
+
+        .sr-only {
+            position: absolute;
+            width: 1px; height: 1px;
+            padding: 0; margin: -1px;
+            overflow: hidden; clip: rect(0, 0, 0, 0);
+            white-space: nowrap; border: 0;
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            .diploma-overlay, .diploma-overlay * { visibility: visible; }
+            .diploma-overlay { position: absolute; left: 0; top: 0; width: 100%; background: none; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="fireworks-canvas"></canvas>
+
+    <main class="container">
+        <header>
+            <div class="title-group" id="brand-title-group">
+                <h1 class="brand-title">Tall<span>Treneren</span> 🔢</h1>
+                <div class="brand-subtitle" id="secret-trigger-area">binær • heksadesimal • desimal ⚡</div>
+            </div>
+            <button type="button" class="help-btn" id="help-btn" title="Åpne teori og konverteringstabeller">
+                💡 Teori & Tabeller
+            </button>
+        </header>
+        
+        <div class="level-bar">
+            <div>Nivå <span id="level" class="level-badge">1</span>: <strong id="level-name">4-bit Binærtall</strong></div>
+            <div class="streak-badge">Rette på rad: <span id="streak">0</span> / <span id="target-streak">5</span></div>
+        </div>
+        
+        <div class="problem-box">
+            <div class="topic-pill" id="topic-pill">4-bit Binær ↔ Desimal</div>
+            <div class="problem">
+                <p id="problem-text">Laster oppgave...</p>
+            </div>
+        </div>
+
+        <form id="game-form" class="input-section">
+            <label for="answer-input" class="sr-only">Ditt svar</label>
+            <input 
+                type="text" 
+                id="answer-input" 
+                placeholder="Skriv svaret ditt her..." 
+                autocomplete="off" 
+                spellcheck="false"
+                required
+            >
+            <div class="button-group">
+                <button type="button" class="shortcut-btn" data-char="0">0</button>
+                <button type="button" class="shortcut-btn" data-char="1">1</button>
+                <button type="button" class="shortcut-btn" data-char="A">A</button>
+                <button type="button" class="shortcut-btn" data-char="B">B</button>
+                <button type="button" class="shortcut-btn" data-char="C">C</button>
+                <button type="button" class="shortcut-btn" data-char="D">D</button>
+                <button type="button" class="shortcut-btn" data-char="E">E</button>
+                <button type="button" class="shortcut-btn" data-char="F">F</button>
+                <button type="submit" id="submit-btn">Sjekk svar</button>
+            </div>
+        </form>
+
+        <div class="feedback" id="feedback" aria-live="polite"></div>
+
+        <!-- Introduksjonstabell for Nivå 1 -->
+        <div class="level1-ref-card" id="level1-ref-card">
+            <div class="level1-ref-header">
+                <span>📖 Introduksjonshjelp (Nivå 1)</span>
+                <span style="font-size: 11px; color: #64748b; font-weight: normal;">4-bit posisjonsverdier</span>
+            </div>
+            <table class="lesson-table" style="margin: 6px 0;">
+                <thead>
+                    <tr><th>8</th><th>4</th><th>2</th><th>1</th><th>= Desimalverdi</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>0</td><td>1</td><td>0</td><td>1</td><td>4 + 1 = <strong>5</strong></td></tr>
+                    <tr><td>1</td><td>1</td><td>0</td><td>0</td><td>8 + 4 = <strong>12</strong></td></tr>
+                </tbody>
+            </table>
+            <div style="font-size: 12px; color: #64748b;">
+                Summer verdiene til posisjonene der det står <strong>1</strong>.
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for Teori og Tabeller -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Nivå 1: 4-bit Binærtall</h2>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Fylles dynamisk -->
+            </div>
+            <button type="button" class="modal-close-btn" id="modal-close-btn">Forstått! Tilbake til oppgaven ➔</button>
+        </div>
+    </div>
+
+    <!-- Diplom for fullført TallTreneren -->
+    <div class="diploma-overlay" id="diploma-overlay">
+        <div class="diploma-info-banner no-print">
+            📄 <strong>Tallsystem-Mester!</strong> Skriv navnet ditt under og klikk <strong>«Skriv ut / Lagre som PDF»</strong> for å vise at du mestrer tallsystemene!
+        </div>
+        <div class="diploma-card">
+            <div class="diploma-seal">⚡ 🎓 ⚡</div>
+            <h2 class="diploma-title">TALLSYSTEM-MESTER DIPLOM</h2>
+            <div class="diploma-subtitle">Full Mestring av Binær • Heksadesimal • Desimal</div>
+            <div class="diploma-award-to">TILDELT TIL:</div>
+            <input type="text" class="diploma-name-input" id="student-name-input" placeholder="Skriv ditt navn her..." value="" autocomplete="name" spellcheck="false">
+            <div class="diploma-praise">«Digital Mester!»</div>
+            <p class="diploma-desc">
+                Har fullført alle 5 nivåer i Tallsystem-Treneren og demonstrert overlegen forståelse av posisjonssystemer:
+                4-bit og 8-bit binærtall, heksadesimale nibbles (0–F), 16-er potenser og direkte tallkonvertering.
+            </p>
+            <div class="diploma-footer">
+                <div class="diploma-signature">
+                    <div class="signature-line" id="diploma-date"></div>
+                    <span>Dato</span>
+                </div>
+                <div class="diploma-signature">
+                    <div class="signature-line">Ingve</div>
+                    <span>Lærer / Data- & Elektro-Ingeniør</span>
+                </div>
+            </div>
+        </div>
+        <div class="diploma-buttons no-print">
+            <button type="button" class="diploma-btn diploma-btn-print" onclick="window.print()">🖨️ Skriv ut / Lagre som PDF</button>
+            <button type="button" class="diploma-btn diploma-btn-close" id="diploma-close-btn">Tilbake til spillet</button>
+        </div>
+    </div>
+
+    <!-- Hemmelig Lærermeny -->
+    <div class="cheat-panel" id="cheat-panel">
+        <div class="cheat-header">
+            <span>🕵️ Lærermeny TallTreneren</span>
+            <button type="button" class="cheat-close" id="cheat-close" title="Lukk">✖</button>
+        </div>
+        <div class="cheat-sec-title">Hopp direkte til nivå:</div>
+        <div class="cheat-lvl-grid" id="cheat-lvl-grid">
+            <button type="button" class="cheat-lvl-btn" data-lvl="1">Nivå 1</button>
+            <button type="button" class="cheat-lvl-btn" data-lvl="2">Nivå 2</button>
+            <button type="button" class="cheat-lvl-btn" data-lvl="3">Nivå 3</button>
+            <button type="button" class="cheat-lvl-btn" data-lvl="4">Nivå 4</button>
+            <button type="button" class="cheat-lvl-btn" data-lvl="5">Nivå 5</button>
+        </div>
+        <div class="cheat-sec-title">Fasit for aktiv oppgave:</div>
+        <div class="cheat-ans-box">
+            <div>Fasit: <span class="cheat-ans-val" id="cheat-ans-val">-</span></div>
+        </div>
+        <div class="cheat-btn-row">
+            <button type="button" class="cheat-action-btn green" id="cheat-fill-btn">🪄 Fyll inn fasit</button>
+            <button type="button" class="cheat-action-btn" id="cheat-skip-btn">⏩ Ny oppgave</button>
+            <button type="button" class="cheat-action-btn" id="cheat-streak-btn">⭐ +1 Streak</button>
+            <button type="button" class="cheat-action-btn gold" id="cheat-diploma-btn">🎓 Vis diplom</button>
+        </div>
+    </div>
+
+    <script>
+        const LEVEL_META = [
+            {
+                level: 1,
+                name: "4-bit Binærtall (0–15)",
+                targetStreak: 5,
+                topic: "4-bit Binær ↔ Desimal (0–15)",
+                concept: "<strong>Binærtall (2-tallsystemet)</strong> bruker kun sifrene <strong>0</strong> og <strong>1</strong>.<br><br>I et 4-bit binærtall har hver posisjon en fast verdi som dobles fra høyre mot venstre: <strong>8, 4, 2, 1</strong>.",
+                example: "• <strong>1011 i desimal:</strong> 8 + 2 + 1 = <strong>11</strong><br>• <strong>13 i binær:</strong> 13 = 8 + 4 + 1 ➔ <strong>1101</strong>"
+            },
+            {
+                level: 2,
+                name: "8-bit Binærtall (0–255)",
+                targetStreak: 5,
+                topic: "8-bit Binær ↔ Desimal (0–255)",
+                concept: "<strong>8 bits (1 byte)</strong> kan representere tall fra 0 til 255. Posisjonsverdiene fortsetter å dobles fra høyre mot venstre:<br><strong>128, 64, 32, 16, 8, 4, 2, 1</strong>.",
+                example: "• <strong>10101000 i desimal:</strong> 128 + 32 + 8 = <strong>168</strong><br>• <strong>200 i binær:</strong> 200 - 128 = 72 ➔ 72 - 64 = 8 ➔ 8 - 8 = 0 ➔ <strong>11001000</strong>"
+            },
+            {
+                level: 3,
+                name: "Binær ↔ Heksadesimal",
+                targetStreak: 5,
+                topic: "4-bits grupper (Nibbles)",
+                concept: "<strong>Heksadesimaltall (16-tallsystemet)</strong> bruker sifrene 0–9 og bokstavene A–F:<br><strong>A=10, B=11, C=12, D=13, E=14, F=15</strong>.<br><br>Ett heksadesimalt siffer tilsvarer nøyaktig <strong>4 bits</strong>. For å konvertere deler du binærtallet i grupper på 4 bit!",
+                example: "• <strong>A8 til binær:</strong> A = 1010, 8 = 1000 ➔ <strong>10101000</strong><br>• <strong>11110011 til hex:</strong> 1111 = F, 0011 = 3 ➔ <strong>F3</strong>"
+            },
+            {
+                level: 4,
+                name: "Desimal ↔ Hex (via binær)",
+                targetStreak: 5,
+                topic: "Desimal ↔ Hex (Mellomledd)",
+                concept: "For å konvertere mellom desimal og heksadesimal i hodet er binærtall det perfekte mellomsteget:<br><br><strong>Desimal ➔ 8-bit Binær ➔ 2 Hex-sifre (4-bit grupper)</strong>.",
+                example: "• <strong>202 desimal til hex:</strong> 202 = 11001010 i binær ➔ (1100) (1010) = <strong>CA</strong><br>• <strong>7C hex til desimal:</strong> 7 = 0111, C = 1100 ➔ 01111100 binær = 64+32+16+8+4 = <strong>124</strong>"
+            },
+            {
+                level: 5,
+                name: "Mester: Direkte Hex ↔ Desimal",
+                targetStreak: 5,
+                topic: "16-er potenser & Delemetoden",
+                concept: "På Mesternivå konverterer vi direkte med matematikk:<br><br>• <strong>Hex ➔ Desimal:</strong> Gang hvert siffer med potenser av 16 (16⁰=1, 16¹=16, 16²=256, 16³=4096).<br>• <strong>Desimal ➔ Hex:</strong> Del gjentatte ganger på 16 og noter resten.",
+                example: "• <strong>8060 hex til desimal:</strong> 8·16³ + 0·16² + 6·16¹ + 0·1 = 8·4096 + 96 = <strong>32864</strong><br>• <strong>32864 desimal til hex:</strong> 32864/16 = 2054 (rest 0), 2054/16 = 128 (rest 6), 128/16 = 8 (rest 0), 8/16 = 0 (rest 8) ➔ <strong>8060</strong>"
+            }
+        ];
+
+        const HEX_MAP = [
+            { hex: '0', bin: '0000', dec: 0 },
+            { hex: '1', bin: '0001', dec: 1 },
+            { hex: '2', bin: '0010', dec: 2 },
+            { hex: '3', bin: '0011', dec: 3 },
+            { hex: '4', bin: '0100', dec: 4 },
+            { hex: '5', bin: '0101', dec: 5 },
+            { hex: '6', bin: '0110', dec: 6 },
+            { hex: '7', bin: '0111', dec: 7 },
+            { hex: '8', bin: '1000', dec: 8 },
+            { hex: '9', bin: '1001', dec: 9 },
+            { hex: 'A', bin: '1010', dec: 10 },
+            { hex: 'B', bin: '1011', dec: 11 },
+            { hex: 'C', bin: '1100', dec: 12 },
+            { hex: 'D', bin: '1101', dec: 13 },
+            { hex: 'E', bin: '1110', dec: 14 },
+            { hex: 'F', bin: '1111', dec: 15 }
+        ];
+
+        const gameState = {
+            level: 1,
+            streak: 0,
+            consecutiveWrong: 0,
+            currentQuestion: null,
+            isReviewing: false
+        };
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function toBinary(n, bits = 0) {
+            let b = n.toString(2);
+            return bits > 0 ? b.padStart(bits, '0') : b;
+        }
+
+        function toHex(n, digits = 0) {
+            let h = n.toString(16).toUpperCase();
+            return digits > 0 ? h.padStart(digits, '0') : h;
+        }
+
+        function generateProblem() {
+            let max = 15;
+            if (gameState.level === 1) max = 15;
+            else if (gameState.level >= 2 && gameState.level <= 4) max = 255;
+            else if (gameState.level === 5) max = 65535;
+
+            let num = Math.floor(Math.random() * (max + 1));
+            // Unngå 0 for ofte på høye nivåer
+            if (num === 0 && max > 15 && Math.random() < 0.8) {
+                num = Math.floor(Math.random() * max) + 1;
+            }
+
+            let questionText = '';
+            let rawExpected = '';
+            let displayExpected = '';
+            let type = ''; // 'binary', 'hex', 'decimal'
+            let explanation = '';
+
+            const isDirectionForward = Math.random() < 0.5;
+
+            if (gameState.level === 1) {
+                const bits = 4;
+                const bin = toBinary(num, bits);
+                if (isDirectionForward) {
+                    // Desimal til Binær
+                    type = 'binary';
+                    questionText = `Hva er desimaltallet <span class="highlight-num">${num}</span> i 4-bit binærtall?`;
+                    rawExpected = bin;
+                    displayExpected = bin;
+                    explanation = `${num} i binær: Finn hvilke potenser som summerer til ${num}: ` +
+                        `8·${(num & 8)?1:0} + 4·${(num & 4)?1:0} + 2·${(num & 2)?1:0} + 1·${(num & 1)?1:0} = ${num} ➔ <strong>${bin}</strong>`;
+                } else {
+                    // Binær til Desimal
+                    type = 'decimal';
+                    questionText = `Hva er binærtallet <span class="highlight-num">${bin}</span> i desimaltall?`;
+                    rawExpected = num.toString();
+                    displayExpected = num.toString();
+                    explanation = `${bin} i desimal: (8·${bin[0]}) + (4·${bin[1]}) + (2·${bin[2]}) + (1·${bin[3]}) = ` +
+                        `${parseInt(bin[0])*8} + ${parseInt(bin[1])*4} + ${parseInt(bin[2])*2} + ${parseInt(bin[3])*1} = <strong>${num}</strong>`;
+                }
+            } else if (gameState.level === 2) {
+                const bits = 8;
+                const bin = toBinary(num, bits);
+                if (isDirectionForward) {
+                    // Desimal til Binær
+                    type = 'binary';
+                    questionText = `Hva er desimaltallet <span class="highlight-num">${num}</span> i 8-bit binærtall?`;
+                    rawExpected = bin;
+                    displayExpected = `${bin.slice(0,4)} ${bin.slice(4)}`;
+                    let activeBits = [128, 64, 32, 16, 8, 4, 2, 1].filter(b => num & b);
+                    explanation = `${num} i binær: ${activeBits.join(' + ') || '0'} = ${num} ➔ <strong>${bin}</strong>`;
+                } else {
+                    // Binær til Desimal
+                    type = 'decimal';
+                    const binDisplay = `${bin.slice(0,4)} ${bin.slice(4)}`;
+                    questionText = `Hva er binærtallet <span class="highlight-num">${binDisplay}</span> i desimaltall?`;
+                    rawExpected = num.toString();
+                    displayExpected = num.toString();
+                    let parts = [];
+                    [128, 64, 32, 16, 8, 4, 2, 1].forEach((val, idx) => {
+                        if (bin[idx] === '1') parts.push(val);
+                    });
+                    explanation = `${binDisplay} i desimal: ${parts.join(' + ') || '0'} = <strong>${num}</strong>`;
+                }
+            } else if (gameState.level === 3) {
+                const hex = toHex(num, 2);
+                const bin = toBinary(num, 8);
+                const binGrouped = `${bin.slice(0,4)} ${bin.slice(4)}`;
+                if (isDirectionForward) {
+                    // Hex til Binær
+                    type = 'binary';
+                    questionText = `Hva er heksadesimaltallet <span class="highlight-num">${hex}</span> i binærtall?`;
+                    rawExpected = bin;
+                    displayExpected = binGrouped;
+                    const h1 = hex[0], h2 = hex[1];
+                    const b1 = toBinary(parseInt(h1, 16), 4);
+                    const b2 = toBinary(parseInt(h2, 16), 4);
+                    explanation = `${hex} til binær: Hvert siffer konverteres til 4 bit: ${h1} = ${b1}, ${h2} = ${b2} ➔ <strong>${b1} ${b2}</strong>`;
+                } else {
+                    // Binær til Hex
+                    type = 'hex';
+                    questionText = `Hva er binærtallet <span class="highlight-num">${binGrouped}</span> i heksadesimaltall?`;
+                    rawExpected = hex;
+                    displayExpected = hex;
+                    const b1 = bin.slice(0,4);
+                    const b2 = bin.slice(4);
+                    const h1 = parseInt(b1, 2).toString(16).toUpperCase();
+                    const h2 = parseInt(b2, 2).toString(16).toUpperCase();
+                    explanation = `${binGrouped} til hex: Gruppe 1 (${b1}) = ${h1}, Gruppe 2 (${b2}) = ${h2} ➔ <strong>${hex}</strong>`;
+                }
+            } else if (gameState.level === 4) {
+                const hex = toHex(num, 2);
+                const bin = toBinary(num, 8);
+                const binGrouped = `${bin.slice(0,4)} ${bin.slice(4)}`;
+                if (isDirectionForward) {
+                    // Desimal til Hex via binær
+                    type = 'hex';
+                    questionText = `Hva er desimaltallet <span class="highlight-num">${num}</span> i heksadesimaltall?`;
+                    rawExpected = hex;
+                    displayExpected = hex;
+                    explanation = `${num} til hex: 1) Finn binærtall: ${binGrouped} ➔ 2) Konverter grupper til hex: ${bin.slice(0,4)} = ${hex[0]}, ${bin.slice(4)} = ${hex[1]} ➔ <strong>${hex}</strong>`;
+                } else {
+                    // Hex til Desimal via binær
+                    type = 'decimal';
+                    questionText = `Hva er heksadesimaltallet <span class="highlight-num">${hex}</span> i desimaltall?`;
+                    rawExpected = num.toString();
+                    displayExpected = num.toString();
+                    explanation = `${hex} til desimal: 1) Til binær: ${hex[0]} = ${bin.slice(0,4)}, ${hex[1]} = ${bin.slice(4)} ➔ ${binGrouped} ➔ 2) Summer verdier: ${num} ➔ <strong>${num}</strong>`;
+                }
+            } else if (gameState.level === 5) {
+                // Direkte konvertering med 16-er potenser
+                const hex = toHex(num);
+                if (isDirectionForward) {
+                    // Desimal til Hex
+                    type = 'hex';
+                    questionText = `Hva er desimaltallet <span class="highlight-num">${num}</span> i heksadesimaltall?`;
+                    rawExpected = hex;
+                    displayExpected = hex;
+                    explanation = `${num} til hex (dele-med-16 metoden):<br>` +
+                        generateDivisionExplanation(num);
+                } else {
+                    // Hex til Desimal
+                    type = 'decimal';
+                    questionText = `Hva er heksadesimaltallet <span class="highlight-num">${hex}</span> i desimaltall?`;
+                    rawExpected = num.toString();
+                    displayExpected = num.toString();
+                    let terms = [];
+                    for (let i = 0; i < hex.length; i++) {
+                        const digit = hex[i];
+                        const val = parseInt(digit, 16);
+                        const power = hex.length - 1 - i;
+                        terms.push(`${val}·16${toSuperscript(power)} (${val * Math.pow(16, power)})`);
+                    }
+                    explanation = `${hex} til desimal (16-er potenser): ${terms.join(' + ')} = <strong>${num}</strong>`;
+                }
+            }
+
+            gameState.currentQuestion = {
+                number: num,
+                questionText: questionText,
+                rawExpected: rawExpected,
+                displayExpected: displayExpected,
+                type: type,
+                explanation: explanation
+            };
+
+            const lvlMeta = LEVEL_META[gameState.level - 1];
+
+            document.getElementById('problem-text').innerHTML = questionText;
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('level-name').textContent = lvlMeta.name;
+            document.getElementById('topic-pill').textContent = lvlMeta.topic;
+            document.getElementById('streak').textContent = gameState.streak;
+            document.getElementById('target-streak').textContent = lvlMeta.targetStreak;
+            
+            const refCard = document.getElementById('level1-ref-card');
+            if (gameState.level === 1) {
+                refCard.style.display = 'block';
+            } else {
+                refCard.style.display = 'none';
+            }
+
+            updateCheatPanel();
+        }
+
+        function toSuperscript(num) {
+            const map = {
+                '-': '⁻', '+': '⁺',
+                '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+                '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹'
+            };
+            return String(num).split('').map(c => map[c] || c).join('');
+        }
+
+        function generateDivisionExplanation(n) {
+            if (n === 0) return `0 / 16 = 0 (rest 0) ➔ <strong>0</strong>`;
+            let steps = [];
+            let temp = n;
+            while (temp > 0) {
+                let q = Math.floor(temp / 16);
+                let r = temp % 16;
+                let rHex = r.toString(16).toUpperCase();
+                steps.push(`${temp} / 16 = ${q} (rest ${r} = ${rHex})`);
+                temp = q;
+            }
+            return steps.join('<br>') + ` ➔ Les restene nedenfra og opp: <strong>${toHex(n)}</strong>`;
+        }
+
+        function checkAnswer(rawInput) {
+            if (!rawInput || typeof rawInput !== 'string') {
+                return { correct: false, message: 'Vennligst skriv inn et svar.' };
+            }
+
+            const clean = rawInput.trim().replace(/\s+/g, '');
+            const type = gameState.currentQuestion.type;
+            const expected = gameState.currentQuestion.rawExpected;
+
+            if (type === 'binary') {
+                if (!/^[01]+$/.test(clean)) {
+                    return { correct: false, message: 'Ugyldig format. Binærtall kan kun inneholde 0 og 1.' };
+                }
+                // Sammenlign tallverdien
+                const userVal = parseInt(clean, 2);
+                const expVal = parseInt(expected, 2);
+                if (userVal !== expVal) {
+                    return { correct: false, message: 'Feil binærverdi.' };
+                }
+                return { correct: true, message: 'Helt riktig! Perfekt binærkonvertering! 🎉' };
+            } else if (type === 'hex') {
+                if (!/^[0-9a-fA-F]+$/.test(clean)) {
+                    return { correct: false, message: 'Ugyldig format. Heksadesimale tall bruker 0–9 og A–F.' };
+                }
+                const userVal = parseInt(clean, 16);
+                const expVal = parseInt(expected, 16);
+                if (userVal !== expVal) {
+                    return { correct: false, message: 'Feil heksadesimal verdi.' };
+                }
+                return { correct: true, message: 'Helt riktig! Presis hex-konvertering! 🚀' };
+            } else if (type === 'decimal') {
+                if (!/^\d+$/.test(clean)) {
+                    return { correct: false, message: 'Ugyldig format. Desimaltall kan kun inneholde siffer (0–9).' };
+                }
+                const userVal = parseInt(clean, 10);
+                const expVal = parseInt(expected, 10);
+                if (userVal !== expVal) {
+                    return { correct: false, message: 'Feil desimaltall.' };
+                }
+                return { correct: true, message: 'Helt riktig! Flott utregnet! ⭐' };
+            }
+
+            return { correct: false, message: 'Ukjent oppgavetype.' };
+        }
+
+        function handleSubmission(e) {
+            if (e) e.preventDefault();
+
+            const inputElement = document.getElementById('answer-input');
+            const submitBtn = document.getElementById('submit-btn');
+            const feedbackElement = document.getElementById('feedback');
+
+            if (gameState.isReviewing) {
+                gameState.isReviewing = false;
+                submitBtn.textContent = 'Sjekk svar';
+                submitBtn.classList.remove('btn-next');
+                feedbackElement.innerHTML = '';
+                inputElement.value = '';
+                generateProblem();
+                inputElement.focus();
+                return;
+            }
+
+            const rawAnswer = inputElement.value;
+            const result = checkAnswer(rawAnswer);
+
+            if (result.correct) {
+                gameState.consecutiveWrong = 0;
+                gameState.streak++;
+
+                const lvlMeta = LEVEL_META[gameState.level - 1];
+
+                // Sjekk om hele spillet er fullført (Nivå 5)
+                if (gameState.level === 5 && gameState.streak >= lvlMeta.targetStreak) {
+                    document.getElementById('streak').textContent = gameState.streak;
+                    feedbackElement.className = 'feedback correct';
+                    feedbackElement.textContent = '🏆 GRATULERER! Du er TALLSYSTEM-MESTER! 🎆';
+                    launchFireworks(3000, () => {
+                        showDiploma();
+                    });
+                    return;
+                }
+
+                // Nivåopprykk
+                if (gameState.streak >= lvlMeta.targetStreak && gameState.level < LEVEL_META.length) {
+                    gameState.level++;
+                    gameState.streak = 0;
+                    showHelpModal(gameState.level);
+                }
+
+                feedbackElement.className = 'feedback correct';
+                feedbackElement.textContent = result.message;
+
+                generateProblem();
+                inputElement.value = '';
+                inputElement.focus();
+            } else {
+                gameState.consecutiveWrong++;
+                gameState.streak = 0;
+
+                // Nivånedrykk ved 3 feil på rad
+                if (gameState.consecutiveWrong >= 3 && gameState.level > 1) {
+                    gameState.level--;
+                    gameState.consecutiveWrong = 0;
+                    showHelpModal(gameState.level);
+                }
+
+                document.getElementById('level').textContent = gameState.level;
+                document.getElementById('streak').textContent = gameState.streak;
+
+                gameState.isReviewing = true;
+                submitBtn.textContent = 'Neste oppgave ➔';
+                submitBtn.classList.add('btn-next');
+
+                const safeAnswer = rawAnswer ? escapeHtml(rawAnswer) : '(ingenting skrevet)';
+
+                feedbackElement.className = 'feedback';
+                feedbackElement.innerHTML = `
+                    <div class="review-card">
+                        <div class="review-title">❌ ${escapeHtml(result.message)}</div>
+                        <div class="review-grid">
+                            <div class="review-row">
+                                <span class="label">Oppgave:</span>
+                                <span class="val">${gameState.currentQuestion.questionText.replace(/<[^>]+>/g, ' ')}</span>
+                            </div>
+                            <div class="review-row wrong-row">
+                                <span class="label">Ditt svar:</span>
+                                <span class="val">${safeAnswer}</span>
+                            </div>
+                            <div class="review-row correct-row">
+                                <span class="label">Riktig svar:</span>
+                                <span class="val">${escapeHtml(gameState.currentQuestion.displayExpected)}</span>
+                            </div>
+                        </div>
+                        <div class="review-explanation">
+                            <strong>Utregning:</strong> ${gameState.currentQuestion.explanation}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // ==========================================
+        // HJELPEMODAL & TABELLER
+        // ==========================================
+        function showHelpModal(lvl = gameState.level) {
+            const data = LEVEL_META[lvl - 1];
+            document.getElementById('modal-title').textContent = `Nivå ${lvl}: ${data.name}`;
+
+            let hexTableRows = HEX_MAP.map(item => `
+                <tr>
+                    <td class="active-bit">${item.hex}</td>
+                    <td>${item.bin}</td>
+                    <td>${item.dec}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('modal-body').innerHTML = `
+                <div class="lesson-card">
+                    <div class="lesson-card-header">🎯 Nivåteori & Konsept</div>
+                    <div style="font-size: 13.5px; line-height: 1.55; color: #334155;">${data.concept}</div>
+                </div>
+
+                <div class="lesson-card">
+                    <div class="lesson-card-header">📐 8-bit Posisjonstabell</div>
+                    <table class="lesson-table">
+                        <thead>
+                            <tr>
+                                <th>128</th><th>64</th><th>32</th><th>16</th><th>8</th><th>4</th><th>2</th><th>1</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2⁷</td><td>2⁶</td><td>2⁵</td><td>2⁴</td><td>2³</td><td>2²</td><td>2¹</td><td>2⁰</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="lesson-card">
+                    <div class="lesson-card-header">🔢 4-bit Nibbles & Heksadesimal Tabell (0–F)</div>
+                    <table class="lesson-table">
+                        <thead>
+                            <tr>
+                                <th>Hex</th><th>4-bit Binær</th><th>Desimal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${hexTableRows}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="lesson-card">
+                    <div class="lesson-card-header" style="color: #7c3aed;">💡 Praktiske Eksempler</div>
+                    <div style="font-size: 13px; line-height: 1.55; color: #334155;">
+                        ${data.example}
+                    </div>
+                </div>
+
+                <div class="tip-box">
+                    💡 <strong>Tips:</strong> For å skrive binærtall kan du skrive med eller uten mellomrom (f.eks. <code>10101000</code> eller <code>1010 1000</code>).
+                </div>
+            `;
+
+            document.getElementById('modal-close-btn').textContent = gameState.streak === 0 ? 'Start oppgavene ➔' : 'Forstått! Tilbake til oppgaven ➔';
+            document.getElementById('modal-overlay').classList.add('active');
+            const modalContent = document.querySelector('#modal-overlay .modal-content');
+            if (modalContent) modalContent.scrollTop = 0;
+            document.getElementById('modal-close-btn').focus({ preventScroll: true });
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+            document.getElementById('answer-input').focus();
+        }
+
+        // ==========================================
+        // FYRVERKERI & DIPLOMMOTOR
+        // ==========================================
+        function launchFireworks(durationMs = 3000, callback) {
+            const canvas = document.getElementById('fireworks-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.style.display = 'block';
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#ffffff', '#eab308'];
+
+            function createExplosion(x, y) {
+                const count = 50;
+                for (let i = 0; i < count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 6 + 2;
+                    particles.push({
+                        x: x, y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        alpha: 1,
+                        decay: Math.random() * 0.02 + 0.015,
+                        radius: Math.random() * 3 + 2
+                    });
+                }
+            }
+
+            let animationFrameId;
+            let intervalId = setInterval(() => {
+                const x = Math.random() * canvas.width * 0.8 + canvas.width * 0.1;
+                const y = Math.random() * canvas.height * 0.5 + canvas.height * 0.1;
+                createExplosion(x, y);
+            }, 300);
+
+            function loop() {
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.2)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.08;
+                    p.alpha -= p.decay;
+
+                    if (p.alpha <= 0) {
+                        particles.splice(i, 1);
+                        continue;
+                    }
+
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                animationFrameId = requestAnimationFrame(loop);
+            }
+
+            createExplosion(canvas.width * 0.5, canvas.height * 0.3);
+            loop();
+
+            setTimeout(() => {
+                clearInterval(intervalId);
+                cancelAnimationFrame(animationFrameId);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                canvas.style.display = 'none';
+                if (callback) callback();
+            }, durationMs);
+        }
+
+        function showDiploma() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('no-NO', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('diploma-date').textContent = dateStr;
+            document.getElementById('diploma-overlay').classList.add('active');
+            document.getElementById('student-name-input').focus();
+        }
+
+        function closeDiploma() {
+            document.getElementById('diploma-overlay').classList.remove('active');
+            document.getElementById('answer-input').focus();
+        }
+
+        // ==========================================
+        // LÆRERMENY
+        // ==========================================
+        function toggleCheatMenu() {
+            const panel = document.getElementById('cheat-panel');
+            panel.classList.toggle('active');
+            if (panel.classList.contains('active')) updateCheatPanel();
+        }
+
+        function updateCheatPanel() {
+            if (!gameState.currentQuestion) return;
+            document.getElementById('cheat-ans-val').textContent = gameState.currentQuestion.displayExpected || '-';
+            document.querySelectorAll('.cheat-lvl-btn[data-lvl]').forEach(btn => {
+                const lvl = parseInt(btn.getAttribute('data-lvl'));
+                if (lvl === gameState.level) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
+        // ==========================================
+        // EVENT LISTENERS
+        // ==========================================
+        document.getElementById('game-form').addEventListener('submit', handleSubmission);
+
+        document.getElementById('help-btn').addEventListener('click', () => showHelpModal(gameState.level));
+        document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+        document.getElementById('modal-overlay').addEventListener('click', (e) => {
+            if (e.target.id === 'modal-overlay') closeModal();
+        });
+
+        document.getElementById('diploma-close-btn').addEventListener('click', closeDiploma);
+
+        // Snarveiknapper
+        document.querySelectorAll('.shortcut-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const char = btn.getAttribute('data-char');
+                const input = document.getElementById('answer-input');
+                const start = input.selectionStart || input.value.length;
+                const end = input.selectionEnd || input.value.length;
+                input.value = input.value.substring(0, start) + char + input.value.substring(end);
+                input.focus();
+                input.selectionStart = input.selectionEnd = start + char.length;
+            });
+        });
+
+        // Hemmelig lærermeny: 7 klikk eller Ctrl+Alt+K
+        let triggerClicks = 0;
+        let triggerTimer = null;
+        document.getElementById('secret-trigger-area').addEventListener('click', () => {
+            triggerClicks++;
+            clearTimeout(triggerTimer);
+            triggerTimer = setTimeout(() => { triggerClicks = 0; }, 3000);
+            if (triggerClicks >= 7) {
+                triggerClicks = 0;
+                toggleCheatMenu();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.altKey && (e.key === 'k' || e.key === 'K')) {
+                e.preventDefault();
+                toggleCheatMenu();
+            }
+            if (e.key === 'Escape') {
+                if (document.getElementById('modal-overlay').classList.contains('active')) closeModal();
+                if (document.getElementById('diploma-overlay').classList.contains('active')) closeDiploma();
+                if (document.getElementById('cheat-panel').classList.contains('active')) toggleCheatMenu();
+            }
+        });
+
+        document.getElementById('cheat-close').addEventListener('click', toggleCheatMenu);
+
+        document.querySelectorAll('.cheat-lvl-btn[data-lvl]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const lvl = parseInt(btn.getAttribute('data-lvl'));
+                gameState.level = lvl;
+                gameState.streak = 0;
+                gameState.isReviewing = false;
+                document.getElementById('feedback').innerHTML = '';
+                document.getElementById('submit-btn').textContent = 'Sjekk svar';
+                document.getElementById('submit-btn').classList.remove('btn-next');
+                document.getElementById('answer-input').value = '';
+                generateProblem();
+                document.getElementById('answer-input').focus();
+            });
+        });
+
+        document.getElementById('cheat-fill-btn').addEventListener('click', () => {
+            if (gameState.currentQuestion) {
+                document.getElementById('answer-input').value = gameState.currentQuestion.displayExpected;
+                document.getElementById('answer-input').focus();
+            }
+        });
+
+        document.getElementById('cheat-skip-btn').addEventListener('click', () => {
+            gameState.isReviewing = false;
+            document.getElementById('feedback').innerHTML = '';
+            document.getElementById('submit-btn').textContent = 'Sjekk svar';
+            document.getElementById('submit-btn').classList.remove('btn-next');
+            document.getElementById('answer-input').value = '';
+            generateProblem();
+            document.getElementById('answer-input').focus();
+        });
+
+        document.getElementById('cheat-streak-btn').addEventListener('click', () => {
+            gameState.streak++;
+            document.getElementById('streak').textContent = gameState.streak;
+            updateCheatPanel();
+        });
+
+        document.getElementById('cheat-diploma-btn').addEventListener('click', () => {
+            showDiploma();
+        });
+
+        // Start spillet ved innlasting
+        generateProblem();
+    </script>
+</body>
+</html>
