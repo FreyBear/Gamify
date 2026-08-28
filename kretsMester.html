@@ -897,9 +897,13 @@
                 tips: "Husk å velge strømretning med retningsknappene under oppgaven før du sjekker svaret!"
             }
         ];
-        const gameState = { currentLevel: 1, streak: 0, consecutiveWrong: 0, isReviewing: false, currentProblem: null, selectedDirection: null };
+        const gameState = { currentLevel: 1, streak: 0, consecutiveWrong: 0, isReviewing: false, currentProblem: null, selectedDirection: null, lastProblemSignature: null };
         function getRandomChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
         function roundNum(num, decimals = 2) { const factor = Math.pow(10, decimals); return Math.round(num * factor) / factor; }
+        // Identifiserer en oppgave unikt slik at vi kan unngå at samme oppgave dukker opp to ganger på rad
+        function getProblemSignature(problem) {
+            return JSON.stringify([problem.circuitType, problem.circuitParams, problem.questionText, problem.expectedAnswer, problem.expectedDir]);
+        }
         function escapeHtml(str) { if (!str) return ""; return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
 
         function createVerticalSourceSvg(x, y, label, val, isTarget = false) {
@@ -1414,7 +1418,14 @@
 
         function loadNewProblem() {
             gameState.selectedDirection = null;
-            gameState.currentProblem = generateProblemForLevel(gameState.currentLevel);
+            let problem, signature, attempts = 0;
+            do {
+                problem = generateProblemForLevel(gameState.currentLevel);
+                signature = getProblemSignature(problem);
+                attempts++;
+            } while (signature === gameState.lastProblemSignature && attempts < 15);
+            gameState.lastProblemSignature = signature;
+            gameState.currentProblem = problem;
             const lvlData = LEVELS[gameState.currentLevel - 1];
             document.getElementById("level-num").textContent = gameState.currentLevel;
             document.getElementById("level-name").textContent = lvlData.name;

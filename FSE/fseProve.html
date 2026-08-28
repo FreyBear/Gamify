@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FSE-prøve - Sikkerhet ved arbeid i og drift av elektriske anlegg</title>
+<style>
+    * { box-sizing: border-box; }
+    body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background-color: #f1f5f9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 16px;
+        color: #1e293b;
+    }
+    .container {
+        background-color: #ffffff;
+        padding: 24px 20px;
+        border-radius: 14px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+        max-width: 640px;
+        width: 100%;
+        position: relative;
+    }
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .title-group { text-align: left; user-select: none; cursor: default; }
+    .brand-title {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.5px;
+        line-height: 1.1;
+    }
+    .brand-title span { color: #d97706; }
+    .brand-subtitle { font-size: 13px; font-weight: 600; color: #64748b; margin-top: 2px; }
+    .help-btn {
+        background-color: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #334155;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.15s ease;
+    }
+    .help-btn:hover { background-color: #e2e8f0; border-color: #94a3b8; }
+    .progress-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #f8fafc;
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 16px;
+        font-size: 14px;
+    }
+    .progress-badge {
+        font-weight: 700;
+        color: #d97706;
+        background-color: #fffbeb;
+        padding: 3px 8px;
+        border-radius: 6px;
+        border: 1px solid #fde68a;
+    }
+    .score-badge { font-weight: 600; color: #059669; }
+    .progress-track {
+        height: 6px;
+        background-color: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 18px;
+    }
+    .progress-fill { height: 100%; background-color: #d97706; transition: width 0.25s ease; }
+    .question-box { margin: 14px 0; text-align: left; }
+    .question-pill {
+        display: inline-block;
+        background-color: #f1f5f9;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .question-text { font-size: 17px; font-weight: 700; color: #0f172a; margin: 0 0 14px 0; line-height: 1.4; }
+    .question-image { max-width: 100%; border-radius: 8px; border: 1px solid #e2e8f0; display: block; margin: 0 0 14px 0; }
+    .question-image-caption { font-size: 12px; color: #64748b; margin: -8px 0 14px 0; }
+    .options-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 6px; }
+    .option-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        background-color: #ffffff;
+        font-size: 14.5px;
+        font-weight: 500;
+        color: #334155;
+    }
+    .option-row:hover { border-color: #fbbf24; background-color: #fffbeb; }
+    .option-row.selected { border-color: #d97706; background-color: #fffbeb; color: #92400e; font-weight: 700; }
+    .option-row input { margin-top: 2px; accent-color: #d97706; cursor: pointer; flex-shrink: 0; }
+    .option-row.disabled { cursor: default; }
+    .option-row.disabled:hover { border-color: #e2e8f0; background-color: #ffffff; }
+    .option-row.correct-answer { border-color: #16a34a; background-color: #f0fdf4; color: #166534; font-weight: 700; }
+    .option-row.wrong-answer { border-color: #dc2626; background-color: #fef2f2; color: #991b1b; font-weight: 700; }
+    .feedback { margin: 14px 0 6px 0; font-size: 15px; font-weight: 700; min-height: 22px; }
+    .feedback.correct { color: #16a34a; }
+    .feedback.wrong { color: #dc2626; }
+    .explanation-box {
+        background-color: #fffbeb;
+        border: 1px solid #fde68a;
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 10px 0;
+        font-size: 13.5px;
+        color: #78350f;
+        line-height: 1.5;
+    }
+    .action-row { margin-top: 16px; display: flex; gap: 8px; }
+    #submit-btn {
+        padding: 10px 24px;
+        font-size: 16px;
+        font-weight: 600;
+        background-color: #d97706;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        flex-grow: 1;
+        transition: background-color 0.15s, transform 0.05s;
+    }
+    #submit-btn:hover { background-color: #b45309; }
+    #submit-btn:active { transform: scale(0.98); }
+    #submit-btn:disabled { background-color: #cbd5e1; cursor: not-allowed; }
+    #submit-btn.btn-next { background-color: #0f172a; }
+    #submit-btn.btn-next:hover { background-color: #1e293b; }
+    .result-box { text-align: center; }
+    .result-score { font-size: 46px; font-weight: 800; margin: 6px 0; }
+    .result-score.pass { color: #16a34a; }
+    .result-score.fail { color: #dc2626; }
+    .result-msg { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
+    .result-msg.pass { color: #166534; }
+    .result-msg.fail { color: #991b1b; }
+    .review-list { text-align: left; display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
+    .review-item {
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        padding: 10px 14px;
+    }
+    .review-item .rq { font-weight: 700; color: #991b1b; font-size: 13.5px; margin-bottom: 4px; }
+    .review-item .ra { font-size: 13px; color: #475569; }
+    .review-item .ra strong { color: #166534; }
+    .retry-btn {
+        padding: 10px 24px;
+        font-size: 15px;
+        font-weight: 700;
+        background-color: #0f172a;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 6px;
+    }
+    .retry-btn:hover { background-color: #1e293b; }
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: rgba(15, 23, 42, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 16px;
+        z-index: 100;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal-content {
+        background-color: #ffffff;
+        padding: 24px;
+        border-radius: 14px;
+        max-width: 560px;
+        width: 100%;
+        text-align: left;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 12px;
+        margin-bottom: 14px;
+    }
+    .modal-title { margin: 0; font-size: 19px; color: #0f172a; font-weight: 800; }
+    .modal-body { font-size: 14px; color: #334155; line-height: 1.6; }
+    .modal-body ul { padding-left: 20px; }
+    .modal-close-btn {
+        background-color: #d97706;
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 16px;
+        transition: background-color 0.15s;
+    }
+    .modal-close-btn:hover { background-color: #b45309; }
+
+    #fireworks-canvas {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        pointer-events: none;
+        z-index: 9999;
+        display: none;
+    }
+
+    /* Diplom-overlay */
+    .diploma-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: rgba(15, 23, 42, 0.88);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 20px 16px;
+        z-index: 10000;
+        overflow-y: auto;
+    }
+    .diploma-overlay.active { display: flex; }
+    .diploma-info-banner {
+        color: #f8fafc;
+        background: rgba(30, 41, 59, 0.9);
+        border: 1px solid #475569;
+        border-radius: 10px;
+        padding: 10px 18px;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 14px;
+        text-align: center;
+        max-width: 620px;
+        width: 100%;
+    }
+    .diploma-card {
+        background: #fffdfa;
+        border: 8px double #d97706;
+        border-radius: 16px;
+        max-width: 620px;
+        width: 100%;
+        padding: 32px 24px;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+    .diploma-seal { font-size: 44px; margin-bottom: 6px; }
+    .diploma-title { font-family: Georgia, serif; font-size: 26px; color: #92400e; margin: 0; font-weight: bold; }
+    .diploma-subtitle { font-size: 13px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 4px 0 16px 0; }
+    .diploma-award-to { font-size: 13px; font-weight: 700; color: #475569; }
+    .diploma-name-input {
+        border: none;
+        border-bottom: 2px solid #d97706;
+        background: transparent;
+        font-family: Georgia, serif;
+        font-size: 24px;
+        font-weight: bold;
+        color: #0f172a;
+        text-align: center;
+        width: 80%;
+        max-width: 380px;
+        margin: 8px auto 14px auto;
+        padding: 4px;
+        outline: none;
+        display: block;
+    }
+    .diploma-praise { font-family: Georgia, serif; font-style: italic; font-size: 18px; color: #d97706; margin-bottom: 10px; }
+    .diploma-desc { font-size: 14px; line-height: 1.55; color: #334155; max-width: 480px; margin: 0 auto 12px auto; }
+    .diploma-score { font-size: 15px; font-weight: 700; color: #166534; margin-bottom: 16px; }
+    .diploma-footer { display: flex; justify-content: space-around; margin-top: 20px; }
+    .diploma-signature { display: flex; flex-direction: column; align-items: center; width: 140px; }
+    .signature-line { border-top: 1px solid #94a3b8; width: 100%; padding-top: 4px; font-size: 13px; color: #475569; font-weight: bold; }
+    .diploma-buttons { display: flex; gap: 10px; margin-top: 14px; }
+    .diploma-btn {
+        border: none;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+    .diploma-btn-print { background-color: #d97706; color: #ffffff; }
+    .diploma-btn-close { background-color: #64748b; color: #ffffff; }
+    .diploma-btn:hover { opacity: 0.9; }
+
+    /* Lærermeny */
+    .cheat-panel {
+        position: fixed;
+        bottom: 20px; right: 20px;
+        background: #1e293b;
+        color: #f8fafc;
+        border: 1px solid #475569;
+        border-radius: 12px;
+        padding: 16px;
+        max-width: 300px;
+        width: 100%;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        z-index: 1000;
+        display: none;
+        font-size: 13px;
+    }
+    .cheat-panel.active { display: block; }
+    .cheat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 700; color: #fbbf24; }
+    .cheat-close { background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; }
+    .cheat-btn-row { display: flex; flex-direction: column; gap: 6px; }
+    .cheat-action-btn {
+        background: #334155;
+        color: #f8fafc;
+        border: 1px solid #475569;
+        border-radius: 4px;
+        padding: 7px;
+        font-weight: 600;
+        font-size: 12px;
+        cursor: pointer;
+    }
+    .cheat-action-btn:hover { background: #475569; }
+    .cheat-action-btn.green { background: #166534; border-color: #22c55e; }
+    .cheat-action-btn.gold { background: #854d0e; border-color: #eab308; }
+
+    @media print {
+        body * { visibility: hidden; }
+        .diploma-overlay, .diploma-overlay * { visibility: visible; }
+        .diploma-overlay { position: absolute; left: 0; top: 0; width: 100%; background: none; }
+        .no-print { display: none !important; }
+    }
+</style>
+</head>
+<body>
+    <canvas id="fireworks-canvas"></canvas>
+
+    <main class="container">
+        <header>
+            <div class="title-group">
+                <h1 class="brand-title">FSE<span>-prøve</span></h1>
+                <div class="brand-subtitle" id="secret-trigger-area">Sikkerhet ved arbeid i og drift av elektriske anlegg ⚡</div>
+            </div>
+            <button type="button" class="help-btn" id="help-btn" title="Om prøven">
+                ℹ️ Om prøven
+            </button>
+        </header>
+
+        <div class="progress-bar">
+            <div>Spørsmål <span class="progress-badge" id="q-index">1</span> av <span id="q-total">17</span></div>
+            <div class="score-badge">Riktige: <span id="q-score">0</span></div>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width: 0%;"></div></div>
+
+        <div id="quiz-view">
+            <div class="question-box">
+                <div class="question-pill" id="question-pill">Spørsmål 1</div>
+                <p class="question-text" id="question-text">Laster spørsmål...</p>
+                <div id="question-image-container"></div>
+                <div class="options-list" id="options-list"></div>
+            </div>
+
+            <div class="feedback" id="feedback"></div>
+            <div id="explanation-container"></div>
+
+            <div class="action-row">
+                <button type="button" id="submit-btn" disabled>Sjekk svar</button>
+            </div>
+        </div>
+
+        <div id="result-view" class="result-box" style="display:none;">
+            <div class="result-score" id="result-score">0 / 17</div>
+            <div class="result-msg" id="result-msg"></div>
+            <div id="review-container"></div>
+            <button type="button" class="retry-btn" id="retry-btn">🔄 Ta prøven på nytt</button>
+        </div>
+    </main>
+
+    <!-- Modal: om prøven -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Om FSE-prøven</h2>
+            </div>
+            <div class="modal-body">
+                <p>Denne prøven tester den teoretiske delen av FSE - <em>Forskrift om sikkerhet ved arbeid i og drift av elektriske anlegg</em>.</p>
+                <ul>
+                    <li>Prøven har <strong id="modal-total">17</strong> spørsmål med ett eller flere riktige svar.</li>
+                    <li>Du får umiddelbar tilbakemelding og en faglig begrunnelse etter hvert spørsmål.</li>
+                    <li>For å bestå og motta diplom må du ha minst <strong id="modal-pass-pct">80%</strong> riktige svar.</li>
+                    <li>Du kan ta prøven på nytt så mange ganger du trenger.</li>
+                </ul>
+            </div>
+            <button type="button" class="modal-close-btn" id="modal-close-btn">Start prøven ➔</button>
+        </div>
+    </div>
+
+    <!-- Diplom -->
+    <div class="diploma-overlay" id="diploma-overlay">
+        <div class="diploma-info-banner no-print">
+            📄 Skriv navnet ditt under og klikk <strong>«Skriv ut / Lagre som PDF»</strong> for å dokumentere bestått teoretisk FSE-prøve!
+        </div>
+        <div class="diploma-card">
+            <div class="diploma-seal">⚡ 🎓 ⚡</div>
+            <h2 class="diploma-title">FSE-DIPLOM</h2>
+            <div class="diploma-subtitle">Teoretisk del - Sikkerhet ved arbeid i og drift av elektriske anlegg</div>
+            <div class="diploma-award-to">TILDELT TIL:</div>
+            <input type="text" class="diploma-name-input" id="student-name-input" placeholder="Skriv ditt navn her..." value="" autocomplete="name" spellcheck="false">
+            <div class="diploma-praise">«Bestått!»</div>
+            <p class="diploma-desc">
+                Har gjennomført og bestått den teoretiske prøven i FSE, og har vist kunnskap om sikkerhetsforskriften,
+                arbeidsmetoder, barrierer mot spenning og ansvar ved arbeid i og drift av elektriske anlegg.
+            </p>
+            <div class="diploma-score" id="diploma-score"></div>
+            <div class="diploma-footer">
+                <div class="diploma-signature">
+                    <div class="signature-line" id="diploma-date"></div>
+                    <span>Dato</span>
+                </div>
+                <div class="diploma-signature">
+                    <div class="signature-line">Ingve</div>
+                    <span>Lærer / Elektrofaglærer</span>
+                </div>
+            </div>
+        </div>
+        <div class="diploma-buttons no-print">
+            <button type="button" class="diploma-btn diploma-btn-print" onclick="window.print()">🖨️ Skriv ut / Lagre som PDF</button>
+            <button type="button" class="diploma-btn diploma-btn-close" id="diploma-close-btn">Tilbake</button>
+        </div>
+    </div>
+
+    <!-- Hemmelig lærermeny -->
+    <div class="cheat-panel" id="cheat-panel">
+        <div class="cheat-header">
+            <span>🕵️ Lærermeny FSE-prøve</span>
+            <button type="button" class="cheat-close" id="cheat-close" title="Lukk">✖</button>
+        </div>
+        <div class="cheat-btn-row">
+            <button type="button" class="cheat-action-btn green" id="cheat-fill-btn">🪄 Fyll inn riktig svar</button>
+            <button type="button" class="cheat-action-btn" id="cheat-finish-all-correct-btn">✅ Fullfør med alt riktig</button>
+            <button type="button" class="cheat-action-btn gold" id="cheat-diploma-btn">🎓 Vis diplom direkte</button>
+            <button type="button" class="cheat-action-btn" id="cheat-restart-btn">🔄 Start på nytt</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // SPØRSMÅLSDATA (FSE-prøve)
+        // ==========================================
+        const QUESTIONS = [
+            {
+                question: "Hva står FSE for?",
+                type: "single",
+                options: [
+                    "Forskrift om arbeid i elektriske anlegg",
+                    "Forskrift om sikkerhet i elektriske anlegg",
+                    "Forskrift om sikkerhet ved arbeid i og drift av elektriske anlegg"
+                ],
+                correct: ["Forskrift om sikkerhet ved arbeid i og drift av elektriske anlegg"],
+                explanation: "FSE er forkortelsen for Forskrift om sikkerhet ved arbeid i og drift av elektriske anlegg, fastsatt av Direktoratet for samfunnssikkerhet og beredskap (DSB)."
+            },
+            {
+                question: "Gjelder FSE på skolen?",
+                type: "single",
+                options: [
+                    "Ja, men kun ved arbeider på skolens elektriske anlegg",
+                    "Ja",
+                    "Nei"
+                ],
+                correct: ["Ja"],
+                explanation: "FSE gjelder for alle som arbeider på eller nær ved elektriske anlegg, inkludert opplæringssituasjoner og verksteder i skoleverket."
+            },
+            {
+                question: "Hvor ofte skal man ha FSE-kurs på skolen?",
+                type: "single",
+                options: [
+                    "Det stilles ikke krav til FSE-opplæring i skolen",
+                    "Hvert kalenderår",
+                    "Minimum hver 12. mnd",
+                    "Hvert semester, høst og vår"
+                ],
+                correct: ["Minimum hver 12. mnd"],
+                explanation: "FSE § 7 stiller krav om at opplæring og øvelse skal gjentas minst én gang hver 12. måned (det skal ikke gå mer enn 12 måneder mellom hver opplæring)."
+            },
+            {
+                question: "FSE § 7 skisserer at sikkerhetsopplæringen har tre deler. Hvilke? (Sett tre kryss)",
+                type: "multiple",
+                options: [
+                    "Strømmåling",
+                    "Teoretisk gjennomgang av hele forskriften",
+                    "Praktisk øvelse i bruk av sikkerhetstiltak",
+                    "Førstehjelp",
+                    "Teoretisk gjennomgang av relevante deler",
+                    "Praksisøvelser uten spenning",
+                    "Praksisøvelser med spenning"
+                ],
+                correct: ["Praktisk øvelse i bruk av sikkerhetstiltak", "Førstehjelp", "Teoretisk gjennomgang av relevante deler"],
+                explanation: "I henhold til FSE § 7 består den årlige opplæringen av: (1) Teoretisk gjennomgang av relevante deler av forskriften, (2) Praktisk øvelse i bruk av relevante sikkerhetstiltak og verneutstyr, og (3) Opplæring i førstehjelp inkludert hjerte-lunge-redning og spesialopplæring om strømskader."
+            },
+            {
+                question: "Hvilke strømskader er vanligst på skolen?",
+                type: "single",
+                options: [
+                    "Strømgjennomgang",
+                    "Det skjer ikke skader på skolen",
+                    "Lysbueskader"
+                ],
+                correct: ["Strømgjennomgang"],
+                explanation: "I skolemiljø og ved lavspenningsøvinger er strømgjennomgang den hyppigst forekommende personskaden."
+            },
+            {
+                question: "Kan du få skader selv om du ikke sitter fast i strømkretsen?",
+                type: "single",
+                options: [
+                    "Vi får kun skader dersom vi henger fast i strømkretsen",
+                    "Nei, vi får kun skader dersom vi får brannsår",
+                    "Ja, det er vanskelig å se indre skader"
+                ],
+                correct: ["Ja, det er vanskelig å se indre skader"],
+                explanation: "Strømgjennomgang kan forårsake alvorlige indre skader (på hjerterytme, muskulatur, nyrer og nervesystem) selv ved kortvarig kontakt og uten synlige ytre brannsår."
+            },
+            {
+                question: "Hvor i kroppen går strømmen lettest? (Sett to kryss)",
+                type: "multiple",
+                options: [
+                    "De store musklene",
+                    "Sener",
+                    "Ledd",
+                    "Nervebaner og blodårer"
+                ],
+                correct: ["De store musklene", "Nervebaner og blodårer"],
+                explanation: "Vev med høyt væske- og elektrolyttinnhold leder strøm best (blodårer, nerver og muskler har lav motstand), mens sener, ledd, bein og tørr hud har høy motstand."
+            },
+            {
+                question: "Hvilken type strømskade ble Yngve (lærlingen) utsatt for?",
+                type: "single",
+                options: [
+                    "Lysbueskade",
+                    "Jordfeil",
+                    "Strømgjennomgang"
+                ],
+                correct: ["Strømgjennomgang"],
+                explanation: "I FSE-caset/opplæringseksempelet ble lærlingen utsatt for strømgjennomgang ved berøring av spenningssatt del."
+            },
+            {
+                question: "Hva var årsaken til at strømskaden skjedde?",
+                type: "single",
+                options: [
+                    "Montøren hadde ikke kontrollert at det var trygt for Yngve",
+                    "Det ble ikke målt at fordelingstavlen var spenningsløs",
+                    "Strømmen ble ikke skrudd av"
+                ],
+                correct: ["Det ble ikke målt at fordelingstavlen var spenningsløs"],
+                explanation: "Hovedårsaken til ulykken var manglende spenningsprøving (kontroll av at anlegget faktisk var spenningsløst før arbeidet startet)."
+            },
+            {
+                question: "Hvem har ansvar for sikkerheten på arbeidsstedet?",
+                type: "single",
+                options: [
+                    "Begge",
+                    "Yngve (lærlingen)",
+                    "Montøren"
+                ],
+                correct: ["Begge"],
+                explanation: "Sikkerhet er et felles ansvar. Arbeidsleder/montør har overordnet tilretteleggings- og instruksjonsansvar, mens lærlingen/eleven har medvirkningsplikt og plikt til å ivareta egen sikkerhet."
+            },
+            {
+                question: "Hvilket ansvar har Yngve (lærlingen)?",
+                type: "single",
+                options: [
+                    "Følge rutinene i virksomheten",
+                    "Ingen, siden han er lærling",
+                    "Han må selv ta fullt ansvar for sin sikkerhet"
+                ],
+                correct: ["Følge rutinene i virksomheten"],
+                explanation: "Arbeidstakere og lærlinger plikter å følge etablerte sikkerhetsrutiner, instrukser og bruke påbudt verneutstyr."
+            },
+            {
+                question: "FSE skisserer tre alternative arbeidsmetoder. Hvilke av disse kan du som skoleelev benytte?",
+                type: "single",
+                options: [
+                    "Arbeid på frakoblet anlegg",
+                    "Arbeid nær ved spenningssatte deler",
+                    "Arbeid under spenning, AUS"
+                ],
+                correct: ["Arbeid på frakoblet anlegg"],
+                explanation: "Hovedregelen i opplæring for elever er at alt arbeid skal foregå på helt frakoblet og spenningsløst anlegg."
+            },
+            {
+                question: "Hvilke barrierer har arbeidsmetoden «Arbeid på frakoblet anlegg»? (Sett to kryss)",
+                type: "multiple",
+                options: [
+                    "Sikre mot innkobling",
+                    "Personlig verneutstyr",
+                    "Frakoble og spenningsprøve",
+                    "Anleggsbeskyttelse"
+                ],
+                correct: ["Sikre mot innkobling", "Frakoble og spenningsprøve"],
+                explanation: "Ved arbeid på frakoblet anlegg er de to primære sikkerhetsbarrierene å (1) koble fra og kontrollere at anlegget er spenningsløst (spenningsprøving), og (2) sikre mot utilsiktet innkobling (låsing/merking)."
+            },
+            {
+                question: "Før arbeidene starter skal spenningsforsyningen frakobles. Hvor skal dette gjøres?",
+                type: "single",
+                options: [
+                    "Det er skolens rutiner som avgjør hvor frakoblingen skal skje",
+                    "Inne i modellen",
+                    "Utenfor modellen"
+                ],
+                correct: ["Utenfor modellen"],
+                explanation: "Frakobling må skje utenfor selve øvingsmodellen (f.eks. ved å trekke ut støpsel til tilførsel) slik at hele modellen blir garantert spenningsfri."
+            },
+            {
+                question: "Dersom frakoblingen skjer innenfor modellen slik at deler av denne er spenningssatt, hvilken arbeidsmetode skal da benyttes?",
+                type: "single",
+                options: [
+                    "Arbeid under spenning, AUS",
+                    "Arbeid på frakoblet anlegg",
+                    "Arbeid nær ved spenningssatte deler"
+                ],
+                correct: ["Arbeid nær ved spenningssatte deler"],
+                explanation: "Dersom deler av modellen forblir spenningssatt mens man arbeider på andre deler, defineres dette som arbeid nær ved spenningssatte deler, og det krever særskilte barrierer som anleggsbeskyttelse og personlig verneutstyr."
+            },
+            {
+                question: "Hvilke barrierer skal benyttes ved «Arbeid nær ved spenningssatte deler»? (Sett to kryss)",
+                type: "multiple",
+                options: [
+                    "Sikre mot innkobling",
+                    "Frakobling og spenningsprøving",
+                    "Anleggsbeskyttelse",
+                    "Personlig verneutstyr"
+                ],
+                correct: ["Anleggsbeskyttelse", "Personlig verneutstyr"],
+                explanation: "Ved arbeid nær ved spenningssatte deler beskytter man seg mot berøring og lysbue ved hjelp av fysisk anleggsbeskyttelse (isolerende duker/skjermer) og personlig verneutstyr (vernebriller/visir, isolerende hansker etc.)."
+            },
+            {
+                question: "På hvilken måte skal en slik modell (automasjonsmodell/øvingspult, se bilde) sikres mot innkobling? (Sett tre kryss)",
+                image: "https://bfk.no/handlers/bv.ashx/i2927204e-3f55-42ad-9ccf-6f39c0efe98c/w1920/h1080/q265636/k9b4b4eae92a3/1m9a3342.jpg",
+                imageAlt: "Automasjonsmodell på en pult med tilkoblingsledning som kan trekkes ut",
+                type: "multiple",
+                options: [
+                    "Måle at modellen er spenningsløs",
+                    "Koble ledningene fra vernet",
+                    "Sikre støpslet slik at ingen setter det inn igjen",
+                    "Skru av vernet",
+                    "Trekke ut støpslet"
+                ],
+                correct: ["Sikre støpslet slik at ingen setter det inn igjen", "Skru av vernet", "Trekke ut støpslet"],
+                explanation: "For å sikre en øvingsmodell mot utilsiktet innkobling skal man: (1) Skru av vernet/bryteren, (2) Trekke ut støpslet, og (3) Sikre støpslet fysisk (f.eks. låsbar plugghette eller låst boks) slik at ingen plugger det inn igjen ved en feiltakelse. Spenningsmåling er en kontrollhandling, ikke en sikring mot innkobling."
+            }
+        ];
+
+        const PASS_PERCENT = 80;
+        const PASS_COUNT = Math.ceil(QUESTIONS.length * PASS_PERCENT / 100);
+
+        const state = {
+            index: 0,
+            score: 0,
+            submitted: false,
+            selected: [],
+            wrongReview: []
+        };
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function currentQuestion() {
+            return QUESTIONS[state.index];
+        }
+
+        function renderQuestion() {
+            const q = currentQuestion();
+            state.submitted = false;
+            state.selected = [];
+
+            document.getElementById('q-index').textContent = state.index + 1;
+            document.getElementById('q-score').textContent = state.score;
+            document.getElementById('progress-fill').style.width = `${(state.index / QUESTIONS.length) * 100}%`;
+
+            const typeLabel = q.type === 'single' ? 'Velg ett svar' : `Velg ${q.correct.length} svar`;
+            document.getElementById('question-pill').textContent = `Spørsmål ${state.index + 1} - ${typeLabel}`;
+            document.getElementById('question-text').textContent = q.question;
+
+            const imageContainer = document.getElementById('question-image-container');
+            imageContainer.innerHTML = q.image
+                ? `<img class="question-image" src="${q.image}" alt="${escapeHtml(q.imageAlt || '')}"><div class="question-image-caption">${escapeHtml(q.imageAlt || '')}</div>`
+                : '';
+
+            const inputType = q.type === 'single' ? 'radio' : 'checkbox';
+            const optionsHtml = q.options.map((opt, i) => `
+                <label class="option-row" data-idx="${i}">
+                    <input type="${inputType}" name="q-option" value="${i}">
+                    <span>${escapeHtml(opt)}</span>
+                </label>
+            `).join('');
+            document.getElementById('options-list').innerHTML = optionsHtml;
+
+            document.querySelectorAll('.option-row input').forEach(input => {
+                input.addEventListener('change', syncSelectionFromInputs);
+            });
+
+            document.getElementById('feedback').className = 'feedback';
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('explanation-container').innerHTML = '';
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.textContent = 'Sjekk svar';
+            submitBtn.classList.remove('btn-next');
+            submitBtn.disabled = true;
+        }
+
+        function syncSelectionFromInputs() {
+            if (state.submitted) return;
+            const selected = [];
+            document.querySelectorAll('.option-row').forEach(row => {
+                const input = row.querySelector('input');
+                const idx = parseInt(row.getAttribute('data-idx'));
+                if (input.checked) selected.push(idx);
+                row.classList.toggle('selected', input.checked);
+            });
+            state.selected = selected;
+            document.getElementById('submit-btn').disabled = state.selected.length === 0;
+        }
+
+        function checkAnswer() {
+            if (state.submitted) {
+                goToNext();
+                return;
+            }
+
+            const q = currentQuestion();
+            const correctIdx = q.correct.map(c => q.options.indexOf(c)).sort();
+            const selectedIdx = [...state.selected].sort();
+            const isCorrect = JSON.stringify(correctIdx) === JSON.stringify(selectedIdx);
+
+            state.submitted = true;
+
+            document.querySelectorAll('.option-row').forEach(row => {
+                row.classList.add('disabled');
+                row.querySelector('input').disabled = true;
+                const idx = parseInt(row.getAttribute('data-idx'));
+                if (correctIdx.includes(idx)) row.classList.add('correct-answer');
+                else if (selectedIdx.includes(idx)) row.classList.add('wrong-answer');
+            });
+
+            const feedbackEl = document.getElementById('feedback');
+            if (isCorrect) {
+                state.score++;
+                document.getElementById('q-score').textContent = state.score;
+                feedbackEl.className = 'feedback correct';
+                feedbackEl.textContent = '✅ Riktig!';
+            } else {
+                feedbackEl.className = 'feedback wrong';
+                feedbackEl.textContent = '❌ Feil svar.';
+                state.wrongReview.push({
+                    question: q.question,
+                    correctText: q.correct.join(', ')
+                });
+            }
+
+            document.getElementById('explanation-container').innerHTML = `
+                <div class="explanation-box"><strong>Faglig begrunnelse:</strong> ${escapeHtml(q.explanation)}</div>
+            `;
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = false;
+            submitBtn.classList.add('btn-next');
+            submitBtn.textContent = state.index === QUESTIONS.length - 1 ? 'Fullfør prøven 🏁' : 'Neste spørsmål ➔';
+        }
+
+        function goToNext() {
+            state.index++;
+            if (state.index >= QUESTIONS.length) {
+                showResults();
+            } else {
+                renderQuestion();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-view').style.display = 'none';
+            document.getElementById('result-view').style.display = 'block';
+            document.getElementById('progress-fill').style.width = '100%';
+
+            const passed = state.score >= PASS_COUNT;
+            document.getElementById('result-score').textContent = `${state.score} / ${QUESTIONS.length}`;
+            document.getElementById('result-score').className = `result-score ${passed ? 'pass' : 'fail'}`;
+
+            const msgEl = document.getElementById('result-msg');
+            msgEl.className = `result-msg ${passed ? 'pass' : 'fail'}`;
+            msgEl.textContent = passed
+                ? `🎉 Bestått! (krav: minst ${PASS_COUNT} av ${QUESTIONS.length} riktige)`
+                : `Ikke bestått. Krav: minst ${PASS_COUNT} av ${QUESTIONS.length} riktige.`;
+
+            const reviewContainer = document.getElementById('review-container');
+            if (state.wrongReview.length > 0) {
+                reviewContainer.innerHTML = `
+                    <div class="review-list">
+                        ${state.wrongReview.map(r => `
+                            <div class="review-item">
+                                <div class="rq">${escapeHtml(r.question)}</div>
+                                <div class="ra">Riktig svar: <strong>${escapeHtml(r.correctText)}</strong></div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                reviewContainer.innerHTML = '';
+            }
+
+            if (passed) {
+                launchFireworks(3000, () => showDiploma());
+            }
+        }
+
+        function restartQuiz() {
+            state.index = 0;
+            state.score = 0;
+            state.submitted = false;
+            state.selected = [];
+            state.wrongReview = [];
+            document.getElementById('result-view').style.display = 'none';
+            document.getElementById('quiz-view').style.display = 'block';
+            renderQuestion();
+        }
+
+        // ==========================================
+        // FYRVERKERI & DIPLOM
+        // ==========================================
+        function launchFireworks(durationMs = 3000, callback) {
+            const canvas = document.getElementById('fireworks-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.style.display = 'block';
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#ffffff', '#eab308'];
+
+            function createExplosion(x, y) {
+                const count = 50;
+                for (let i = 0; i < count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 6 + 2;
+                    particles.push({
+                        x, y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        alpha: 1,
+                        decay: Math.random() * 0.02 + 0.015,
+                        radius: Math.random() * 3 + 2
+                    });
+                }
+            }
+
+            let animationFrameId;
+            let intervalId = setInterval(() => {
+                const x = Math.random() * canvas.width * 0.8 + canvas.width * 0.1;
+                const y = Math.random() * canvas.height * 0.5 + canvas.height * 0.1;
+                createExplosion(x, y);
+            }, 300);
+
+            function loop() {
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.2)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.08;
+                    p.alpha -= p.decay;
+
+                    if (p.alpha <= 0) {
+                        particles.splice(i, 1);
+                        continue;
+                    }
+
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                animationFrameId = requestAnimationFrame(loop);
+            }
+
+            createExplosion(canvas.width * 0.5, canvas.height * 0.3);
+            loop();
+
+            setTimeout(() => {
+                clearInterval(intervalId);
+                cancelAnimationFrame(animationFrameId);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                canvas.style.display = 'none';
+                if (callback) callback();
+            }, durationMs);
+        }
+
+        function showDiploma() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('no-NO', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('diploma-date').textContent = dateStr;
+            document.getElementById('diploma-score').textContent = `Resultat: ${state.score} av ${QUESTIONS.length} riktige svar`;
+            document.getElementById('diploma-overlay').classList.add('active');
+            document.getElementById('student-name-input').focus();
+        }
+
+        function closeDiploma() {
+            document.getElementById('diploma-overlay').classList.remove('active');
+        }
+
+        // ==========================================
+        // MODAL
+        // ==========================================
+        function showHelpModal() {
+            document.getElementById('modal-total').textContent = QUESTIONS.length;
+            document.getElementById('modal-pass-pct').textContent = `${PASS_PERCENT}%`;
+            document.getElementById('modal-overlay').classList.add('active');
+        }
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+        }
+
+        // ==========================================
+        // LÆRERMENY
+        // ==========================================
+        function toggleCheatMenu() {
+            document.getElementById('cheat-panel').classList.toggle('active');
+        }
+
+        document.getElementById('help-btn').addEventListener('click', showHelpModal);
+        document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+        document.getElementById('modal-overlay').addEventListener('click', (e) => {
+            if (e.target.id === 'modal-overlay') closeModal();
+        });
+
+        document.getElementById('submit-btn').addEventListener('click', checkAnswer);
+        document.getElementById('retry-btn').addEventListener('click', restartQuiz);
+        document.getElementById('diploma-close-btn').addEventListener('click', closeDiploma);
+
+        let triggerClicks = 0;
+        let triggerTimer = null;
+        document.getElementById('secret-trigger-area').addEventListener('click', () => {
+            triggerClicks++;
+            clearTimeout(triggerTimer);
+            triggerTimer = setTimeout(() => { triggerClicks = 0; }, 3000);
+            if (triggerClicks >= 7) {
+                triggerClicks = 0;
+                toggleCheatMenu();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.altKey && (e.key === 'k' || e.key === 'K')) {
+                e.preventDefault();
+                toggleCheatMenu();
+            }
+            if (e.key === 'Escape') {
+                if (document.getElementById('modal-overlay').classList.contains('active')) closeModal();
+                if (document.getElementById('diploma-overlay').classList.contains('active')) closeDiploma();
+                if (document.getElementById('cheat-panel').classList.contains('active')) toggleCheatMenu();
+            }
+        });
+
+        document.getElementById('cheat-close').addEventListener('click', toggleCheatMenu);
+
+        document.getElementById('cheat-fill-btn').addEventListener('click', () => {
+            if (state.submitted) return;
+            const q = currentQuestion();
+            const correctIdx = q.correct.map(c => q.options.indexOf(c));
+            document.querySelectorAll('.option-row').forEach(row => {
+                const idx = parseInt(row.getAttribute('data-idx'));
+                const input = row.querySelector('input');
+                const shouldCheck = correctIdx.includes(idx);
+                input.checked = shouldCheck;
+                row.classList.toggle('selected', shouldCheck);
+            });
+            state.selected = correctIdx.slice();
+            document.getElementById('submit-btn').disabled = false;
+        });
+
+        document.getElementById('cheat-finish-all-correct-btn').addEventListener('click', () => {
+            state.score = QUESTIONS.length;
+            state.wrongReview = [];
+            state.index = QUESTIONS.length;
+            showResults();
+        });
+
+        document.getElementById('cheat-diploma-btn').addEventListener('click', () => {
+            showDiploma();
+        });
+
+        document.getElementById('cheat-restart-btn').addEventListener('click', () => {
+            restartQuiz();
+        });
+
+        // Start prøven
+        renderQuestion();
+    </script>
+</body>
+</html>
