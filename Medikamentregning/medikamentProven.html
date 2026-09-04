@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Medikamentprøven: digital trening i klinisk medikamentregning for sykepleierutdanning.">
+    <title>Medikamentprøven | Digital trening i klinisk medikamentregning</title>
+    <style>
+        :root {
+            --ink: #18322f;
+            --muted: #60736f;
+            --paper: #fbfcf9;
+            --canvas: #e9efeb;
+            --line: #d5e0da;
+            --teal: #176b61;
+            --teal-dark: #0e514a;
+            --teal-soft: #e2f0ed;
+            --amber: #b87518;
+            --amber-soft: #fff3d9;
+            --red: #a53f3f;
+            --red-soft: #fff0ef;
+            --green: #24704b;
+            --green-soft: #eaf6ee;
+            --shadow: 0 18px 45px rgba(29, 58, 48, 0.10);
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #e9efeb 0%, #f7f8f3 48%, #e4eeeb 100%);
+            color: var(--ink);
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+            padding: 24px 16px;
+        }
+        button, input { font: inherit; }
+        button { cursor: pointer; }
+        .shell { max-width: 960px; margin: 0 auto; }
+        .app-header {
+            display: flex; justify-content: space-between; align-items: flex-start; gap: 24px;
+            margin-bottom: 18px;
+        }
+        .eyebrow { margin: 0 0 6px; color: var(--teal); font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+        h1, h2, h3, p { margin-top: 0; }
+        h1 { margin-bottom: 4px; font-family: Georgia, serif; font-size: clamp(30px, 5vw, 46px); line-height: 1; letter-spacing: 0; }
+        .subtitle { margin: 0; color: var(--muted); font-size: 15px; }
+        .header-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+        .btn {
+            border: 1px solid var(--line); border-radius: 7px; background: var(--paper); color: var(--ink);
+            padding: 11px 15px; font-weight: 700; transition: background .15s, border-color .15s, transform .05s;
+        }
+        .btn:hover { background: #f1f6f2; border-color: #aec4ba; }
+        .btn:active { transform: translateY(1px); }
+        .btn-primary { border-color: var(--teal); background: var(--teal); color: #fff; }
+        .btn-primary:hover { background: var(--teal-dark); border-color: var(--teal-dark); }
+        .btn-warning { border-color: #d4a34c; background: var(--amber-soft); color: #7b4a09; }
+        .btn:disabled { cursor: not-allowed; opacity: .5; }
+
+        .status-strip { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+        .status-card { background: rgba(251,252,249,.82); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+        .status-label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 3px; }
+        .status-value { font-size: 18px; font-weight: 800; }
+        .progress-wrap { height: 6px; background: #dce6df; border-radius: 99px; overflow: hidden; margin-top: 7px; }
+        .progress-bar { height: 100%; width: 0; background: var(--teal); transition: width .25s ease; }
+
+        .main-grid { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 16px; align-items: start; }
+        .panel { background: rgba(251,252,249,.96); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); }
+        .question-panel { padding: clamp(20px, 4vw, 34px); }
+        .question-meta { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 18px; color: var(--muted); font-size: 13px; }
+        .level-tag { color: var(--teal-dark); background: var(--teal-soft); border: 1px solid #b9d9d2; border-radius: 99px; padding: 5px 10px; font-weight: 800; }
+        .question-type { text-align: right; }
+        .question { font-family: Georgia, serif; font-size: clamp(24px, 4vw, 34px); line-height: 1.25; margin-bottom: 22px; }
+        .question strong { color: var(--teal-dark); }
+        .clinical-note { border-left: 3px solid var(--amber); background: var(--amber-soft); color: #69450e; padding: 11px 13px; font-size: 13px; line-height: 1.5; margin-bottom: 18px; }
+        
+        .answer-form { display: grid; gap: 10px; }
+        .answer-row { display: flex; gap: 8px; }
+        #answer-input, #exam-answer, .answer-input {
+            min-width: 0; flex: 1; border: 2px solid #b9cbc2; border-radius: 7px;
+            padding: 13px 14px; color: var(--ink); background: #fff; font-size: 20px;
+            text-align: center; outline: none; width: 100%;
+        }
+        #answer-input:focus, #exam-answer:focus, .answer-input:focus {
+            border-color: var(--teal); box-shadow: 0 0 0 3px rgba(23,107,97,.14);
+        }
+        .unit-hint { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
+        .quick-keys { display: flex; flex-wrap: wrap; gap: 6px; }
+        .quick-key {
+            border: 1px solid var(--line); border-radius: 6px; background: #f5f8f5;
+            color: var(--ink); padding: 7px 10px; font-size: 13px; font-weight: 700;
+            user-select: none;
+        }
+        .quick-key:hover { border-color: #9cbcb0; background: var(--teal-soft); }
+        .feedback { min-height: 28px; margin-top: 16px; font-size: 15px; line-height: 1.5; }
+        .feedback.correct {
+            color: #1a5634;
+            background: #eaf6ee;
+            border: 1px solid #a8d9b9;
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: feedbackFadeIn 0.2s ease;
+        }
+        .feedback.correct .feedback-icon {
+            font-size: 20px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        @keyframes feedbackFadeIn {
+            from { opacity: 0; transform: translateY(-3px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .review { border: 1px solid #e7b8b4; background: var(--red-soft); border-radius: 8px; padding: 14px; color: #753636; }
+        .review h3 { color: var(--red); margin-bottom: 8px; font-size: 16px; }
+        .review-grid { display: grid; gap: 6px; margin: 10px 0; }
+        .review-row { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid rgba(165,63,63,.15); padding: 5px 0; font-size: 13px; }
+        .review-row strong { color: inherit; }
+        .solution { border-left: 3px solid var(--teal); background: #f5fbf8; color: var(--ink); padding: 10px 12px; margin-top: 10px; font-size: 13px; }
+
+        .side-panel { padding: 18px; }
+        .side-panel h2 { font-size: 17px; margin-bottom: 14px; }
+        .level-list { display: grid; gap: 7px; }
+        .level-item { display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 7px; padding: 9px; background: #f8faf7; font-size: 12px; }
+        .level-item.active { border-color: #8ebfb4; background: var(--teal-soft); }
+        .level-item.locked { opacity: .55; }
+        .level-number { color: var(--teal-dark); font-weight: 800; }
+        .level-state { color: var(--muted); font-size: 11px; }
+        .side-divider { height: 1px; background: var(--line); margin: 18px 0; }
+        .small-copy { color: var(--muted); font-size: 12px; line-height: 1.5; }
+        .notice { padding: 11px 12px; border-radius: 7px; background: var(--green-soft); color: #245b40; font-size: 12px; line-height: 1.45; }
+        .footer { color: #6c7d78; font-size: 11px; text-align: center; margin: 18px 0 4px; }
+
+        .modal-backdrop { position: fixed; inset: 0; z-index: 10; display: none; align-items: center; justify-content: center; background: rgba(20, 42, 37, .48); padding: 16px; }
+        .modal-backdrop.open { display: flex; }
+        .modal { width: min(720px, 100%); max-height: 90vh; overflow: auto; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 24px 70px rgba(13, 37, 31, .25); padding: 24px; }
+        .modal-header { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 16px; }
+        .modal-header h2 { margin: 0; font-family: Georgia, serif; }
+        .close-btn { border: 0; background: transparent; color: var(--muted); font-size: 24px; line-height: 1; }
+        .lesson-block { border: 1px solid var(--line); border-radius: 7px; padding: 13px; margin: 10px 0; background: #f7faf7; }
+        .lesson-block h3 { font-size: 14px; color: var(--teal-dark); margin-bottom: 7px; }
+        .lesson-block p, .lesson-block li { color: #40534e; font-size: 13px; line-height: 1.55; }
+        .formula { font-family: Consolas, monospace; background: #eef4ef; border-radius: 5px; padding: 9px 10px; margin: 8px 0; color: var(--ink); font-size: 13px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+
+        .certificate { border: 8px double var(--teal); padding: 32px 26px; text-align: center; background: #fffef9; }
+        .certificate h2 { font-family: Georgia, serif; color: var(--teal-dark); font-size: 30px; margin-bottom: 5px; }
+        .certificate h3 { color: var(--muted); font-size: 13px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 26px; }
+        .certificate-name { border: 0; border-bottom: 2px solid var(--teal); background: transparent; width: min(360px, 90%); padding: 8px; text-align: center; font-family: Georgia, serif; font-size: 23px; outline: none; }
+        .certificate-text { max-width: 520px; margin: 20px auto; color: #40534e; line-height: 1.55; font-size: 14px; }
+        .certificate-footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1px solid var(--line); margin-top: 28px; padding-top: 13px; color: var(--muted); font-size: 12px; }
+        .certificate-credit { margin: 20px 0 0; color: #9aa7a2; font-size: 10px; }
+
+        .exam-layout { display: grid; gap: 16px; }
+        .exam-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 12px; }
+        .exam-timer { color: var(--teal-dark); font-weight: 800; font-variant-numeric: tabular-nums; font-size: 15px; }
+        .exam-question-number { color: var(--muted); font-size: 13px; }
+        .exam-controls { display: flex; justify-content: space-between; gap: 8px; margin-top: 16px; }
+        .exam-overview { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; margin-top: 14px; }
+        .exam-dot { border: 1px solid var(--line); border-radius: 5px; background: #f7faf7; color: var(--muted); min-height: 32px; font-size: 13px; }
+        .exam-dot.current { border-color: var(--teal); color: var(--teal-dark); font-weight: 800; background: #eef6f3; }
+        .exam-dot.answered { background: var(--teal-soft); color: var(--teal-dark); font-weight: 700; }
+        .exam-result { border: 1px solid var(--line); border-radius: 7px; padding: 16px; background: #f7faf7; }
+        .exam-result h3 { color: var(--teal-dark); font-size: 18px; margin-bottom: 6px; }
+        .exam-result table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
+        .exam-result th, .exam-result td { text-align: left; border-bottom: 1px solid var(--line); padding: 8px 6px; }
+        .exam-result details { margin-top: 4px; font-size: 12px; color: var(--ink); }
+        .exam-result summary { cursor: pointer; color: var(--teal); font-weight: 600; outline: none; }
+        .pass { color: var(--green); font-weight: 800; }
+        .fail { color: var(--red); font-weight: 800; }
+
+        @media (max-width: 760px) {
+            body { padding: 16px 10px; }
+            .app-header { flex-direction: column; gap: 14px; }
+            .header-actions { justify-content: flex-start; }
+            .status-strip { grid-template-columns: 1fr; }
+            .main-grid { grid-template-columns: 1fr; }
+            .side-panel { order: 2; }
+            .question-meta { align-items: flex-start; flex-direction: column; }
+            .question-type { text-align: left; }
+            .answer-row { flex-direction: column; }
+            .exam-overview { grid-template-columns: repeat(5, 1fr); }
+            .certificate-footer { flex-direction: column; }
+        }
+
+        @media print {
+            body { background: #fff; padding: 0; }
+            body > * { display: none !important; }
+            #certificate-modal { display: flex !important; position: static; background: none; padding: 0; }
+            #certificate-modal .modal { max-height: none; border: 0; box-shadow: none; width: 100%; }
+            #certificate-modal .modal-header, #certificate-modal .modal-actions { display: none; }
+            .certificate { margin: 25mm auto; max-width: 180mm; }
+        }
+
+        /* Hemmelig Utvikler- og Lærermeny */
+        .cheat-panel {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #0f172a;
+            color: #f8fafc;
+            border: 2px solid var(--teal);
+            border-radius: 12px;
+            padding: 16px;
+            max-width: 420px;
+            width: calc(100% - 40px);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+            z-index: 10000;
+            text-align: left;
+            font-size: 13px;
+        }
+        .cheat-panel.active { display: block; }
+        .cheat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: #5eead4;
+        }
+        .cheat-close { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 16px; padding: 0 4px; }
+        .cheat-close:hover { color: #ffffff; }
+        .cheat-sec-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; margin: 8px 0 4px 0; font-weight: 700; }
+        .cheat-lvl-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 8px; }
+        .cheat-lvl-btn {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            color: #f8fafc;
+            padding: 6px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+            text-align: center;
+            transition: all 0.1s;
+        }
+        .cheat-lvl-btn:hover { background-color: var(--teal); border-color: #5eead4; }
+        .cheat-lvl-btn.active { background-color: var(--teal); border-color: #5eead4; }
+        .cheat-ans-box {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin: 6px 0;
+            font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        }
+        .cheat-ans-val { color: #4ade80; font-weight: bold; font-size: 14px; }
+        .cheat-ans-step { color: #94a3b8; font-size: 11px; margin-top: 4px; line-height: 1.4; }
+        .cheat-btn-row { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+        .cheat-action-btn {
+            flex: 1 1 calc(50% - 6px);
+            background-color: #334155;
+            border: none;
+            color: #ffffff;
+            padding: 7px 8px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.15s;
+            text-align: center;
+        }
+        .cheat-action-btn:hover { background-color: #475569; }
+        .cheat-action-btn.teal { background-color: var(--teal); }
+        .cheat-action-btn.teal:hover { background-color: var(--teal-dark); }
+        .cheat-action-btn.amber { background-color: #b87518; }
+        .cheat-action-btn.amber:hover { background-color: #92580c; }
+        @media print {
+            .cheat-panel { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <header class="app-header">
+            <div>
+                <p class="eyebrow">Sykepleierutdanning</p>
+                <h1>Medikamentprøven</h1>
+                <p class="subtitle" id="secret-trigger-area" style="cursor: default; user-select: none;" title="Digital trening i klinisk medikamentregning">Digital trening i klinisk medikamentregning</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn" id="help-btn" type="button">Teori og formler</button>
+                <button class="btn" id="password-btn" type="button">Lås opp med passord</button>
+                <button class="btn btn-warning" id="exam-btn" type="button" disabled>Prøvemodus</button>
+            </div>
+        </header>
+
+        <section class="status-strip" aria-label="Fremdrift">
+            <div class="status-card"><span class="status-label">Aktivt nivå</span><span class="status-value" id="level-value">1</span></div>
+            <div class="status-card"><span class="status-label">Rette på rad</span><span class="status-value"><span id="streak-value">0</span> / 5</span><div class="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div></div>
+            <div class="status-card"><span class="status-label">Oppgaver løst</span><span class="status-value" id="solved-value">0</span></div>
+        </section>
+
+        <main class="main-grid">
+            <section class="panel question-panel" aria-live="polite">
+                <div class="question-meta"><span class="level-tag" id="level-tag">Nivå 1</span><span class="question-type" id="question-type">Enhetsomregning og tabletter</span></div>
+                <div class="question" id="question-text">Laster oppgave ...</div>
+                <div class="clinical-note" id="clinical-note">Kontroller alltid dose, styrke, mengde og enhet før du svarer.</div>
+                <form class="answer-form" id="answer-form">
+                    <div class="answer-row">
+                        <input id="answer-input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="Skriv svar med enhet" aria-label="Svar">
+                        <button class="btn btn-primary" type="submit" id="submit-btn">Kontroller svar</button>
+                    </div>
+                    <div class="unit-hint"><span>Komma og punktum godtas.</span><span id="answer-format">Forventet format: tall + enhet</span></div>
+                    <div class="quick-keys" id="quick-keys" aria-label="Hurtigtaster"></div>
+                </form>
+                <div class="feedback" id="feedback" aria-live="assertive"></div>
+            </section>
+
+            <aside class="panel side-panel">
+                <h2>Progresjon</h2>
+                <div class="level-list" id="level-list"></div>
+                <div class="side-divider"></div>
+                <div class="notice" id="unlock-notice">Bestå hvert nivå med fem riktige svar på rad for å gå videre.</div>
+                <div class="side-divider"></div>
+                <p class="small-copy">Dette er et treningsverktøy for sykepleierstudenter. Følg alltid nasjonalt pensum og gjeldende kliniske prosedyrer.</p>
+            </aside>
+        </main>
+        <footer class="footer">Medikamentprøven · Treningsverktøy i klinisk medikamentregning</footer>
+    </div>
+
+    <!-- Teori og formler modal -->
+    <div class="modal-backdrop" id="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-title">
+        <div class="modal">
+            <div class="modal-header"><h2 id="help-title">Teori, formler og avrundingsregler</h2><button class="close-btn" type="button" data-close="help-modal" aria-label="Lukk">×</button></div>
+            <div id="help-content"></div>
+            <div class="modal-actions"><button class="btn btn-primary" type="button" data-close="help-modal">Tilbake til oppgaven</button></div>
+        </div>
+    </div>
+
+    <!-- Passord modal -->
+    <div class="modal-backdrop" id="password-modal" role="dialog" aria-modal="true" aria-labelledby="password-title">
+        <div class="modal" style="max-width: 440px;">
+            <div class="modal-header">
+                <h2 id="password-title">Lås opp prøvemodus</h2>
+                <button class="close-btn" type="button" data-close="password-modal" aria-label="Lukk">×</button>
+            </div>
+            <p class="small-copy" style="margin-bottom: 14px;">Oppgi eksamenspassordet (tildeles ved fullført Nivå 5) for å låse opp prøvemodus direkte:</p>
+            <form id="password-form" style="display: grid; gap: 12px;">
+                <input id="password-input" type="text" placeholder="F.eks. NULLFEIL-2026" autocomplete="off" style="padding: 11px; border: 2px solid var(--line); border-radius: 6px; font-size: 16px; text-align: center; text-transform: uppercase;">
+                <div id="password-feedback" style="font-size: 13px; color: var(--red); min-height: 18px; text-align: center;"></div>
+                <div class="modal-actions">
+                    <button class="btn" type="button" data-close="password-modal">Avbryt</button>
+                    <button class="btn btn-primary" type="submit">Lås opp</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sertifikat modal -->
+    <div class="modal-backdrop" id="certificate-modal" role="dialog" aria-modal="true" aria-labelledby="certificate-title">
+        <div class="modal">
+            <div class="modal-header"><h2 id="certificate-title">Fullført treningsprogram</h2><button class="close-btn" type="button" data-close="certificate-modal" aria-label="Lukk">×</button></div>
+            <div class="certificate">
+                <p class="eyebrow">Medikamentprøven</p>
+                <h2>Sertifikat for gjennomført treningsprogram</h2>
+                <h3>Digital trening i klinisk medikamentregning</h3>
+                <p>Dette sertifikatet tildeles</p>
+                <input class="certificate-name" id="certificate-name" type="text" placeholder="Skriv navnet ditt" autocomplete="name">
+                <p class="certificate-text">for å ha fullført treningsnivåene og bestått den innebygde sluttprøven i Medikamentprøven. Sertifikatet dokumenterer gjennomføring av treningsprogrammet og erstatter ikke formell eksamen eller autorisasjon.</p>
+                <div class="certificate-footer"><span id="certificate-date"></span><span>Gjennomført digitalt treningsprogram</span></div>
+                <p class="certificate-credit">Utviklet av Ingve Bjørnå</p>
+            </div>
+            <div class="modal-actions"><button class="btn" type="button" data-close="certificate-modal">Lukk</button><button class="btn btn-primary" type="button" id="print-btn">Skriv ut / lagre PDF</button></div>
+        </div>
+    </div>
+
+    <!-- Eksamensmodal (Prøvemodus) -->
+    <div class="modal-backdrop" id="exam-modal" role="dialog" aria-modal="true" aria-labelledby="exam-title">
+        <div class="modal">
+            <div class="modal-header"><h2 id="exam-title">Prøvemodus (Simulert eksamen)</h2><button class="close-btn" type="button" data-close="exam-modal" aria-label="Lukk">×</button></div>
+            <div id="exam-content"></div>
+        </div>
+    </div>
+
+
+    <!-- Hemmelig Utvikler- og Lærermeny -->
+    <div class="cheat-panel" id="cheat-panel">
+        <div class="cheat-header">
+            <span>🕵️ Utvikler- og Lærermeny</span>
+            <button type="button" class="cheat-close" id="cheat-close" title="Lukk (Esc)">✖</button>
+        </div>
+        <div class="cheat-sec-title">Hopp direkte til nivå:</div>
+        <div class="cheat-lvl-grid" id="cheat-lvl-grid">
+            <button type="button" class="cheat-lvl-btn" data-lvl="1">Nivå 1</button>
+            <button type="button" class="cheat-lvl-btn" data-lvl="2">Nivå 2</button>
+            <button type="button" class="cheat-lvl-btn" data-lvl="3">Nivå 3</button>
+            <button type="button" class="cheat-lvl-btn" data-lvl="4">Nivå 4</button>
+            <button type="button" class="cheat-lvl-btn" data-lvl="5">Nivå 5</button>
+        </div>
+        <div class="cheat-sec-title">Fasit for aktiv oppgave:</div>
+        <div class="cheat-ans-box">
+            <div>Fasit: <span class="cheat-ans-val" id="cheat-ans-val">-</span></div>
+            <div class="cheat-ans-step" id="cheat-ans-step">-</div>
+        </div>
+        <div class="cheat-btn-row">
+            <button type="button" class="cheat-action-btn teal" id="cheat-fill-btn">🪄 Fyll inn fasit</button>
+            <button type="button" class="cheat-action-btn" id="cheat-skip-btn">⏩ Ny oppgave</button>
+            <button type="button" class="cheat-action-btn" id="cheat-streak-btn">⭐ +1 Rette på rad</button>
+            <button type="button" class="cheat-action-btn amber" id="cheat-exam-btn">📝 Start prøvemodus</button>
+            <button type="button" class="cheat-action-btn" id="cheat-cert-btn">🎓 Vis sertifikat</button>
+            <button type="button" class="cheat-action-btn" id="cheat-reset-btn">🔄 Nullstill lagring</button>
+        </div>
+    </div>
+
+    <script>
+        'use strict';
+
+        const LEVELS = [
+            { name: 'Enhetsomregning og tabletter', short: 'Tabletter og enheter' },
+            { name: 'Flytende legemidler og injeksjoner', short: 'Væske og injeksjon' },
+            { name: 'Vektbasert dosering hos barn', short: 'Pediatrisk dosering' },
+            { name: 'Infusjonshastighet og dråpetakt', short: 'Infusjon' },
+            { name: 'Fortynning og sprøytepumper', short: 'Sammensatte formler' }
+        ];
+
+        const EXAM_PASSWORD = 'NULLFEIL-2026';
+
+        const state = {
+            level: 1,
+            streak: 0,
+            solved: 0,
+            current: null,
+            reviewing: false,
+            unlockedExam: false,
+            lastSignature: '',
+            exam: null
+        };
+
+        let examTimerInterval = null;
+        let autoAdvanceTimer = null;
+
+        function clearAutoAdvance() {
+            if (autoAdvanceTimer) {
+                clearTimeout(autoAdvanceTimer);
+                autoAdvanceTimer = null;
+            }
+        }
+
+        const $ = (selector) => document.querySelector(selector);
+
+        // 1. Matematikk- og formateringsverktøy
+        const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+        const roundTo = (value, decimals) => {
+            const factor = Math.pow(10, decimals);
+            return Math.round((value + Number.EPSILON) * factor) / factor;
+        };
+
+        const formatNumber = (value, decimals = null) => {
+            if (decimals === null) {
+                return String(value).replace('.', ',');
+            }
+            return value.toFixed(decimals).replace('.', ',');
+        };
+
+        const formatUnit = (unit) => {
+            switch (unit) {
+                case 'tablet': return 'tabletter';
+                case 'ml/t': return 'ml/t';
+                case 'dr/min': return 'dr/min';
+                case 'mmol/ml': return 'mmol/ml';
+                default: return unit;
+            }
+        };
+
+        const formatDisplayExpected = (expected, decimals, unit) => {
+            if (unit === 'tablet') {
+                const valStr = expected % 1 === 0 ? String(expected) : formatNumber(expected, 1);
+                return expected === 1 ? `1 tablett` : `${valStr} tabletter`;
+            }
+            if (unit === 'dr/min') {
+                return `${Math.round(expected)} dr/min`;
+            }
+            return `${formatNumber(expected, decimals)} ${formatUnit(unit)}`;
+        };
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[char]);
+        }
+
+        // 2. Inndataparser med robust håndtering av komma, punktum, brøker og enheter
+        function parseAnswer(raw) {
+            if (!raw || typeof raw !== 'string') return null;
+            let s = raw.trim();
+
+            // Erstatt brøksymbol ½
+            s = s.replace(/½/g, '0.5');
+
+            // Standardiser komma til punktum
+            s = s.replace(/,/g, '.');
+
+            // Fjern mellomrom rundt skråstreker (f.eks. "dr / min" -> "dr/min", "ml / t" -> "ml/t")
+            s = s.replace(/\s*\/\s*/g, '/');
+
+            // Fjern tusenskilletegn med mellomrom (f.eks. "1 000 mg" -> "1000 mg")
+            s = s.replace(/^([0-9]+)\s+([0-9]{3})\b/, '$1$2');
+
+            // Sjekk brøkform (f.eks. "1/2 tablett")
+            const fracMatch = s.match(/^([0-9]+)\/([0-9]+)\s*(.*)$/);
+            if (fracMatch) {
+                const num = Number(fracMatch[1]);
+                const den = Number(fracMatch[2]);
+                if (den !== 0) {
+                    const val = num / den;
+                    const unit = fracMatch[3].trim().toLowerCase().replace('μ', 'µ');
+                    return {
+                        value: val,
+                        decimals: val % 1 === 0 ? 0 : 2,
+                        unit: unit
+                    };
+                }
+            }
+
+            // Standard tall + enhet
+            const match = s.match(/^([0-9]+(?:\.[0-9]+)?)\s*(.*)$/);
+            if (!match) return null;
+
+            const numStr = match[1];
+            const value = Number(numStr);
+            if (!Number.isFinite(value)) return null;
+
+            const decCount = (numStr.split('.')[1] || '').length;
+            const unit = match[2].trim().toLowerCase().replace('μ', 'µ');
+
+            return { value, decimals: decCount, unit };
+        }
+
+        // 3. Enhetsvalidering med støtte for vanlige norske fagaliaser
+        const UNIT_ALIASES = {
+            'tablet': ['tablett', 'tabletter', 'tabl', 'tbl', 'tab', 'stk'],
+            'ml': ['ml', 'milliliter', 'millilitre'],
+            'mg': ['mg', 'milligram', 'milligramm'],
+            'g': ['g', 'gram'],
+            'µg': ['µg', 'ug', 'mikrog', 'mikrogram', 'mcg'],
+            'mmol': ['mmol', 'millimol'],
+            'mmol/ml': ['mmol/ml', 'mmolprml', 'mmol pr ml', 'mmol/millilitre', 'mmol/milliliter', 'mmol pr milliliter'],
+            'ml/t': ['ml/t', 'ml/time', 'ml/h', 'ml pr time', 'ml/t.', 'ml/time.'],
+            'dr/min': ['dr/min', 'dråper/min', 'dråper/minutt', 'dr/minutt', 'drp/min', 'draper/min', 'draper/minutt', 'dråper pr min', 'dråper pr minutt']
+        };
+
+        function unitMatches(actual, expected) {
+            if (!actual || !expected) return false;
+            const normActual = actual.replace(/\s*\/\s*/g, '/').replace(/\s+/g, ' ').trim().toLowerCase();
+            const aliases = UNIT_ALIASES[expected] || [expected];
+            return aliases.some(alias => alias.replace(/\s*\/\s*/g, '/').replace(/\s+/g, ' ').trim().toLowerCase() === normActual);
+        }
+
+        // 4. Svarsjekk i tråd med nasjonale sensorveiledninger
+        function answerIsCorrect(parsed, question) {
+            if (!parsed || !unitMatches(parsed.unit, question.unit)) return false;
+
+            const diff = Math.abs(parsed.value - question.expected);
+
+            if (question.unit === 'tablet') {
+                return diff < 0.001;
+            }
+
+            if (question.unit === 'dr/min') {
+                if (parsed.decimals > 0) return false;
+                return diff < 0.001;
+            }
+
+            const maxAllowedDecimals = question.maxDecimals ?? question.decimals;
+            if (parsed.decimals > maxAllowedDecimals) {
+                if (diff > 0.0001) return false;
+            }
+
+            const tolerance = question.decimals === 0 ? 0.001 : (Math.pow(10, -question.decimals) / 2) + 0.0001;
+            return diff <= tolerance;
+        }
+
+        function checkQuestion(raw, currentQuestion = state.current) {
+            const parsed = parseAnswer(raw);
+            if (!parsed) {
+                return {
+                    correct: false,
+                    message: 'Skriv et tall etterfulgt av riktig enhet, for eksempel «1,5 ml» eller «2 tabletter».'
+                };
+            }
+            if (!parsed.unit) {
+                return {
+                    correct: false,
+                    message: `Husk å oppgi enhet. Forventet enhet er ${formatUnit(currentQuestion.unit)}.`
+                };
+            }
+            if (!unitMatches(parsed.unit, currentQuestion.unit)) {
+                return {
+                    correct: false,
+                    message: `Enheten «${parsed.unit}» stemmer ikke med oppgaven. Svar med ${formatUnit(currentQuestion.unit)}.`
+                };
+            }
+            if (currentQuestion.unit === 'dr/min' && parsed.decimals > 0) {
+                return {
+                    correct: false,
+                    message: 'Dråpetakt skal alltid oppgis i hele dråper per minutt.'
+                };
+            }
+            const maxAllowedDecimals = currentQuestion.maxDecimals ?? currentQuestion.decimals;
+            if (parsed.decimals > maxAllowedDecimals && Math.abs(parsed.value - currentQuestion.expected) > 0.0001) {
+                return {
+                    correct: false,
+                    message: `Svaret skal avrundes til høyst ${maxAllowedDecimals} desimal${maxAllowedDecimals === 1 ? '' : 'er'}.`
+                };
+            }
+            if (!answerIsCorrect(parsed, currentQuestion)) {
+                return {
+                    correct: false,
+                    message: 'Tallet stemmer ikke med den kliniske beregningen.'
+                };
+            }
+            return {
+                correct: true,
+                message: 'Riktig! Kontrollen av dose, styrke, mengde og enhet er bestått.'
+            };
+        }
+
+        function makeQuestion(data) {
+            const roundedExpected = roundTo(data.expected, data.decimals);
+            return {
+                ...data,
+                expected: roundedExpected,
+                displayExpected: formatDisplayExpected(roundedExpected, data.decimals, data.unit)
+            };
+        }
+
+        function choose(options) {
+            return options[Math.floor(Math.random() * options.length)];
+        }
+
+        // 5. Oppgavegeneratorer kvalitetssikret mot Felleskatalogen og pensum
+
+        // Nivå 1: Enhetsomregning og tabletter
+        function generateLevelOne() {
+            const profiles = [
+                // Paracetamol tabletter 500 mg
+                () => {
+                    const dose = choose([500, 1000, 1500]);
+                    const strength = 500;
+                    const expected = dose / strength;
+                    return makeQuestion({
+                        type: 'Tablettdose',
+                        prompt: `Du skal gi <strong>${dose} mg paracetamol</strong>. Tablettene har styrken <strong>${strength} mg per tablett</strong>. Hvor mange tabletter skal gis?`,
+                        note: 'Paracetamol 500 mg tabletter har delestrek. Kontroller at dose og styrke har samme enhet.',
+                        expected,
+                        decimals: expected % 1 === 0 ? 0 : 1,
+                        maxDecimals: 1,
+                        unit: 'tablet',
+                        formula: `Mengde = Dose ÷ Styrke\nMengde = ${dose} mg ÷ ${strength} mg/tablett = ${formatDisplayExpected(expected, 1, 'tablet')}.`
+                    });
+                },
+                // Sobril (oksazepam) 10 mg, 15 mg, 25 mg
+                () => {
+                    const config = choose([
+                        { strength: 10, dose: 15, expected: 1.5, med: 'Sobril (oksazepam)' },
+                        { strength: 10, dose: 20, expected: 2, med: 'Sobril (oksazepam)' },
+                        { strength: 15, dose: 15, expected: 1, med: 'Sobril (oksazepam)' },
+                        { strength: 15, dose: 30, expected: 2, med: 'Sobril (oksazepam)' },
+                        { strength: 25, dose: 25, expected: 1, med: 'Sobril (oksazepam)' },
+                        { strength: 25, dose: 50, expected: 2, med: 'Sobril (oksazepam)' }
+                    ]);
+                    return makeQuestion({
+                        type: 'Tablettdose',
+                        prompt: `Pasienten er ordinert <strong>${config.dose} mg ${config.med}</strong> mot uro. Tilgjengelig styrke er <strong>${config.strength} mg per tablett</strong>. Hvor mange tabletter skal administreres?`,
+                        note: 'Sobril tabletter har delestrek og kan deles i to like halvdoser.',
+                        expected: config.expected,
+                        decimals: config.expected % 1 === 0 ? 0 : 1,
+                        maxDecimals: 1,
+                        unit: 'tablet',
+                        formula: `Mengde = Dose ÷ Styrke\nMengde = ${config.dose} mg ÷ ${config.strength} mg/tablett = ${formatDisplayExpected(config.expected, 1, 'tablet')}.`
+                    });
+                },
+                // Metoprolol depottabletter 25 mg, 50 mg, 100 mg
+                () => {
+                    const config = choose([
+                        { strength: 50, dose: 25, expected: 0.5 },
+                        { strength: 50, dose: 50, expected: 1 },
+                        { strength: 50, dose: 75, expected: 1.5 },
+                        { strength: 50, dose: 100, expected: 2 },
+                        { strength: 100, dose: 50, expected: 0.5 },
+                        { strength: 100, dose: 100, expected: 1 }
+                    ]);
+                    return makeQuestion({
+                        type: 'Tablettdose',
+                        prompt: `En pasient er ordinert <strong>${config.dose} mg Metoprolol</strong>. Avdelingen har tabletter med styrke <strong>${config.strength} mg per tablett</strong>. Hvor mange tabletter skal gis?`,
+                        note: 'Metoprolol tabletter med delestrek kan deles i to like deler.',
+                        expected: config.expected,
+                        decimals: config.expected % 1 === 0 ? 0 : 1,
+                        maxDecimals: 1,
+                        unit: 'tablet',
+                        formula: `Mengde = Dose ÷ Styrke\nMengde = ${config.dose} mg ÷ ${config.strength} mg/tablett = ${formatDisplayExpected(config.expected, 1, 'tablet')}.`
+                    });
+                },
+                // Prednisolon 5 mg, 20 mg
+                () => {
+                    const config = choose([
+                        { strength: 5, dose: 10, expected: 2 },
+                        { strength: 5, dose: 15, expected: 3 },
+                        { strength: 5, dose: 20, expected: 4 },
+                        { strength: 20, dose: 10, expected: 0.5 },
+                        { strength: 20, dose: 30, expected: 1.5 }
+                    ]);
+                    return makeQuestion({
+                        type: 'Tablettdose',
+                        prompt: `Prednisolon er ordinert med <strong>${config.dose} mg</strong>. Tilgjengelig preparat har styrken <strong>${config.strength} mg per tablett</strong>. Hvor mange tabletter skal gis?`,
+                        note: 'Kontroller alltid antall tabletter og delestrek før utlevering.',
+                        expected: config.expected,
+                        decimals: config.expected % 1 === 0 ? 0 : 1,
+                        maxDecimals: 1,
+                        unit: 'tablet',
+                        formula: `Mengde = Dose ÷ Styrke\nMengde = ${config.dose} mg ÷ ${config.strength} mg/tablett = ${formatDisplayExpected(config.expected, 1, 'tablet')}.`
+                    });
+                },
+                // Enhetsomregning g til mg
+                () => {
+                    const grams = choose([0.5, 0.75, 1, 1.5, 2]);
+                    const expected = Math.round(grams * 1000);
+                    return makeQuestion({
+                        type: 'Enhetsomregning',
+                        prompt: `En ordinert dose er angitt som <strong>${formatNumber(grams, grams % 1 ? 2 : 0)} g</strong>. Hvor mange milligram (mg) tilsvarer denne dosen?`,
+                        note: 'Tier-potens: 1 g = 1000 mg (flytt komma tre plasser mot høyre).',
+                        expected,
+                        decimals: 0,
+                        unit: 'mg',
+                        formula: `${formatNumber(grams, grams % 1 ? 2 : 0)} g × 1000 mg/g = ${formatNumber(expected, 0)} mg.`
+                    });
+                },
+                // Enhetsomregning mg til mikrogram (µg)
+                () => {
+                    const mg = choose([0.05, 0.1, 0.25, 0.5, 1]);
+                    const expected = Math.round(mg * 1000);
+                    return makeQuestion({
+                        type: 'Enhetsomregning',
+                        prompt: `En dose er angitt som <strong>${formatNumber(mg, mg < 0.1 ? 2 : 1)} mg</strong>. Hvor mange mikrogram (µg) tilsvarer dette?`,
+                        note: '1 mg = 1000 µg (mikrogram). Skriv svar med µg.',
+                        expected,
+                        decimals: 0,
+                        unit: 'µg',
+                        formula: `${formatNumber(mg, mg < 0.1 ? 2 : 1)} mg × 1000 µg/mg = ${formatNumber(expected, 0)} µg.`
+                    });
+                },
+                // Enhetsomregning mikrogram til mg
+                () => {
+                    const ug = choose([250, 500, 750]);
+                    const expected = ug / 1000;
+                    return makeQuestion({
+                        type: 'Enhetsomregning',
+                        prompt: `En pasient skal få <strong>${ug} µg</strong> av et legemiddel. Hvor mange milligram (mg) tilsvarer dette?`,
+                        note: '1000 µg = 1 mg (del på 1000 / flytt komma tre plasser til venstre).',
+                        expected,
+                        decimals: expected % 0.1 === 0 ? 1 : 2,
+                        maxDecimals: 2,
+                        unit: 'mg',
+                        formula: `${ug} µg ÷ 1000 µg/mg = ${formatNumber(expected, expected % 0.1 === 0 ? 1 : 2)} mg.`
+                    });
+                }
+            ];
+            return choose(profiles)();
+        }
+
+        // Nivå 2: Flytende legemidler og injeksjoner
+        function generateLevelTwo() {
+            const profiles = [
+                // Morfin 10 mg/ml ampuller
+                () => {
+                    const dose = choose([2.5, 5, 7.5, 10, 15]);
+                    const concentration = 10;
+                    const expected = dose / concentration;
+                    const isSubOne = expected < 1;
+                    return makeQuestion({
+                        type: 'Volumberegning',
+                        prompt: `Pasienten har sterke smerter og skal ha <strong>${formatNumber(dose, dose % 1 ? 1 : 0)} mg Morfin</strong> intravenøst. Morfin har styrken <strong>${concentration} mg/ml</strong>. Hvor mange ml skal trekkes opp?`,
+                        note: isSubOne ? 'For volum under 1 ml avrundes til 2 desimaler. Bruk finsprøyte.' : 'Volum på 1 ml eller mer angis normalt med 1 desimal.',
+                        expected,
+                        decimals: isSubOne ? 2 : 1,
+                        maxDecimals: 2,
+                        unit: 'ml',
+                        formula: `Mengde (volum) = Dose ÷ Styrke\nVolum = ${formatNumber(dose, dose % 1 ? 1 : 0)} mg ÷ ${concentration} mg/ml = ${formatNumber(expected, isSubOne ? 2 : 1)} ml.`
+                    });
+                },
+                // Ketorolak 30 mg/ml
+                () => {
+                    const dose = choose([7.5, 15, 30]);
+                    const concentration = 30;
+                    const expected = dose / concentration;
+                    const isSubOne = expected < 1;
+                    return makeQuestion({
+                        type: 'Volumberegning',
+                        prompt: `Ketorolak injeksjonsvæske har styrken <strong>${concentration} mg/ml</strong>. Ordinert dose er <strong>${formatNumber(dose, dose % 1 ? 1 : 0)} mg</strong>. Hvor mange ml skal administreres?`,
+                        note: 'Volum under 1 ml krever nøyaktig opptrekk i 1 ml sprøyte.',
+                        expected,
+                        decimals: isSubOne ? 2 : 1,
+                        maxDecimals: 2,
+                        unit: 'ml',
+                        formula: `Mengde = Dose ÷ Styrke\nVolum = ${formatNumber(dose, dose % 1 ? 1 : 0)} mg ÷ ${concentration} mg/ml = ${formatNumber(expected, isSubOne ? 2 : 1)} ml.`
+                    });
+                },
+                // Furosemid 10 mg/ml
+                () => {
+                    const dose = choose([20, 40]);
+                    const concentration = 10;
+                    const expected = dose / concentration;
+                    return makeQuestion({
+                        type: 'Volumberegning',
+                        prompt: `En pasient med hjertesvikt skal få <strong>${dose} mg Furosemid</strong> intravenøst. Furosemid injeksjonsvæske har styrken <strong>${concentration} mg/ml</strong>. Hvor mange ml skal trekkes opp?`,
+                        note: 'Kontroller alltid ampullens volum og virkestoffstyrke.',
+                        expected,
+                        decimals: 0,
+                        maxDecimals: 1,
+                        unit: 'ml',
+                        formula: `Mengde = Dose ÷ Styrke\nVolum = ${dose} mg ÷ ${concentration} mg/ml = ${formatNumber(expected, 0)} ml.`
+                    });
+                },
+                // Haloperidol 5 mg/ml
+                () => {
+                    const dose = choose([1, 2.5, 5]);
+                    const concentration = 5;
+                    const expected = dose / concentration;
+                    const isSubOne = expected < 1;
+                    return makeQuestion({
+                        type: 'Volumberegning',
+                        prompt: `Haloperidol injeksjonsvæske har styrken <strong>${concentration} mg/ml</strong>. Pasienten skal ha <strong>${formatNumber(dose, dose % 1 ? 1 : 0)} mg</strong>. Hvor mange ml skal trekkes opp?`,
+                        note: 'Benytt finsprøyte for volumer under 1 ml.',
+                        expected,
+                        decimals: isSubOne ? 2 : 0,
+                        maxDecimals: 2,
+                        unit: 'ml',
+                        formula: `Mengde = Dose ÷ Styrke\nVolum = ${formatNumber(dose, dose % 1 ? 1 : 0)} mg ÷ ${concentration} mg/ml = ${formatNumber(expected, isSubOne ? 2 : 0)} ml.`
+                    });
+                },
+                // Apocillin mikstur 50 mg/ml
+                () => {
+                    const isDoseCalc = choose([true, false]);
+                    const concentration = 50;
+                    if (isDoseCalc) {
+                        const volume = choose([5, 7.5, 10, 15]);
+                        const expected = Math.round(volume * concentration);
+                        return makeQuestion({
+                            type: 'Doseberegning',
+                            prompt: `En pasient inntar <strong>${formatNumber(volume, volume % 1 ? 1 : 0)} ml Apocillin mikstur</strong> med styrke <strong>${concentration} mg/ml</strong>. Hvor stor dose i mg tilsvarer dette?`,
+                            note: 'Dose = Styrke × Mengde.',
+                            expected,
+                            decimals: 0,
+                            unit: 'mg',
+                            formula: `Dose = Styrke × Mengde\nDose = ${concentration} mg/ml × ${formatNumber(volume, volume % 1 ? 1 : 0)} ml = ${formatNumber(expected, 0)} mg.`
+                        });
+                    } else {
+                        const dose = choose([250, 500, 750, 1000]);
+                        const expected = dose / concentration;
+                        return makeQuestion({
+                            type: 'Volumberegning',
+                            prompt: `Apocillin mikstur har styrken <strong>${concentration} mg/ml</strong>. Pasienten skal ha en dose på <strong>${dose} mg</strong>. Hvor mange ml mikstur skal gis?`,
+                            note: 'Mengde = Dose ÷ Styrke.',
+                            expected,
+                            decimals: expected % 1 === 0 ? 0 : 1,
+                            maxDecimals: 1,
+                            unit: 'ml',
+                            formula: `Mengde = Dose ÷ Styrke\nVolum = ${dose} mg ÷ ${concentration} mg/ml = ${formatNumber(expected, expected % 1 === 0 ? 0 : 1)} ml.`
+                        });
+                    }
+                }
+            ];
+            return choose(profiles)();
+        }
+
+        // Nivå 3: Vektbasert dosering hos barn (pediatri)
+        function generateLevelThree() {
+            const profiles = [
+                // Paracetamol mikstur 24 mg/ml - enkeltdose (15 mg/kg)
+                () => {
+                    const weight = choose([12, 16, 20, 24, 28]);
+                    const dosePerKg = 15;
+                    const concentration = 24;
+                    const singleDoseMg = weight * dosePerKg;
+                    const volume = singleDoseMg / concentration;
+                    const expected = roundTo(volume, 1);
+                    return makeQuestion({
+                        type: 'Pediatrisk dosering',
+                        prompt: `Et barn som veier <strong>${weight} kg</strong> skal ha Paracetamol mikstur dosert med <strong>${dosePerKg} mg/kg per enkeltdose</strong>. Miksturen har styrken <strong>${concentration} mg/ml</strong>. Hvor mange ml skal barnet ha per enkeltdose?`,
+                        note: 'Standard barnedose for paracetamol er 15 mg/kg inntil 4 ganger i døgnet (maks 60 mg/kg/døgn).',
+                        expected,
+                        decimals: expected % 1 === 0 ? 0 : 1,
+                        maxDecimals: 1,
+                        unit: 'ml',
+                        formula: `1. Enkeltdose (mg) = Vekt × Dose per kg = ${weight} kg × ${dosePerKg} mg/kg = ${singleDoseMg} mg.\n2. Mengde mikstur (ml) = Enkeltdose ÷ Styrke = ${singleDoseMg} mg ÷ ${concentration} mg/ml = ${formatNumber(expected, expected % 1 === 0 ? 0 : 1)} ml.`
+                    });
+                },
+                // Apocillin mikstur 50 mg/ml fordelt på 3 doser
+                () => {
+                    const weight = choose([10, 15, 20, 25]);
+                    const dailyDosePerKg = 30;
+                    const dosesPerDay = 3;
+                    const concentration = 50;
+                    const totalDailyMg = weight * dailyDosePerKg;
+                    const singleDoseMg = totalDailyMg / dosesPerDay;
+                    const singleDoseMl = singleDoseMg / concentration;
+                    const expected = roundTo(singleDoseMl, 1);
+                    return makeQuestion({
+                        type: 'Pediatrisk døgndose',
+                        prompt: `Et barn på <strong>${weight} kg</strong> er ordinert Apocillin mikstur <strong>${dailyDosePerKg} mg/kg/døgn</strong> fordelt på <strong>${dosesPerDay} like doser</strong>. Miksturens styrke er <strong>${concentration} mg/ml</strong>. Hvor mange ml skal gis per dose?`,
+                        note: 'Flerleddet regning: Regn først ut døgndosen, deretter enkeltdosen i mg, og til slutt volum per dose.',
+                        expected,
+                        decimals: expected % 1 === 0 ? 0 : 1,
+                        maxDecimals: 1,
+                        unit: 'ml',
+                        formula: `1. Døgndose (mg) = ${weight} kg × ${dailyDosePerKg} mg/kg/døgn = ${totalDailyMg} mg/døgn.\n2. Enkeltdose (mg) = ${totalDailyMg} mg ÷ ${dosesPerDay} doser = ${singleDoseMg} mg per dose.\n3. Volum per dose (ml) = ${singleDoseMg} mg ÷ ${concentration} mg/ml = ${formatNumber(expected, expected % 1 === 0 ? 0 : 1)} ml.`
+                    });
+                },
+                // Kontroll av døgndose
+                () => {
+                    const weight = choose([14, 18, 22]);
+                    const singleDoseMgPerKg = 15;
+                    const dosesPerDay = 4;
+                    const totalDailyMg = weight * singleDoseMgPerKg * dosesPerDay;
+                    return makeQuestion({
+                        type: 'Pediatrisk dosekontroll',
+                        prompt: `Et barn på <strong>${weight} kg</strong> får paracetamol <strong>${singleDoseMgPerKg} mg/kg per dose</strong>, og dette gis <strong>${dosesPerDay} ganger i døgnet</strong>. Hva blir den samlede døgndosen i milligram (mg)?`,
+                        note: 'Kontroller at maksimal døgndose (60 mg/kg/døgn) overholdes for pasientsikkerhet.',
+                        expected: totalDailyMg,
+                        decimals: 0,
+                        unit: 'mg',
+                        formula: `1. Enkeltdose = ${weight} kg × ${singleDoseMgPerKg} mg/kg = ${weight * singleDoseMgPerKg} mg.\n2. Samlet døgndose = ${weight * singleDoseMgPerKg} mg × ${dosesPerDay} doser = ${totalDailyMg} mg.`
+                    });
+                }
+            ];
+            return choose(profiles)();
+        }
+
+        // Nivå 4: Infusjonshastighet og dråpetakt
+        function generateLevelFour() {
+            const profile = choose(['rate', 'drops_crystalloid', 'drops_blood']);
+            if (profile === 'rate') {
+                const config = choose([
+                    { volume: 1000, hours: 4, expected: 250, fluid: 'Ringer-acetat' },
+                    { volume: 1000, hours: 5, expected: 200, fluid: 'Glukose 50 mg/ml' },
+                    { volume: 1000, hours: 8, expected: 125, fluid: 'Ringer-acetat' },
+                    { volume: 1000, hours: 10, expected: 100, fluid: 'NaCl 9 mg/ml' },
+                    { volume: 500, hours: 2, expected: 250, fluid: 'NaCl 9 mg/ml' },
+                    { volume: 500, hours: 4, expected: 125, fluid: 'Ringer-acetat' },
+                    { volume: 500, hours: 5, expected: 100, fluid: 'Glukose 50 mg/ml' }
+                ]);
+                return makeQuestion({
+                    type: 'Infusjonshastighet',
+                    prompt: `En infusjon på <strong>${config.volume} ml ${config.fluid}</strong> skal administreres over <strong>${config.hours} timer</strong> ved hjelp av en infusjonspumpe. Hvilken hastighet i ml/t skal pumpen innstilles på?`,
+                    note: 'Formel: Infusjonshastighet (ml/t) = Volum (ml) ÷ Tid (timer). Enheten er ml/t.',
+                    expected: config.expected,
+                    decimals: 0,
+                    maxDecimals: 1,
+                    unit: 'ml/t',
+                    formula: `Hastighet = Volum ÷ Tid\nHastighet = ${config.volume} ml ÷ ${config.hours} timer = ${config.expected} ml/t.`
+                });
+            }
+
+            if (profile === 'drops_crystalloid') {
+                const config = choose([
+                    { volume: 1000, hours: 8, fluid: 'Ringer-acetat' },
+                    { volume: 1000, hours: 6, fluid: 'NaCl 9 mg/ml' },
+                    { volume: 500, hours: 4, fluid: 'Glukose 50 mg/ml' },
+                    { volume: 500, hours: 2, fluid: 'Ringer-acetat' }
+                ]);
+                const dropFactor = 20;
+                const raw = (config.volume * dropFactor) / (config.hours * 60);
+                const expected = Math.round(raw);
+                return makeQuestion({
+                    type: 'Dråpetakt',
+                    prompt: `En infusjon på <strong>${config.volume} ml ${config.fluid}</strong> skal gis over <strong>${config.hours} timer</strong> med vanlig infusjonssett (<strong>${dropFactor} dråper/ml</strong>). Hva blir dråpetakten i dråper/minutt? Rund av til nærmeste hele dråpe.`,
+                    note: 'Standard infusjonssett gir 20 dråper/ml for klare infusjonsvæsker. Dråpetakt angis alltid som hele dråper/minutt.',
+                    expected,
+                    decimals: 0,
+                    unit: 'dr/min',
+                    formula: `Dråpetakt = (Volum i ml × Dråpefaktor) ÷ (Tid i timer × 60 min/time)\nDråpetakt = (${config.volume} ml × ${dropFactor} dr/ml) ÷ (${config.hours} × 60 min) = ${formatNumber(raw, 2)} dr/min → avrundet til ${expected} dr/min.`
+                });
+            }
+
+            // Blodtransfusjon / mikrodrypp (60 dr/ml)
+            const config = choose([
+                { volume: 250, hours: 2, fluid: 'SAG-blod (erytrocyttkonsentrat)' },
+                { volume: 300, hours: 3, fluid: 'SAG-blod (erytrocyttkonsentrat)' },
+                { volume: 200, hours: 2, fluid: 'infusjonsvæske med mikrodryppsett' }
+            ]);
+            const dropFactor = 60;
+            const raw = (config.volume * dropFactor) / (config.hours * 60);
+            const expected = Math.round(raw);
+            return makeQuestion({
+                type: 'Dråpetakt',
+                prompt: `En pasient skal motta <strong>${config.volume} ml ${config.fluid}</strong> over <strong>${config.hours} timer</strong>. Dråpekammeret har en dråpefaktor på <strong>${dropFactor} dråper/ml</strong>. Hva blir dråpetakten i dråper/minutt?`,
+                note: 'Kontroller alltid dråpefaktoren som er oppgitt på transfusjons- eller infusjonssettet.',
+                expected,
+                decimals: 0,
+                unit: 'dr/min',
+                formula: `Dråpetakt = (${config.volume} ml × ${dropFactor} dr/ml) ÷ (${config.hours} × 60 min) = ${formatNumber(raw, 2)} dr/min → ${expected} dr/min.`
+            });
+        }
+
+        // Nivå 5: Fortynninger, tilsetninger og sprøytepumper
+        function generateLevelFive() {
+            const profile = choose(['dilution_strength', 'dilution_volume', 'noradrenalin_pump']);
+
+            // Sluttstyrke etter tilsetning av KCl
+            if (profile === 'dilution_strength') {
+                const config = choose([
+                    { amount: 20, volume: 1000, fluid: 'Ringer-acetat' },
+                    { amount: 40, volume: 1000, fluid: 'NaCl 9 mg/ml' },
+                    { amount: 20, volume: 500, fluid: 'NaCl 9 mg/ml' },
+                    { amount: 10, volume: 500, fluid: 'Glukose 50 mg/ml' }
+                ]);
+                const expected = config.amount / config.volume;
+                return makeQuestion({
+                    type: 'Fortynning og tilsetning',
+                    prompt: `Det tilsettes <strong>${config.amount} mmol Kaliumklorid (KCl)</strong> i en pose med <strong>${config.volume} ml ${config.fluid}</strong>. Hva blir den nye sluttstyrken i mmol/ml?`,
+                    note: 'KCl er et høyrisikolegemiddel som krever dobbelkontroll og grundig blanding. Formel: Styrke = Mengde virkestoff ÷ Totalt volum.',
+                    expected,
+                    decimals: 2,
+                    maxDecimals: 3,
+                    unit: 'mmol/ml',
+                    formula: `Sluttstyrke = Tilsatt mengde stoff ÷ Væskevolum\nSluttstyrke = ${config.amount} mmol ÷ ${config.volume} ml = ${formatNumber(expected, 2)} mmol/ml.`
+                });
+            }
+
+            // Opptrekksvolum av elektrolyttkonsentrat
+            if (profile === 'dilution_volume') {
+                const config = choose([
+                    { amount: 20, strength: 2, fluid: 'Ringer-acetat 1000 ml' },
+                    { amount: 40, strength: 2, fluid: 'NaCl 9 mg/ml 1000 ml' },
+                    { amount: 10, strength: 1, fluid: 'Glukose 50 mg/ml 500 ml' },
+                    { amount: 20, strength: 1, fluid: 'NaCl 9 mg/ml 1000 ml' }
+                ]);
+                const expected = config.amount / config.strength;
+                return makeQuestion({
+                    type: 'Tilsetningsvolum',
+                    prompt: `En pasient er forordnet <strong>${config.amount} mmol Kaliumklorid (KCl)</strong> tilsatt i ${config.fluid}. Konsentratet i ampullen har en styrke på <strong>${config.strength} mmol/ml</strong>. Hvor mange ml KCl-konsentrat må du trekke opp for å tilsette forordnet mengde?`,
+                    note: 'Formel: Mengde (volum) = Dose (i mmol) ÷ Konsentratets styrke (i mmol/ml).',
+                    expected,
+                    decimals: 0,
+                    maxDecimals: 1,
+                    unit: 'ml',
+                    formula: `Volum konsentrat = Forordnet mengde ÷ Styrke\nVolum = ${config.amount} mmol ÷ ${config.strength} mmol/ml = ${formatNumber(expected, 0)} ml.`
+                });
+            }
+
+            // Noradrenalin intensiv sprøytepumpe
+            const config = choose([
+                { weight: 70, dosePerKgMin: 0.10, concMgMl: 0.04 },
+                { weight: 80, dosePerKgMin: 0.05, concMgMl: 0.04 },
+                { weight: 60, dosePerKgMin: 0.10, concMgMl: 0.04 },
+                { weight: 70, dosePerKgMin: 0.20, concMgMl: 0.04 },
+                { weight: 80, dosePerKgMin: 0.10, concMgMl: 0.04 },
+                { weight: 90, dosePerKgMin: 0.05, concMgMl: 0.04 },
+                { weight: 70, dosePerKgMin: 0.10, concMgMl: 0.10 }
+            ]);
+            const doseUgMin = config.weight * config.dosePerKgMin;
+            const doseUgHour = doseUgMin * 60;
+            const concUgMl = config.concMgMl * 1000;
+            const rawRate = doseUgHour / concUgMl;
+            const expected = roundTo(rawRate, 1);
+
+            return makeQuestion({
+                type: 'Sprøytepumpe',
+                prompt: `En intensivpasient veier <strong>${config.weight} kg</strong>. Det er forordnet <strong>Noradrenalin ${formatNumber(config.dosePerKgMin, 2)} µg/kg/min</strong> på sprøytepumpe. Sprøyten inneholder Noradrenalin med styrken <strong>${formatNumber(config.concMgMl, 2)} mg/ml</strong>. Hvilken infusjonshastighet i ml/t skal sprøytepumpen stilles inn på?`,
+                note: 'Gjør først om fra minutt til time (× 60) og fra mg/ml til µg/ml (× 1000) før du beregner ml/t.',
+                expected,
+                decimals: 1,
+                maxDecimals: 2,
+                unit: 'ml/t',
+                formula: `1. Dose per minutt = ${config.weight} kg × ${formatNumber(config.dosePerKgMin, 2)} µg/kg/min = ${formatNumber(doseUgMin, 1)} µg/min.\n2. Dose per time = ${formatNumber(doseUgMin, 1)} µg/min × 60 min/t = ${formatNumber(doseUgHour, 0)} µg/t.\n3. Sprøytestyrke i µg/ml = ${formatNumber(config.concMgMl, 2)} mg/ml × 1000 µg/mg = ${concUgMl} µg/ml.\n4. Pumpehastighet = ${formatNumber(doseUgHour, 0)} µg/t ÷ ${concUgMl} µg/ml = ${formatNumber(rawRate, 2)} ml/t → ${formatNumber(expected, 1)} ml/t.`
+            });
+        }
+
+        function generateQuestion(level = state.level) {
+            const generators = [generateLevelOne, generateLevelTwo, generateLevelThree, generateLevelFour, generateLevelFive];
+            let question;
+            let attempts = 0;
+            do {
+                question = generators[level - 1]();
+                attempts++;
+            } while (question.type + question.prompt === state.lastSignature && attempts < 8);
+            state.lastSignature = question.type + question.prompt;
+            state.current = question;
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            clearAutoAdvance();
+            const question = state.current;
+            $('#level-tag').textContent = `Nivå ${state.level}`;
+            $('#question-type').textContent = LEVELS[state.level - 1].name;
+            $('#question-text').innerHTML = question.prompt;
+            $('#clinical-note').textContent = question.note;
+            $('#answer-format').textContent = `Forventet format: tall + ${formatUnit(question.unit)}`;
+            $('#answer-input').value = '';
+            $('#answer-input').disabled = false;
+            $('#submit-btn').textContent = 'Kontroller svar';
+            $('#submit-btn').disabled = false;
+            $('#feedback').innerHTML = '';
+            $('#feedback').className = 'feedback';
+            state.reviewing = false;
+            renderQuickKeys(question.unit);
+            updateCheatPanel();
+            $('#answer-input').focus();
+        }
+
+        // 6. Virtuelle hurtigtaster for mobil og PC
+        function getQuickKeysForUnit(unit) {
+            if (unit === 'tablet') {
+                return ['0,5', '1', '1,5', '2', 'tabletter', '½'];
+            }
+            if (unit === 'dr/min') {
+                return ['dr/min'];
+            }
+            if (unit === 'ml/t') {
+                return ['ml/t', 'ml/time'];
+            }
+            if (unit === 'mmol/ml') {
+                return ['mmol/ml', '0,02', '0,04'];
+            }
+            return ['0,5', 'ml', 'mg', 'g', 'µg', 'mmol'];
+        }
+
+        function setupQuickKeyListeners(containerSelector, inputSelector) {
+            document.querySelectorAll(`${containerSelector} .quick-key`).forEach((button) => {
+                button.addEventListener('click', () => {
+                    const input = $(inputSelector);
+                    if (!input) return;
+                    const value = button.dataset.value;
+                    const start = input.selectionStart ?? input.value.length;
+                    const end = input.selectionEnd ?? input.value.length;
+                    const needsLeadingSpace = (start > 0 && !/\s$/.test(input.value.slice(0, start)) && !/^[0-9,]/.test(value));
+                    const insertText = (needsLeadingSpace ? ' ' : '') + value;
+                    input.value = input.value.slice(0, start) + insertText + input.value.slice(end);
+                    input.focus();
+                    const newPos = start + insertText.length;
+                    input.setSelectionRange(newPos, newPos);
+                    input.dispatchEvent(new Event('input'));
+                });
+            });
+        }
+
+        function renderQuickKeys(unit) {
+            const keys = getQuickKeysForUnit(unit);
+            $('#quick-keys').innerHTML = keys.map((key) => `<button class="quick-key" type="button" data-value="${key}">${key}</button>`).join('');
+            setupQuickKeyListeners('#quick-keys', '#answer-input');
+        }
+
+        function renderExamQuickKeys(unit) {
+            const keys = getQuickKeysForUnit(unit);
+            const container = $('#exam-quick-keys');
+            if (!container) return;
+            container.innerHTML = keys.map((key) => `<button class="quick-key" type="button" data-value="${key}">${key}</button>`).join('');
+            setupQuickKeyListeners('#exam-quick-keys', '#exam-answer');
+        }
+
+        function showReview(result) {
+            clearAutoAdvance();
+            const question = state.current;
+            $('#feedback').className = 'feedback';
+            $('#feedback').innerHTML = `
+                <div class="review">
+                    <h3>Svaret må kontrolleres</h3>
+                    <div>${escapeHtml(result.message)}</div>
+                    <div class="review-grid">
+                        <div class="review-row"><span>Din besvarelse</span><strong>${escapeHtml($('#answer-input').value || 'Ingen besvarelse')}</strong></div>
+                        <div class="review-row"><span>Forventet svar</span><strong>${escapeHtml(question.displayExpected)}</strong></div>
+                    </div>
+                    <div class="solution">
+                        <strong>Utregning</strong><br>${escapeHtml(question.formula).replace(/\n/g, '<br>')}
+                    </div>
+                </div>`;
+            $('#submit-btn').textContent = 'Neste oppgave ➔';
+            state.reviewing = true;
+        }
+
+        function handleTrainingSubmit(event) {
+            event.preventDefault();
+            if (state.reviewing) {
+                clearAutoAdvance();
+                if ($('#submit-btn').textContent.includes('diplom') || $('#submit-btn').textContent.includes('kursbevis')) {
+                    openCertificate();
+                }
+                generateQuestion();
+                return;
+            }
+            const result = checkQuestion($('#answer-input').value);
+            if (!result.correct) {
+                state.streak = 0;
+                updateStatus();
+                showReview(result);
+                return;
+            }
+            state.streak++;
+            state.solved++;
+            if (state.streak >= 5) {
+                if (state.level < LEVELS.length) {
+                    state.level++;
+                    state.streak = 0;
+                    saveProgress();
+                    updateStatus();
+                    showLevelAdvance();
+                    return;
+                }
+                state.unlockedExam = true;
+                saveProgress();
+                updateStatus();
+                showCompletion();
+                return;
+            }
+            saveProgress();
+            updateStatus();
+            $('#feedback').className = 'feedback correct';
+            $('#feedback').innerHTML = `<div class="feedback-icon">✓</div><div><strong>Riktig!</strong> ${escapeHtml(result.message)}</div>`;
+            $('#submit-btn').textContent = 'Neste oppgave ➔';
+            state.reviewing = true;
+            autoAdvanceTimer = setTimeout(generateQuestion, 2200);
+        }
+
+        function showLevelAdvance() {
+            clearAutoAdvance();
+            $('#feedback').className = 'feedback correct';
+            $('#feedback').innerHTML = `<div class="feedback-icon">🏆</div><div><strong>Nivå ${state.level - 1} bestått!</strong> Du går videre til nivå ${state.level}: ${escapeHtml(LEVELS[state.level - 1].name)}.</div>`;
+            $('#submit-btn').textContent = `Fortsett til nivå ${state.level} ➔`;
+            state.reviewing = true;
+            autoAdvanceTimer = setTimeout(generateQuestion, 2800);
+        }
+
+        function showCompletion() {
+            clearAutoAdvance();
+            $('#feedback').className = 'feedback correct';
+            $('#feedback').innerHTML = `<div class="feedback-icon">🎓</div><div><strong>Treningsnivåene er fullført!</strong> Prøvemodus er nå låst opp. Ditt eksamenspassord er <strong>${EXAM_PASSWORD}</strong>.</div>`;
+            $('#exam-btn').disabled = false;
+            $('#unlock-notice').textContent = `Prøvemodus er tilgjengelig (Passord: ${EXAM_PASSWORD}). Du kan starte sluttprøven når du er klar.`;
+            $('#submit-btn').textContent = 'Vis kursbevis / diplom ➔';
+            state.reviewing = true;
+            autoAdvanceTimer = setTimeout(() => {
+                openCertificate();
+            }, 3000);
+        }
+
+        function updateStatus() {
+            $('#level-value').textContent = state.level;
+            $('#streak-value').textContent = state.streak;
+            $('#solved-value').textContent = state.solved;
+            $('#progress-bar').style.width = `${(state.streak / 5) * 100}%`;
+            $('#exam-btn').disabled = !state.unlockedExam;
+            if (state.unlockedExam) {
+                $('#unlock-notice').textContent = `Prøvemodus er låst opp (Passord: ${EXAM_PASSWORD}). Sluttprøven krever 100 % korrekte svar.`;
+                if ($('#password-btn')) $('#password-btn').style.display = 'none';
+            } else {
+                $('#unlock-notice').textContent = 'Bestå hvert nivå med fem riktige svar på rad for å gå videre.';
+                if ($('#password-btn')) $('#password-btn').style.display = '';
+            }
+            $('#level-list').innerHTML = LEVELS.map((level, index) => {
+                const number = index + 1;
+                const active = number === state.level ? 'active' : '';
+                const locked = number > state.level && !state.unlockedExam ? 'locked' : '';
+                const stateText = number < state.level || state.unlockedExam ? 'Bestått' : number === state.level ? `${state.streak}/5` : 'Låst';
+                return `<div class="level-item ${active} ${locked}"><span class="level-number">${number}</span><span>${escapeHtml(level.short)}</span><span class="level-state">${stateText}</span></div>`;
+            }).join('');
+        }
+
+        function saveProgress() {
+            localStorage.setItem('medikamentproven-progress', JSON.stringify({ level: state.level, solved: state.solved, unlockedExam: state.unlockedExam }));
+        }
+
+        function restoreProgress() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('medikamentproven-progress') || 'null');
+                if (!saved) return;
+                state.level = clamp(Number(saved.level) || 1, 1, LEVELS.length);
+                state.solved = Math.max(0, Number(saved.solved) || 0);
+                state.unlockedExam = Boolean(saved.unlockedExam);
+            } catch (error) {
+                localStorage.removeItem('medikamentproven-progress');
+            }
+        }
+
+        function openModal(id) { $(`#${id}`).classList.add('open'); }
+        function closeModal(id) { $(`#${id}`).classList.remove('open'); }
+
+        function renderHelp() {
+            const sections = [
+                ['Formeltrekanten og grunnbegreper', 'Dose = Styrke × Mengde. Dermed er Mengde = Dose ÷ Styrke og Styrke = Dose ÷ Mengde.', [
+                    'Dose: Mengden virkestoff som pasienten skal motta (f.eks. mg, g, µg, mmol).',
+                    'Styrke: Konsentrasjonen av virkestoff per formuleringsenhet (f.eks. mg/tablett, mg/ml, mmol/ml).',
+                    'Mengde: Det fysiske volumet eller antallet som skal administreres (f.eks. antall tabletter eller ml væske).'
+                ]],
+                ['Enhetsomregning og tier-potenser', 'Gjør alltid alle størrelser om til samme enhet før du setter inn i formelen:', [
+                    '1 g = 1000 mg | 1 mg = 1000 µg (mikrogram).',
+                    '1 liter = 10 dl = 1000 ml.',
+                    'Prosent i infusjonsvæsker: 1 % = 10 mg/ml (f.eks. NaCl 0,9 % = 9 mg/ml; Glukose 5 % = 50 mg/ml).'
+                ]],
+                ['Avrundingsregler (Nasjonal deleksamen)', 'Hovedregel: Aldri rund av underveis i mellomregninger! Regn med nøyaktige tall eller brøk til slutt.', [
+                    'Dråpetakt: Oppgis ALLTID i hele dråper per minutt. Avrundes etter standard regel (0,5 eller mer rundes opp).',
+                    'Injeksjons- og miksturvolum: Volum under 1 ml avrundes til 2 desimaler (f.eks. 0,25 ml). Volum på 1 ml eller mer avrundes til 1 desimal (f.eks. 1,5 ml eller 2 ml).',
+                    'Tabletter: Gis kun som hele eller halve tabletter (f.eks. 0,5, 1, 1,5, 2 tabletter) forutsatt at tabletten har delestrek.',
+                    'Infusjonshastighet: Oppgis i ml/t (innstilles på pumpe med heltall eller 1 desimal).'
+                ]],
+                ['Infusjonshastighet og dråpetakt', 'Infusjonshastighet i ml/t = Volum (ml) ÷ Tid (timer).', [
+                    'Dråpetakt (dr/min) = (Volum i ml × Dråpefaktor) ÷ (Tid i timer × 60 min/t).',
+                    'Dråpefaktor for vandige infusjonsvæsker: standard 20 dr/ml.',
+                    'Dråpefaktor for blodtransfusjon / mikrodryppsett: oppgitt i oppgaven (f.eks. 60 dr/ml).'
+                ]],
+                ['Pediatri og sprøytepumper', 'Alltid flerleddet kontroll for pasientsikkerhet:', [
+                    'Pediatrisk dosering: Vekt (kg) × dose per kg = enkeltdose i mg. Sjekk alltid om ordinasjonen oppgir enkeltdose eller døgndose fordelt på flere doser.',
+                    'Sprøytepumper (µg/kg/min): 1) Vekt × µg/kg/min = µg/min. 2) µg/min × 60 = µg/time. 3) Gjør om mg/ml i sprøyten til µg/ml (× 1000). 4) Del µg/time på sprøytestyrken for å få ml/t.'
+                ]]
+            ];
+            $('#help-content').innerHTML = sections.map(([title, text, points]) => `<section class="lesson-block"><h3>${title}</h3><p>${text}</p>${points.map((point) => `<p>• ${point}</p>`).join('')}</section>`).join('');
+        }
+
+        function openCertificate() {
+            clearAutoAdvance();
+            $('#certificate-date').textContent = new Date().toLocaleDateString('no-NO', { year: 'numeric', month: 'long', day: 'numeric' });
+            openModal('certificate-modal');
+            $('#certificate-name').focus();
+        }
+
+        // 7. Eksamensmodus (Prøvemodus) med 10 balanserte oppgaver og aktiv timer
+        function createExamQuestions() {
+            return [
+                generateLevelOne(),
+                generateLevelOne(),
+                generateLevelTwo(),
+                generateLevelTwo(),
+                generateLevelThree(),
+                generateLevelThree(),
+                generateLevelFour(),
+                generateLevelFour(),
+                generateLevelFive(),
+                generateLevelFive()
+            ];
+        }
+
+        function startExam() {
+            clearAutoAdvance();
+            if (examTimerInterval) clearInterval(examTimerInterval);
+            state.exam = {
+                questions: createExamQuestions(),
+                answers: Array(10).fill(''),
+                current: 0,
+                started: Date.now(),
+                durationSeconds: 3600,
+                finished: false
+            };
+            openModal('exam-modal');
+            renderExam();
+
+            examTimerInterval = setInterval(() => {
+                if (!state.exam || state.exam.finished) {
+                    clearInterval(examTimerInterval);
+                    examTimerInterval = null;
+                    return;
+                }
+                const elapsed = Math.floor((Date.now() - state.exam.started) / 1000);
+                const remaining = Math.max(0, state.exam.durationSeconds - elapsed);
+                const timerEl = document.getElementById('exam-timer');
+                if (timerEl) {
+                    const minutes = String(Math.floor(remaining / 60)).padStart(2, '0');
+                    const seconds = String(remaining % 60).padStart(2, '0');
+                    timerEl.textContent = `Tid igjen: ${minutes}:${seconds}`;
+                }
+                if (remaining === 0) {
+                    clearInterval(examTimerInterval);
+                    examTimerInterval = null;
+                    finishExam();
+                }
+            }, 1000);
+        }
+
+        function renderExam() {
+            const exam = state.exam;
+            if (!exam) return;
+            if (exam.finished) return renderExamResult();
+
+            const question = exam.questions[exam.current];
+            const elapsed = Math.floor((Date.now() - exam.started) / 1000);
+            const remaining = Math.max(0, exam.durationSeconds - elapsed);
+            const minutes = String(Math.floor(remaining / 60)).padStart(2, '0');
+            const seconds = String(remaining % 60).padStart(2, '0');
+
+            $('#exam-content').innerHTML = `
+                <div class="exam-layout">
+                    <div class="exam-top">
+                        <span class="exam-question-number">Oppgave ${exam.current + 1} av ${exam.questions.length} (Nivå ${Math.floor(exam.current / 2) + 1}: ${escapeHtml(LEVELS[Math.floor(exam.current / 2)].short)})</span>
+                        <span class="exam-timer" id="exam-timer">Tid igjen: ${minutes}:${seconds}</span>
+                    </div>
+                    <div class="question">${question.prompt}</div>
+                    <div class="clinical-note">${question.note}</div>
+                    <div class="answer-form">
+                        <input class="answer-input" id="exam-answer" type="text" inputmode="decimal" value="${escapeHtml(exam.answers[exam.current])}" placeholder="Skriv svar med enhet" autocomplete="off" spellcheck="false" aria-label="Eksamenssvar">
+                        <div class="unit-hint">
+                            <span>Komma og punktum godtas.</span>
+                            <span>Forventet format: tall + ${formatUnit(question.unit)}</span>
+                        </div>
+                        <div class="quick-keys" id="exam-quick-keys"></div>
+                    </div>
+                    <div class="exam-overview">
+                        ${exam.questions.map((_, index) => `<button class="exam-dot ${index === exam.current ? 'current' : ''} ${exam.answers[index] && exam.answers[index].trim() ? 'answered' : ''}" data-exam-index="${index}" type="button" title="Gå til oppgave ${index + 1}">${index + 1}</button>`).join('')}
+                    </div>
+                    <div class="exam-controls">
+                        <button class="btn" id="exam-prev" type="button" ${exam.current === 0 ? 'disabled' : ''}>Forrige</button>
+                        <div style="display: flex; gap: 8px;">
+                            ${exam.current === exam.questions.length - 1 ? '' : '<button class="btn" id="exam-next" type="button">Neste</button>'}
+                            <button class="btn btn-primary" id="exam-finish" type="button">Lever prøven</button>
+                        </div>
+                    </div>
+                    <p class="small-copy" style="margin-top: 10px;">Prøvemodus viser ingen fasit underveis. Du kan navigere fritt mellom oppgavene og endre svar før du leverer.</p>
+                </div>
+            `;
+
+            renderExamQuickKeys(question.unit);
+
+            const input = $('#exam-answer');
+            input.focus();
+            input.addEventListener('input', (event) => {
+                exam.answers[exam.current] = event.target.value;
+                const currentDot = document.querySelector(`.exam-dot[data-exam-index="${exam.current}"]`);
+                if (currentDot) {
+                    currentDot.classList.toggle('answered', Boolean(event.target.value.trim()));
+                }
+            });
+
+            $('#exam-prev')?.addEventListener('click', () => {
+                exam.answers[exam.current] = $('#exam-answer').value;
+                exam.current--;
+                renderExam();
+            });
+
+            $('#exam-next')?.addEventListener('click', () => {
+                exam.answers[exam.current] = $('#exam-answer').value;
+                exam.current++;
+                renderExam();
+            });
+
+            $('#exam-finish')?.addEventListener('click', () => {
+                exam.answers[exam.current] = $('#exam-answer').value;
+                const unanswered = exam.answers.filter(a => !a || !a.trim()).length;
+                if (unanswered > 0) {
+                    if (!confirm(`Du har ${unanswered} ubesvarte oppgave${unanswered > 1 ? 'r' : ''}. Er du sikker på at du vil levere nå?`)) {
+                        return;
+                    }
+                }
+                finishExam();
+            });
+
+            document.querySelectorAll('[data-exam-index]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    exam.answers[exam.current] = $('#exam-answer').value;
+                    exam.current = Number(button.dataset.examIndex);
+                    renderExam();
+                });
+            });
+        }
+
+        function finishExam() {
+            if (!state.exam) return;
+            if (examTimerInterval) {
+                clearInterval(examTimerInterval);
+                examTimerInterval = null;
+            }
+            state.exam.finished = true;
+            renderExamResult();
+        }
+
+        function renderExamResult() {
+            const exam = state.exam;
+            const results = exam.questions.map((question, index) => {
+                const answerRaw = exam.answers[index] || '';
+                const parsed = parseAnswer(answerRaw);
+                const correct = answerIsCorrect(parsed, question);
+                return { question, answerRaw, correct };
+            });
+
+            const correctCount = results.filter(r => r.correct).length;
+            const passed = correctCount === results.length;
+
+            $('#exam-content').innerHTML = `
+                <div class="exam-result">
+                    <h3 class="${passed ? 'pass' : 'fail'}">${passed ? 'Prøven er bestått!' : 'Prøven er ikke bestått'}</h3>
+                    <p>${passed ? `Gratulerer! Du svarte riktig på ${results.length} av ${results.length} oppgaver (100 % korrekt, 0 feil).` : `Kravet for bestått eksamen er 100 % korrekt (0 feil). Du hadde ${correctCount} av ${results.length} riktige. Se gjennomgangen nedenfor for å repetere regnetrinnene.`}</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Ditt svar</th>
+                                <th>Resultat</th>
+                                <th>Fasit og utregning</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${results.map((result, index) => `
+                                <tr>
+                                    <td><strong>${index + 1}</strong></td>
+                                    <td>${escapeHtml(result.answerRaw || 'Ingen besvarelse')}</td>
+                                    <td class="${result.correct ? 'pass' : 'fail'}">${result.correct ? 'Riktig' : 'Feil'}</td>
+                                    <td>
+                                        <strong>${escapeHtml(result.question.displayExpected)}</strong>
+                                        <details>
+                                            <summary>Se utregning</summary>
+                                            <div style="margin-top: 4px; padding: 6px; background: #fff; border: 1px solid var(--line); border-radius: 4px;">
+                                                ${escapeHtml(result.question.formula).replace(/\n/g, '<br>')}
+                                            </div>
+                                        </details>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn" data-close="exam-modal" type="button">Lukk</button>
+                    ${passed ? '<button class="btn btn-primary" id="exam-certificate" type="button">Vis sertifikat</button>' : '<button class="btn btn-primary" id="exam-retry" type="button">Ta ny prøve</button>'}
+                </div>
+            `;
+
+            $('#exam-certificate')?.addEventListener('click', () => { closeModal('exam-modal'); openCertificate(); });
+            $('#exam-retry')?.addEventListener('click', startExam);
+            document.querySelectorAll('[data-close="exam-modal"]').forEach((button) => button.addEventListener('click', () => closeModal('exam-modal')));
+        }
+
+        // 8. Event listeners og oppstart
+        $('#answer-form').addEventListener('submit', handleTrainingSubmit);
+        $('#help-btn').addEventListener('click', () => { renderHelp(); openModal('help-modal'); });
+        $('#exam-btn').addEventListener('click', startExam);
+        $('#print-btn').addEventListener('click', () => window.print());
+
+        $('#password-btn')?.addEventListener('click', () => {
+            $('#password-input').value = '';
+            $('#password-feedback').textContent = '';
+            openModal('password-modal');
+            $('#password-input').focus();
+        });
+
+        $('#password-form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const entered = $('#password-input').value.trim().toUpperCase();
+            if (entered === EXAM_PASSWORD) {
+                state.unlockedExam = true;
+                saveProgress();
+                updateStatus();
+                closeModal('password-modal');
+                alert('Prøvemodus er nå låst opp!');
+            } else {
+                $('#password-feedback').textContent = 'Ugyldig passord. Prøv igjen.';
+            }
+        });
+
+        document.querySelectorAll('[data-close]').forEach((button) => button.addEventListener('click', () => closeModal(button.dataset.close)));
+        document.querySelectorAll('.modal-backdrop').forEach((backdrop) => backdrop.addEventListener('click', (event) => { if (event.target === backdrop) closeModal(backdrop.id); }));
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape') document.querySelectorAll('.modal-backdrop.open').forEach((modal) => closeModal(modal.id)); });
+
+
+        // 9. Hemmelig Utvikler- og Lærermeny funksjonalitet
+        function updateCheatPanel() {
+            const q = state.current;
+            const valEl = $('#cheat-ans-val');
+            const stepEl = $('#cheat-ans-step');
+            if (valEl && q) valEl.textContent = q.displayExpected;
+            if (stepEl && q) stepEl.innerHTML = escapeHtml(q.formula).replace(/\n/g, '<br>');
+            document.querySelectorAll('.cheat-lvl-btn[data-lvl]').forEach((btn) => {
+                const lvl = parseInt(btn.dataset.lvl);
+                btn.classList.toggle('active', lvl === state.level);
+            });
+        }
+
+        function toggleCheatMenu() {
+            const panel = $('#cheat-panel');
+            if (!panel) return;
+            panel.classList.toggle('active');
+            if (panel.classList.contains('active')) updateCheatPanel();
+        }
+
+        // Skjult aktivering: 7 raske klikk på undertittelen
+        let secretClickCount = 0;
+        let secretClickTimer = null;
+        const secretTrigger = document.getElementById('secret-trigger-area');
+        if (secretTrigger) {
+            secretTrigger.addEventListener('click', () => {
+                secretClickCount++;
+                clearTimeout(secretClickTimer);
+                if (secretClickCount >= 7) {
+                    toggleCheatMenu();
+                    secretClickCount = 0;
+                } else {
+                    secretClickTimer = setTimeout(() => { secretClickCount = 0; }, 1800);
+                }
+            });
+        }
+
+        // Hemmelig hurtigtast: Ctrl + Alt + I (eller Ctrl + Alt + K)
+        document.addEventListener('keydown', (event) => {
+            if (event.ctrlKey && event.altKey && (event.key === 'i' || event.key === 'I' || event.key === 'k' || event.key === 'K')) {
+                event.preventDefault();
+                toggleCheatMenu();
+            } else if (event.key === 'Escape') {
+                const panel = document.getElementById('cheat-panel');
+                if (panel && panel.classList.contains('active')) {
+                    toggleCheatMenu();
+                    return;
+                }
+                document.querySelectorAll('.modal-backdrop.open').forEach((modal) => closeModal(modal.id));
+            }
+        });
+
+        $('#cheat-close')?.addEventListener('click', toggleCheatMenu);
+
+        document.querySelectorAll('.cheat-lvl-btn[data-lvl]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                clearAutoAdvance();
+                const lvl = parseInt(btn.dataset.lvl);
+                state.level = lvl;
+                state.streak = 0;
+                state.reviewing = false;
+                saveProgress();
+                updateStatus();
+                generateQuestion();
+                updateCheatPanel();
+            });
+        });
+
+        $('#cheat-fill-btn')?.addEventListener('click', () => {
+            const examInput = $('#exam-answer');
+            const trainInput = $('#answer-input');
+            const isExam = Boolean(state.exam && !state.exam.finished && $('#exam-modal.open'));
+            const targetInput = isExam ? examInput : trainInput;
+            const targetQ = isExam ? state.exam.questions[state.exam.current] : state.current;
+            if (targetInput && targetQ) {
+                targetInput.value = targetQ.displayExpected;
+                targetInput.focus();
+                targetInput.dispatchEvent(new Event('input'));
+            }
+        });
+
+        $('#cheat-skip-btn')?.addEventListener('click', () => {
+            clearAutoAdvance();
+            state.reviewing = false;
+            generateQuestion();
+        });
+
+        $('#cheat-streak-btn')?.addEventListener('click', () => {
+            clearAutoAdvance();
+            state.streak++;
+            state.solved++;
+            if (state.streak >= 5) {
+                if (state.level < LEVELS.length) {
+                    state.level++;
+                    state.streak = 0;
+                    saveProgress();
+                    updateStatus();
+                    showLevelAdvance();
+                } else {
+                    state.unlockedExam = true;
+                    saveProgress();
+                    updateStatus();
+                    showCompletion();
+                }
+            } else {
+                saveProgress();
+                updateStatus();
+            }
+            updateCheatPanel();
+        });
+
+        $('#cheat-exam-btn')?.addEventListener('click', () => {
+            clearAutoAdvance();
+            state.unlockedExam = true;
+            saveProgress();
+            updateStatus();
+            startExam();
+        });
+
+        $('#cheat-cert-btn')?.addEventListener('click', () => {
+            clearAutoAdvance();
+            openCertificate();
+        });
+
+        $('#cheat-reset-btn')?.addEventListener('click', () => {
+            if (confirm('Vil du nullstille all lagret progresjon?')) {
+                clearAutoAdvance();
+                localStorage.removeItem('medikamentproven-progress');
+                state.level = 1;
+                state.streak = 0;
+                state.solved = 0;
+                state.unlockedExam = false;
+                updateStatus();
+                generateQuestion();
+                updateCheatPanel();
+            }
+        });
+
+        restoreProgress();
+        updateStatus();
+        generateQuestion();
+    </script>
+</body>
+</html>

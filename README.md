@@ -12,6 +12,7 @@ Alle spillene er selvstendige HTML-filer. De bruker HTML, CSS og JavaScript som 
 | `kretsMesterBM.html` | Kretsberegning: BEAST MODE | En videre utfordring med blant annet effekt, flere parallelle grener, indre motstand, superposisjon og Wheatstone-bro. |
 | `milliGame.html` | SI-prefikser og enhetskonvertering | Trening på kilo, milli, mega, mikro, nano og piko med enhetene V, A, W og Ω. |
 | `TallTreneren.html` | Binær, heksadesimal og desimal | Konvertering mellom 4-bit og 8-bit binærtall, heksadesimale tall og desimaltall. |
+| `Medikamentregning/medikamentProven.html` | Klinisk medikamentregning | Nivåbasert trening i doser, enheter, væske, pediatri, infusjon, fortynning og sprøytepumper. |
 
 ## Pedagogisk innhold
 
