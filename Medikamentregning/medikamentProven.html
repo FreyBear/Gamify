@@ -70,10 +70,60 @@
         .level-tag { color: var(--teal-dark); background: var(--teal-soft); border: 1px solid #b9d9d2; border-radius: 99px; padding: 5px 10px; font-weight: 800; }
         .question-type { text-align: right; }
         .question { font-family: Georgia, serif; font-size: clamp(24px, 4vw, 34px); line-height: 1.25; margin-bottom: 22px; }
-        .question strong { color: var(--teal-dark); }
-        .clinical-note { border-left: 3px solid var(--amber); background: var(--amber-soft); color: #69450e; padding: 11px 13px; font-size: 13px; line-height: 1.5; margin-bottom: 18px; }
-        
-        .answer-form { display: grid; gap: 10px; }
+        .hint-container { margin-bottom: 18px; }
+        .hint-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: #fff9eb;
+            border: 1px solid #f6d289;
+            color: #8f5c0b;
+            padding: 6px 13px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+        .hint-toggle-btn:hover {
+            background: #fef0c7;
+            border-color: #d97706;
+            color: #78350f;
+        }
+        .hint-toggle-btn.revealed {
+            background: #fdf3d7;
+            border-color: #d97706;
+            color: #78350f;
+        }
+        .hint-warning-badge {
+            font-size: 11px;
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-weight: 700;
+            margin-left: 4px;
+        }
+        .clinical-note {
+            border-left: 3px solid var(--amber);
+            background: var(--amber-soft);
+            color: #69450e;
+            padding: 12px 14px;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-top: 8px;
+            border-radius: 0 6px 6px 0;
+            animation: feedbackFadeIn 0.2s ease;
+        }
+        .hint-penalty-warning {
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px dashed rgba(146,64,14,0.3);
+            font-size: 12px;
+            font-weight: 700;
+            color: #92400e;
+        }
         .answer-row { display: flex; gap: 8px; }
         #answer-input, #exam-answer, .answer-input {
             min-width: 0; flex: 1; border: 2px solid #b9cbc2; border-radius: 7px;
@@ -299,7 +349,15 @@
             <section class="panel question-panel" aria-live="polite">
                 <div class="question-meta"><span class="level-tag" id="level-tag">Nivå 1</span><span class="question-type" id="question-type">Enhetsomregning og tabletter</span></div>
                 <div class="question" id="question-text">Laster oppgave ...</div>
-                <div class="clinical-note" id="clinical-note">Kontroller alltid dose, styrke, mengde og enhet før du svarer.</div>
+                <div class="hint-container" id="hint-container">
+                    <button type="button" class="hint-toggle-btn" id="hint-toggle-btn" aria-expanded="false" aria-controls="clinical-note">
+                        <span class="hint-icon">💡</span> <span id="hint-btn-label">Vis hint</span>
+                    </button>
+                    <div class="clinical-note" id="clinical-note" style="display: none;">
+                        <div id="clinical-note-text">Kontroller alltid dose, styrke, mengde og enhet før du svarer.</div>
+                        <div class="hint-penalty-warning">⚠️ Hint benyttet: Gir ikke poeng, men rekken (streak) beholdes ved riktig svar.</div>
+                    </div>
+                </div>
                 <form class="answer-form" id="answer-form">
                     <div class="answer-row">
                         <input id="answer-input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="Skriv svar med enhet" aria-label="Svar">
@@ -426,6 +484,7 @@
             solved: 0,
             current: null,
             reviewing: false,
+            hintUsed: false,
             unlockedExam: false,
             lastSignature: '',
             exam: null
@@ -453,7 +512,8 @@
 
         const formatNumber = (value, decimals = null) => {
             if (decimals === null) {
-                return String(value).replace('.', ',');
+                const cleanVal = Math.round((value + Number.EPSILON) * 1e8) / 1e8;
+                return String(cleanVal).replace('.', ',');
             }
             return value.toFixed(decimals).replace('.', ',');
         };
@@ -470,7 +530,7 @@
 
         const formatDisplayExpected = (expected, decimals, unit) => {
             if (unit === 'tablet') {
-                const valStr = expected % 1 === 0 ? String(expected) : formatNumber(expected, 1);
+                const valStr = Number.isInteger(expected) ? String(expected) : formatNumber(expected, 1);
                 return expected === 1 ? `1 tablett` : `${valStr} tabletter`;
             }
             if (unit === 'dr/min') {
@@ -532,11 +592,11 @@
 
         // 3. Enhetsvalidering med støtte for vanlige norske fagaliaser
         const UNIT_ALIASES = {
-            'tablet': ['tablett', 'tabletter', 'tabl', 'tbl', 'tab', 'stk'],
+            'tablet': ['tablett', 'tabletter', 'tablet', 'tabl', 'tbl', 'tab', 'stk'],
             'ml': ['ml', 'milliliter', 'millilitre'],
             'mg': ['mg', 'milligram', 'milligramm'],
             'g': ['g', 'gram'],
-            'µg': ['µg', 'ug', 'mikrog', 'mikrogram', 'mcg'],
+            'µg': ['µg', 'ug', 'mikrog', 'mikrogram', 'microg', 'microgram', 'mcg'],
             'mmol': ['mmol', 'millimol'],
             'mmol/ml': ['mmol/ml', 'mmolprml', 'mmol pr ml', 'mmol/millilitre', 'mmol/milliliter', 'mmol pr milliliter'],
             'ml/t': ['ml/t', 'ml/time', 'ml/h', 'ml pr time', 'ml/t.', 'ml/time.'],
@@ -721,41 +781,42 @@
                     const expected = Math.round(grams * 1000);
                     return makeQuestion({
                         type: 'Enhetsomregning',
-                        prompt: `En ordinert dose er angitt som <strong>${formatNumber(grams, grams % 1 ? 2 : 0)} g</strong>. Hvor mange milligram (mg) tilsvarer denne dosen?`,
+                        prompt: `En ordinert dose er angitt som <strong>${formatNumber(grams)} g</strong>. Hvor mange milligram (mg) tilsvarer denne dosen?`,
                         note: 'Tier-potens: 1 g = 1000 mg (flytt komma tre plasser mot høyre).',
                         expected,
                         decimals: 0,
                         unit: 'mg',
-                        formula: `${formatNumber(grams, grams % 1 ? 2 : 0)} g × 1000 mg/g = ${formatNumber(expected, 0)} mg.`
+                        formula: `${formatNumber(grams)} g × 1000 mg/g = ${formatNumber(expected, 0)} mg.`
                     });
                 },
                 // Enhetsomregning mg til mikrogram (µg)
                 () => {
-                    const mg = choose([0.05, 0.1, 0.25, 0.5, 1]);
+                    const mg = choose([0.05, 0.1, 0.2, 0.25, 0.3, 0.5, 1]);
                     const expected = Math.round(mg * 1000);
                     return makeQuestion({
                         type: 'Enhetsomregning',
-                        prompt: `En dose er angitt som <strong>${formatNumber(mg, mg < 0.1 ? 2 : 1)} mg</strong>. Hvor mange mikrogram (µg) tilsvarer dette?`,
+                        prompt: `En dose er angitt som <strong>${formatNumber(mg)} mg</strong>. Hvor mange mikrogram (µg) tilsvarer dette?`,
                         note: '1 mg = 1000 µg (mikrogram). Skriv svar med µg.',
                         expected,
                         decimals: 0,
                         unit: 'µg',
-                        formula: `${formatNumber(mg, mg < 0.1 ? 2 : 1)} mg × 1000 µg/mg = ${formatNumber(expected, 0)} µg.`
+                        formula: `${formatNumber(mg)} mg × 1000 µg/mg = ${formatNumber(expected, 0)} µg.`
                     });
                 },
                 // Enhetsomregning mikrogram til mg
                 () => {
                     const ug = choose([250, 500, 750]);
                     const expected = ug / 1000;
+                    const decimals = expected === 0.5 ? 1 : 2;
                     return makeQuestion({
                         type: 'Enhetsomregning',
                         prompt: `En pasient skal få <strong>${ug} µg</strong> av et legemiddel. Hvor mange milligram (mg) tilsvarer dette?`,
                         note: '1000 µg = 1 mg (del på 1000 / flytt komma tre plasser til venstre).',
                         expected,
-                        decimals: expected % 0.1 === 0 ? 1 : 2,
+                        decimals,
                         maxDecimals: 2,
                         unit: 'mg',
-                        formula: `${ug} µg ÷ 1000 µg/mg = ${formatNumber(expected, expected % 0.1 === 0 ? 1 : 2)} mg.`
+                        formula: `${ug} µg ÷ 1000 µg/mg = ${formatNumber(expected, decimals)} mg.`
                     });
                 }
             ];
@@ -773,13 +834,13 @@
                     const isSubOne = expected < 1;
                     return makeQuestion({
                         type: 'Volumberegning',
-                        prompt: `Pasienten har sterke smerter og skal ha <strong>${formatNumber(dose, dose % 1 ? 1 : 0)} mg Morfin</strong> intravenøst. Morfin har styrken <strong>${concentration} mg/ml</strong>. Hvor mange ml skal trekkes opp?`,
+                        prompt: `Pasienten har sterke smerter og skal ha <strong>${formatNumber(dose)} mg Morfin</strong> intravenøst. Morfin har styrken <strong>${concentration} mg/ml</strong>. Hvor mange ml skal trekkes opp?`,
                         note: isSubOne ? 'For volum under 1 ml avrundes til 2 desimaler. Bruk finsprøyte.' : 'Volum på 1 ml eller mer angis normalt med 1 desimal.',
                         expected,
                         decimals: isSubOne ? 2 : 1,
                         maxDecimals: 2,
                         unit: 'ml',
-                        formula: `Mengde (volum) = Dose ÷ Styrke\nVolum = ${formatNumber(dose, dose % 1 ? 1 : 0)} mg ÷ ${concentration} mg/ml = ${formatNumber(expected, isSubOne ? 2 : 1)} ml.`
+                        formula: `Mengde (volum) = Dose ÷ Styrke\nVolum = ${formatNumber(dose)} mg ÷ ${concentration} mg/ml = ${formatNumber(expected, isSubOne ? 2 : 1)} ml.`
                     });
                 },
                 // Ketorolak 30 mg/ml
@@ -790,13 +851,13 @@
                     const isSubOne = expected < 1;
                     return makeQuestion({
                         type: 'Volumberegning',
-                        prompt: `Ketorolak injeksjonsvæske har styrken <strong>${concentration} mg/ml</strong>. Ordinert dose er <strong>${formatNumber(dose, dose % 1 ? 1 : 0)} mg</strong>. Hvor mange ml skal administreres?`,
+                        prompt: `Ketorolak injeksjonsvæske har styrken <strong>${concentration} mg/ml</strong>. Ordinert dose er <strong>${formatNumber(dose)} mg</strong>. Hvor mange ml skal administreres?`,
                         note: 'Volum under 1 ml krever nøyaktig opptrekk i 1 ml sprøyte.',
                         expected,
                         decimals: isSubOne ? 2 : 1,
                         maxDecimals: 2,
                         unit: 'ml',
-                        formula: `Mengde = Dose ÷ Styrke\nVolum = ${formatNumber(dose, dose % 1 ? 1 : 0)} mg ÷ ${concentration} mg/ml = ${formatNumber(expected, isSubOne ? 2 : 1)} ml.`
+                        formula: `Mengde = Dose ÷ Styrke\nVolum = ${formatNumber(dose)} mg ÷ ${concentration} mg/ml = ${formatNumber(expected, isSubOne ? 2 : 1)} ml.`
                     });
                 },
                 // Furosemid 10 mg/ml
@@ -823,13 +884,13 @@
                     const isSubOne = expected < 1;
                     return makeQuestion({
                         type: 'Volumberegning',
-                        prompt: `Haloperidol injeksjonsvæske har styrken <strong>${concentration} mg/ml</strong>. Pasienten skal ha <strong>${formatNumber(dose, dose % 1 ? 1 : 0)} mg</strong>. Hvor mange ml skal trekkes opp?`,
+                        prompt: `Haloperidol injeksjonsvæske har styrken <strong>${concentration} mg/ml</strong>. Pasienten skal ha <strong>${formatNumber(dose)} mg</strong>. Hvor mange ml skal trekkes opp?`,
                         note: 'Benytt finsprøyte for volumer under 1 ml.',
                         expected,
                         decimals: isSubOne ? 2 : 0,
                         maxDecimals: 2,
                         unit: 'ml',
-                        formula: `Mengde = Dose ÷ Styrke\nVolum = ${formatNumber(dose, dose % 1 ? 1 : 0)} mg ÷ ${concentration} mg/ml = ${formatNumber(expected, isSubOne ? 2 : 0)} ml.`
+                        formula: `Mengde = Dose ÷ Styrke\nVolum = ${formatNumber(dose)} mg ÷ ${concentration} mg/ml = ${formatNumber(expected, isSubOne ? 2 : 0)} ml.`
                     });
                 },
                 // Apocillin mikstur 50 mg/ml
@@ -841,12 +902,12 @@
                         const expected = Math.round(volume * concentration);
                         return makeQuestion({
                             type: 'Doseberegning',
-                            prompt: `En pasient inntar <strong>${formatNumber(volume, volume % 1 ? 1 : 0)} ml Apocillin mikstur</strong> med styrke <strong>${concentration} mg/ml</strong>. Hvor stor dose i mg tilsvarer dette?`,
+                            prompt: `En pasient inntar <strong>${formatNumber(volume)} ml Apocillin mikstur</strong> med styrke <strong>${concentration} mg/ml</strong>. Hvor stor dose i mg tilsvarer dette?`,
                             note: 'Dose = Styrke × Mengde.',
                             expected,
                             decimals: 0,
                             unit: 'mg',
-                            formula: `Dose = Styrke × Mengde\nDose = ${concentration} mg/ml × ${formatNumber(volume, volume % 1 ? 1 : 0)} ml = ${formatNumber(expected, 0)} mg.`
+                            formula: `Dose = Styrke × Mengde\nDose = ${concentration} mg/ml × ${formatNumber(volume)} ml = ${formatNumber(expected, 0)} mg.`
                         });
                     } else {
                         const dose = choose([250, 500, 750, 1000]);
@@ -1085,11 +1146,25 @@
 
         function renderQuestion() {
             clearAutoAdvance();
+            state.hintUsed = false;
             const question = state.current;
             $('#level-tag').textContent = `Nivå ${state.level}`;
             $('#question-type').textContent = LEVELS[state.level - 1].name;
             $('#question-text').innerHTML = question.prompt;
-            $('#clinical-note').textContent = question.note;
+
+            // Tilbakestill skjult hint
+            const noteTextEl = $('#clinical-note-text');
+            if (noteTextEl) noteTextEl.textContent = question.note;
+            const noteEl = $('#clinical-note');
+            if (noteEl) noteEl.style.display = 'none';
+            const hintBtn = $('#hint-toggle-btn');
+            if (hintBtn) {
+                hintBtn.classList.remove('revealed');
+                hintBtn.setAttribute('aria-expanded', 'false');
+                const label = $('#hint-btn-label');
+                if (label) label.textContent = 'Vis hint';
+            }
+
             $('#answer-format').textContent = `Forventet format: tall + ${formatUnit(question.unit)}`;
             $('#answer-input').value = '';
             $('#answer-input').disabled = false;
@@ -1190,6 +1265,22 @@
                 showReview(result);
                 return;
             }
+
+            // Svarte riktig!
+            if (state.hintUsed) {
+                // Hint ble benyttet:
+                // - Får ikke poeng (state.solved øker ikke)
+                // - Beholder streeken (rekke nullstilles ikke, men øker heller ikke)
+                saveProgress();
+                updateStatus();
+                $('#feedback').className = 'feedback correct';
+                $('#feedback').innerHTML = `<div class="feedback-icon">💡</div><div><strong>Riktig svar!</strong> Fordi du benyttet hint får du ikke poeng for denne oppgaven, men du beholder rekken din (<strong>${state.streak}/5 rette på rad</strong>). Løs neste oppgave uten hint for å få poeng og gå videre!</div>`;
+                $('#submit-btn').textContent = 'Neste oppgave ➔';
+                state.reviewing = true;
+                autoAdvanceTimer = setTimeout(generateQuestion, 2800);
+                return;
+            }
+
             state.streak++;
             state.solved++;
             if (state.streak >= 5) {
@@ -1339,6 +1430,7 @@
             state.exam = {
                 questions: createExamQuestions(),
                 answers: Array(10).fill(''),
+                hintsUsed: Array(10).fill(false),
                 current: 0,
                 started: Date.now(),
                 durationSeconds: 3600,
@@ -1375,6 +1467,7 @@
             if (exam.finished) return renderExamResult();
 
             const question = exam.questions[exam.current];
+            const isHintUsed = Boolean(exam.hintsUsed && exam.hintsUsed[exam.current]);
             const elapsed = Math.floor((Date.now() - exam.started) / 1000);
             const remaining = Math.max(0, exam.durationSeconds - elapsed);
             const minutes = String(Math.floor(remaining / 60)).padStart(2, '0');
@@ -1387,7 +1480,16 @@
                         <span class="exam-timer" id="exam-timer">Tid igjen: ${minutes}:${seconds}</span>
                     </div>
                     <div class="question">${question.prompt}</div>
-                    <div class="clinical-note">${question.note}</div>
+                    <div class="hint-container">
+                        <button type="button" class="hint-toggle-btn ${isHintUsed ? 'revealed' : ''}" id="exam-hint-btn">
+                            <span class="hint-icon">💡</span> <span>${isHintUsed ? 'Skjul hint' : 'Vis hint'}</span>
+                            <span class="hint-warning-badge">${isHintUsed ? 'Hint benyttet (underkjent)' : 'Underkjenner eksamen'}</span>
+                        </button>
+                        <div class="clinical-note" id="exam-clinical-note" style="${isHintUsed ? '' : 'display: none;'}">
+                            <div>${question.note}</div>
+                            <div class="hint-penalty-warning">⚠️ Hint benyttet på denne oppgaven. Eksamen underkjennes (nasjonalt krav: 100 % selvstendig besvarelse).</div>
+                        </div>
+                    </div>
                     <div class="answer-form">
                         <input class="answer-input" id="exam-answer" type="text" inputmode="decimal" value="${escapeHtml(exam.answers[exam.current])}" placeholder="Skriv svar med enhet" autocomplete="off" spellcheck="false" aria-label="Eksamenssvar">
                         <div class="unit-hint">
@@ -1411,6 +1513,28 @@
             `;
 
             renderExamQuickKeys(question.unit);
+
+            $('#exam-hint-btn')?.addEventListener('click', () => {
+                const noteEl = $('#exam-clinical-note');
+                const btn = $('#exam-hint-btn');
+                if (!noteEl || !btn) return;
+                const isHidden = noteEl.style.display === 'none';
+                if (isHidden) {
+                    if (!exam.hintsUsed[exam.current]) {
+                        if (!confirm('Advarsel: Hvis du åpner hintet, vil eksamensprøven IKKE bli bestått. Nasjonal deleksamen krever at alle oppgaver løses helt uten hjelpemidler.\n\nVil du likevel se hintet?')) {
+                            return;
+                        }
+                        exam.hintsUsed[exam.current] = true;
+                    }
+                    noteEl.style.display = 'block';
+                    btn.classList.add('revealed');
+                    btn.innerHTML = '<span class="hint-icon">💡</span> <span>Skjul hint</span> <span class="hint-warning-badge">Hint benyttet (underkjent)</span>';
+                } else {
+                    noteEl.style.display = 'none';
+                    btn.classList.remove('revealed');
+                    btn.innerHTML = '<span class="hint-icon">💡</span> <span>Vis hint</span> <span class="hint-warning-badge">Hint benyttet (underkjent)</span>';
+                }
+            });
 
             const input = $('#exam-answer');
             input.focus();
@@ -1470,22 +1594,38 @@
                 const answerRaw = exam.answers[index] || '';
                 const parsed = parseAnswer(answerRaw);
                 const correct = answerIsCorrect(parsed, question);
-                return { question, answerRaw, correct };
+                const hintUsed = Boolean(exam.hintsUsed && exam.hintsUsed[index]);
+                return { question, answerRaw, correct, hintUsed };
             });
 
             const correctCount = results.filter(r => r.correct).length;
-            const passed = correctCount === results.length;
+            const hintsCount = results.filter(r => r.hintUsed).length;
+            const passed = (correctCount === results.length) && (hintsCount === 0);
+
+            let resultTitle = '';
+            let resultDesc = '';
+            if (passed) {
+                resultTitle = 'Prøven er bestått!';
+                resultDesc = `Gratulerer! Du svarte riktig på alle ${results.length} oppgaver helt selvstendig uten hint (100 % korrekt, 0 feil).`;
+            } else if (correctCount === results.length && hintsCount > 0) {
+                resultTitle = 'Prøven er ikke bestått (Hint benyttet)';
+                resultDesc = `Du svarte matematisk riktig på alle 10 oppgaver, men benyttet hint underveis på ${hintsCount} oppgave${hintsCount > 1 ? 'r' : ''}. Nasjonal deleksamen i medikamentregning krever 100 % selvstendig besvarelse uten hjelpemidler. Prøven er derfor ikke bestått.`;
+            } else {
+                resultTitle = 'Prøven er ikke bestått';
+                resultDesc = `Kravet for bestått eksamen er 100 % korrekt (0 feil) uten bruk av hint. Du hadde ${correctCount} av ${results.length} riktige${hintsCount > 0 ? ` og benyttet hint på ${hintsCount} oppgave${hintsCount > 1 ? 'r' : ''}` : ''}. Se gjennomgangen nedenfor for å repetere regnetrinnene.`;
+            }
 
             $('#exam-content').innerHTML = `
                 <div class="exam-result">
-                    <h3 class="${passed ? 'pass' : 'fail'}">${passed ? 'Prøven er bestått!' : 'Prøven er ikke bestått'}</h3>
-                    <p>${passed ? `Gratulerer! Du svarte riktig på ${results.length} av ${results.length} oppgaver (100 % korrekt, 0 feil).` : `Kravet for bestått eksamen er 100 % korrekt (0 feil). Du hadde ${correctCount} av ${results.length} riktige. Se gjennomgangen nedenfor for å repetere regnetrinnene.`}</p>
+                    <h3 class="${passed ? 'pass' : 'fail'}">${resultTitle}</h3>
+                    <p>${resultDesc}</p>
                     <table>
                         <thead>
                             <tr>
                                 <th>#</th>
                                 <th>Ditt svar</th>
                                 <th>Resultat</th>
+                                <th>Hjelpemidler</th>
                                 <th>Fasit og utregning</th>
                             </tr>
                         </thead>
@@ -1495,6 +1635,7 @@
                                     <td><strong>${index + 1}</strong></td>
                                     <td>${escapeHtml(result.answerRaw || 'Ingen besvarelse')}</td>
                                     <td class="${result.correct ? 'pass' : 'fail'}">${result.correct ? 'Riktig' : 'Feil'}</td>
+                                    <td style="font-size: 12px; color: ${result.hintUsed ? '#b45309; font-weight: 700;' : 'var(--muted);'}">${result.hintUsed ? '⚠️ Hint benyttet' : 'Ingen'}</td>
                                     <td>
                                         <strong>${escapeHtml(result.question.displayExpected)}</strong>
                                         <details>
@@ -1522,6 +1663,26 @@
 
         // 8. Event listeners og oppstart
         $('#answer-form').addEventListener('submit', handleTrainingSubmit);
+        $('#hint-toggle-btn')?.addEventListener('click', () => {
+            const noteEl = $('#clinical-note');
+            const btn = $('#hint-toggle-btn');
+            if (!noteEl || !btn) return;
+            const isHidden = noteEl.style.display === 'none';
+            if (isHidden) {
+                noteEl.style.display = 'block';
+                btn.classList.add('revealed');
+                btn.setAttribute('aria-expanded', 'true');
+                const label = $('#hint-btn-label');
+                if (label) label.textContent = 'Skjul hint';
+                state.hintUsed = true;
+            } else {
+                noteEl.style.display = 'none';
+                btn.classList.remove('revealed');
+                btn.setAttribute('aria-expanded', 'false');
+                const label = $('#hint-btn-label');
+                if (label) label.textContent = 'Vis hint (benyttet)';
+            }
+        });
         $('#help-btn').addEventListener('click', () => { renderHelp(); openModal('help-modal'); });
         $('#exam-btn').addEventListener('click', startExam);
         $('#print-btn').addEventListener('click', () => window.print());
