@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <title>Simulering av Effekttrekanten</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f7f6;
+      margin: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 850px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #1a365d;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+      background: #edf2f7;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 0.9em;
+    }
+    input[type=range] {
+      width: 100%;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+    }
+    .results {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 15px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .result-card {
+      background: #f8fafc;
+      border-left: 4px solid;
+      padding: 10px 15px;
+      border-radius: 4px;
+      flex: 1;
+      min-width: 180px;
+    }
+    .card-s { border-color: #8b5cf6; } /* Purple */
+    .card-p { border-color: #2563eb; } /* Blue */
+    .card-q { border-color: #dc2626; } /* Red */
+    .card-phi { border-color: #059669; } /* Green */
+
+    .result-card h4 { margin: 0 0 5px 0; font-size: 0.85em; color: #64748b; }
+    .result-card p { margin: 0; font-size: 1.2em; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>⚡ Simulering av Effekttrekanten (NDLA)</h2>
+
+  <!-- Kontrollpanel -->
+  <div class="controls">
+    <div class="control-group">
+      <label for="voltage">Spenning (U): <span id="valU">230</span> V</label>
+      <input type="range" id="voltage" min="110" max="400" step="10" value="230">
+    </div>
+
+    <div class="control-group">
+      <label for="current">Strøm (I): <span id="valI">10.0</span> A</label>
+      <input type="range" id="current" min="1" max="50" step="0.5" value="10">
+    </div>
+
+    <div class="control-group">
+      <label for="cosPhi">Effektfaktor (cos φ): <span id="valCos">0.85</span></label>
+      <input type="range" id="cosPhi" min="0.10" max="1.00" step="0.01" value="0.85">
+    </div>
+
+    <div class="control-group">
+      <label for="phaseType">Systemtype:</label>
+      <select id="phaseType" style="padding: 6px; border-radius: 4px;">
+        <option value="1">1-faset krets (S = U · I)</option>
+        <option value="3">3-faset krets (S = √3 · U · I)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Canvas for tegning av effekttrekant -->
+  <canvas id="triangleCanvas" width="700" height="380"></canvas>
+
+  <!-- Resultatkort -->
+  <div class="results">
+    <div class="result-card card-s">
+      <h4>TILSYNELATENDE EFFEKT (S)</h4>
+      <p id="resS">0 VA</p>
+    </div>
+    <div class="result-card card-p">
+      <h4>AKTIV EFFEKT (P<sub>t</sub>)</h4>
+      <p id="resP">0 W</p>
+    </div>
+    <div class="result-card card-q">
+      <h4>REAKTIV EFFEKT (Q)</h4>
+      <p id="resQ">0 var</p>
+    </div>
+    <div class="result-card card-phi">
+      <h4>FASEVINKEL (φ)</h4>
+      <p id="resPhi">0°</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const canvas = document.getElementById('triangleCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // Hent UI-elementer
+  const inputU = document.getElementById('voltage');
+  const inputI = document.getElementById('current');
+  const inputCos = document.getElementById('cosPhi');
+  const selectPhase = document.getElementById('phaseType');
+
+  function updateValues() {
+    const U = parseFloat(inputU.value);
+    const I = parseFloat(inputI.value);
+    const cosPhi = parseFloat(inputCos.value);
+    const isThreePhase = selectPhase.value === "3";
+
+    // Oppdater tekstverdier i UI
+    document.getElementById('valU').innerText = U;
+    document.getElementById('valI').innerText = I.toFixed(1);
+    document.getElementById('valCos').innerText = cosPhi.toFixed(2);
+
+    // Beregninger etter NDLA-formler
+    const multiplier = isThreePhase ? Math.sqrt(3) : 1.0;
+    const S = U * I * multiplier;                  // Tilsynelatende effekt [VA]
+    const Pt = S * cosPhi;                         // Aktiv effekt [W]
+    const phiRad = Math.acos(cosPhi);             // Fasevinkel i radianer
+    const phiDeg = phiRad * (180 / Math.PI);      // Fasevinkel i grader
+    const Q = S * Math.sin(phiRad);               // Reaktiv effekt [var]
+
+    // Oppdater resultatkort
+    document.getElementById('resS').innerText = Math.round(S).toLocaleString() + " VA";
+    document.getElementById('resP').innerText = Math.round(Pt).toLocaleString() + " W";
+    document.getElementById('resQ').innerText = Math.round(Q).toLocaleString() + " var";
+    document.getElementById('resPhi').innerText = phiDeg.toFixed(1) + "°";
+
+    // Tegn effekttrekanten på canvas
+    drawTriangle(Pt, Q, S, phiRad, phiDeg, cosPhi);
+  }
+
+  function drawTriangle(P, Q, S, phiRad, phiDeg, cosPhi) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Marginer og tilgjengelig tegneplass
+    const marginX = 80;
+    const marginY = 50;
+    const maxDrawWidth = canvas.width - marginX * 2;
+    const maxDrawHeight = canvas.height - marginY * 2;
+
+    // Origo for trekant (nede til venstre)
+    const startX = marginX;
+    const startY = canvas.height - marginY;
+
+    // Skaleringsfaktor slik at trekanten alltid passer inn på lerretet
+    const scale = Math.min(maxDrawWidth / Math.max(P, 1), maxDrawHeight / Math.max(Q, 1));
+
+    const drawP = P * scale;
+    const drawQ = Q * scale;
+
+    const cornerX = startX + drawP;
+    const topY = startY - drawQ;
+
+    // 1. Tegn Hosliggende katet: Aktiv effekt P_t (Blå linje)
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(cornerX, startY);
+    ctx.strokeStyle = '#2563eb';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // 2. Tegn Motstående katet: Reaktiv effekt Q (Rød linje)
+    ctx.beginPath();
+    ctx.moveTo(cornerX, startY);
+    ctx.lineTo(cornerX, topY);
+    ctx.strokeStyle = '#dc2626';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // 3. Tegn Hypotenus: Tilsynelatende effekt S (Lilla linje)
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(cornerX, topY);
+    ctx.strokeStyle = '#8b5cf6';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // 4. Tegn Rettvinklet markør i hjørnet (ved P_t og Q)
+    if (drawQ > 15 && drawP > 15) {
+      ctx.beginPath();
+      ctx.rect(cornerX - 12, startY - 12, 12, 12);
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    // 5. Tegn Vinkelbue φ
+    if (phiDeg > 1 && drawP > 40) {
+      ctx.beginPath();
+      const arcRadius = Math.min(45, drawP * 0.3);
+      ctx.arc(startX, startY, arcRadius, 0, -phiRad, true);
+      ctx.strokeStyle = '#059669';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Vinkeltekst (φ)
+      ctx.fillStyle = '#059669';
+      ctx.font = 'bold 13px Arial';
+      ctx.fillText(`φ = ${phiDeg.toFixed(1)}°`, startX + arcRadius + 8, startY - 10);
+    }
+
+    // 6. Tekstetiketter langs sidene
+    ctx.font = 'bold 14px Arial';
+
+    // P_t merking (Vannrett under)
+    ctx.fillStyle = '#2563eb';
+    ctx.textAlign = 'center';
+    ctx.fillText(`P_t = ${Math.round(P)} W`, startX + drawP / 2, startY + 25);
+
+    // Q merking (Loddrett til høyre)
+    ctx.fillStyle = '#dc2626';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Q = ${Math.round(Q)} var`, cornerX + 12, startY - drawQ / 2);
+
+    // S merking (Skrå over hypotenus)
+    ctx.fillStyle = '#8b5cf6';
+    ctx.textAlign = 'center';
+    const midS_X = startX + drawP / 2 - 15;
+    const midS_Y = startY - drawQ / 2 - 12;
+    ctx.fillText(`S = ${Math.round(S)} VA`, midS_X, midS_Y);
+  }
+
+  // Lytt til endringer i UI
+  inputU.addEventListener('input', updateValues);
+  inputI.addEventListener('input', updateValues);
+  inputCos.addEventListener('input', updateValues);
+  selectPhase.addEventListener('change', updateValues);
+
+  // Første opptegning
+  updateValues();
+</script>
+
+</body>
+</html>
