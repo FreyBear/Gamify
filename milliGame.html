@@ -478,110 +478,165 @@
             padding: 32px 24px;
             text-align: center;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
         }
 
-        .diploma-seal { font-size: 44px; margin-bottom: 6px; }
-        .diploma-title { font-family: Georgia, serif; font-size: 28px; color: #1e3a8a; margin: 0; font-weight: bold; }
-        .diploma-subtitle { font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 4px 0 16px 0; }
-        .diploma-award-to { font-size: 13px; font-weight: 700; color: #475569; }
-        .diploma-name-input {
-            border: none;
-            border-bottom: 2px solid #2563eb;
-            background: transparent;
-            font-family: Georgia, serif;
-            font-size: 24px;
-            font-weight: bold;
-            color: #0f172a;
-            text-align: center;
-            width: 80%;
-            max-width: 380px;
-            margin: 8px auto 14px auto;
-            padding: 4px;
-            outline: none;
+        /* Sikkerhetsvannmerke og serienummer på diplom */
+        .diploma-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-24deg);
+            font-size: 58px;
+            font-weight: 900;
+            color: rgba(217, 119, 6, 0.085);
+            border: 5px solid rgba(217, 119, 6, 0.085);
+            padding: 8px 30px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+            z-index: 1;
+            display: none;
+        }
+
+        .diploma-watermark.active {
             display: block;
         }
-        .diploma-praise { font-family: Georgia, serif; font-style: italic; font-size: 18px; color: #2563eb; margin-bottom: 10px; }
-        .diploma-desc { font-size: 14px; line-height: 1.55; color: #334155; max-width: 480px; margin: 0 auto 20px auto; }
-        .diploma-footer { display: flex; justify-content: space-around; margin-top: 20px; }
-        .diploma-signature { display: flex; flex-direction: column; align-items: center; width: 140px; }
-        .signature-line { border-top: 1px solid #94a3b8; width: 100%; padding-top: 4px; font-size: 13px; color: #475569; font-weight: bold; }
-        .diploma-buttons { display: flex; gap: 10px; margin-top: 14px; }
-        .diploma-btn {
-            border: none;
-            padding: 10px 18px;
+
+        .diploma-serial {
+            margin-top: 16px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #94a3b8;
+            letter-spacing: 1.2px;
+            font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+            user-select: none;
+        }
+
+        .diploma-locked-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        /* Elevstatus i nivålinje */
+        .player-status-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+            padding: 3px 6px 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .player-logout-btn {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #b91c1c;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            line-height: 1.2;
+        }
+
+        .player-logout-btn:hover {
+            background: #fee2e2;
+            border-color: #f87171;
+            color: #991b1b;
+        }
+
+        .btn-logout-modal {
+            width: 100%;
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            color: #be123c;
+            padding: 9px 14px;
             border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-logout-modal:hover {
+            background: #ffe4e6;
+            border-color: #fda4af;
+            color: #9f1239;
+        }
+
+        /* Lagre / Hent modal */
+        .save-tab-bar {
+            display: flex;
+            gap: 8px;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 16px;
+        }
+
+        .save-tab-btn {
+            background: none;
+            border: none;
+            padding: 8px 16px;
             font-size: 14px;
             font-weight: 700;
+            color: #64748b;
             cursor: pointer;
-            transition: opacity 0.2s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.15s;
         }
-        .diploma-btn-print { background-color: #2563eb; color: #ffffff; }
-        .diploma-btn-close { background-color: #64748b; color: #ffffff; }
-        .diploma-btn:hover { opacity: 0.9; }
 
-        /* Lærermeny */
-        .cheat-panel {
-            position: fixed;
-            bottom: 20px; right: 20px;
-            background: #1e293b;
-            color: #f8fafc;
-            border: 1px solid #475569;
-            border-radius: 12px;
-            padding: 16px;
-            max-width: 320px;
+        .save-tab-btn.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+
+        .save-input {
             width: 100%;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            z-index: 1000;
-            display: none;
-            font-size: 13px;
+            padding: 10px 14px;
+            font-size: 14px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #1e293b;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
         }
-        .cheat-panel.active { display: block; }
-        .cheat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 700; color: #38bdf8; }
-        .cheat-close { background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; }
-        .cheat-sec-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin: 8px 0 4px 0; }
-        .cheat-lvl-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 8px; }
-        .cheat-lvl-btn {
-            background: #334155;
-            color: #f8fafc;
-            border: 1px solid #475569;
-            border-radius: 4px;
-            padding: 6px;
-            font-weight: 700;
-            font-size: 12px;
-            cursor: pointer;
-        }
-        .cheat-lvl-btn:hover { background: #475569; }
-        .cheat-lvl-btn.active { background: #2563eb; border-color: #60a5fa; }
-        .cheat-ans-box { background: #0f172a; border-radius: 6px; padding: 8px; margin-bottom: 8px; }
-        .cheat-ans-val { color: #4ade80; font-weight: 700; font-family: ui-monospace, monospace; }
-        .cheat-btn-row { display: flex; flex-direction: column; gap: 4px; }
-        .cheat-action-btn {
-            background: #334155;
-            color: #f8fafc;
-            border: 1px solid #475569;
-            border-radius: 4px;
-            padding: 6px;
-            font-weight: 600;
-            font-size: 12px;
-            cursor: pointer;
-        }
-        .cheat-action-btn:hover { background: #475569; }
-        .cheat-action-btn.green { background: #166534; border-color: #22c55e; }
-        .cheat-action-btn.gold { background: #854d0e; border-color: #eab308; }
 
-        .sr-only {
-            position: absolute;
-            width: 1px; height: 1px;
-            padding: 0; margin: -1px;
-            overflow: hidden; clip: rect(0, 0, 0, 0);
-            white-space: nowrap; border: 0;
-        }
+        .save-input:focus { border-color: #2563eb; }
 
         @media print {
-            body * { visibility: hidden; }
-            .diploma-overlay, .diploma-overlay * { visibility: visible; }
-            .diploma-overlay { position: absolute; left: 0; top: 0; width: 100%; background: none; }
-            .no-print { display: none !important; }
+            body { background: white !important; padding: 0 !important; }
+            .container, .modal-overlay, .cheat-panel, #fireworks-canvas, .diploma-buttons, .diploma-info-banner { display: none !important; }
+            .diploma-overlay { position: static !important; display: block !important; background: none !important; padding: 0 !important; }
+            .diploma-card { box-shadow: none !important; max-width: 100% !important; border: 8px double #2563eb !important; }
+            .diploma-name-input { border-bottom: none !important; }
+            .diploma-watermark, .diploma-serial {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
         }
     </style>
 </head>
@@ -594,13 +649,22 @@
                 <h1 class="brand-title">milli<span>Game</span></h1>
                 <div class="brand-subtitle" id="secret-trigger-area">metrisk enhetskonvertering ⚡</div>
             </div>
-            <button type="button" class="help-btn" id="help-btn" title="Åpne SI-tabell og hint">
-                💡 SI-tabell & Hint
-            </button>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <button type="button" class="help-btn" id="help-btn" title="Åpne SI-tabell og hint">
+                    💡 SI-tabell & Hint
+                </button>
+                <button type="button" class="help-btn" id="save-load-btn" title="Lagre eller hent spill">
+                    💾 Lagre / Hent
+                </button>
+            </div>
         </header>
         
         <div class="level-bar">
             <div>Nivå <span id="level" class="level-badge">1</span>: <strong id="level-name">Kilo & Milli</strong></div>
+            <div class="player-status-tag" id="player-status-tag" style="display: none;">
+                <span>👤 Elev: <strong id="player-status-name">-</strong> 🔒</span>
+                <button type="button" class="player-logout-btn" id="btn-logout-tag" title="Logg ut og start forfra">🚪 Logg ut</button>
+            </div>
             <div class="streak-badge">Rette på rad: <span id="streak">0</span> / <span id="target-streak">5</span></div>
         </div>
         
@@ -657,17 +721,88 @@
         </div>
     </div>
 
+    <!-- LAGRE / LAST SPILL MODAL -->
+    <div class="modal-overlay" id="save-load-modal">
+        <div class="modal-content" style="max-width: 500px; text-align: left;">
+            <div class="modal-header" style="margin-bottom: 12px;">
+                <h2 class="modal-title" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <span>💾 Lagre eller hent spill</span>
+                    <button type="button" id="save-load-close-x" style="background: none; border: none; font-size: 18px; color: #94a3b8; cursor: pointer;">✖</button>
+                </h2>
+            </div>
+            
+            <!-- FANER -->
+            <div class="save-tab-bar">
+                <button type="button" class="save-tab-btn active" id="tab-btn-save" data-tab="save">💾 Lagre spill</button>
+                <button type="button" class="save-tab-btn" id="tab-btn-load" data-tab="load">📂 Hent / Fortsett</button>
+            </div>
+            
+            <!-- FANE 1: LAGRE -->
+            <div id="save-tab-content" class="save-tab-content">
+                <div style="font-size: 13px; color: #64748b; margin-bottom: 12px; line-height: 1.5;">
+                    Lagre fremdriften din og få en personlig sikkerhetskode. Når du lagrer, låses navnet ditt til denne spilløkten og diplomet.
+                </div>
+                <div style="background: #f8fafc; padding: 10px 12px; border-radius: 8px; margin-bottom: 14px; font-size: 13px; font-weight: 700; color: #1e293b; border: 1px solid #e2e8f0;">
+                    Aktiv fremdrift: <span id="save-current-status" style="color: #2563eb;">-</span>
+                </div>
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 12px; font-weight: 800; color: #334155; margin-bottom: 4px;">Elevens fulle navn:</label>
+                    <input type="text" id="save-player-name-input" class="save-input" placeholder="F.eks. Kari Nordmann" spellcheck="false" autocomplete="name">
+                    <div id="save-locked-notice" style="display: none; font-size: 12px; color: #2563eb; font-weight: 700; margin-top: 4px;">🔒 Navnet er allerede låst til denne økten.</div>
+                </div>
+                <button type="button" class="modal-close-btn" id="btn-generate-save-code" style="width: 100%; margin-top: 4px; margin-bottom: 12px;">🔑 Generer lagringskode</button>
+                
+                <div id="save-code-result" style="display: none; background: #0f172a; color: #f8fafc; padding: 14px; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 4px;">Din personlige lagringskode:</div>
+                    <div id="save-code-text" style="font-family: monospace; font-size: 22px; font-weight: 800; letter-spacing: 1.5px; color: #38bdf8; margin-bottom: 10px;">MG-L...</div>
+                    <button type="button" class="help-btn" id="btn-copy-save-code" style="background: #1e293b; color: #4ade80; border-color: #334155; font-size: 12px; padding: 6px 14px;">📋 Kopier kode</button>
+                    <div style="font-size: 11px; color: #94a3b8; margin-top: 8px; line-height: 1.4;">
+                        💡 Ta vare på koden og navnet ditt. Du trenger begge for å fortsette senere på en hvilken som helst PC eller mobil.
+                    </div>
+                </div>
+
+                <div id="save-active-user-box" style="display: none; margin-top: 14px; padding-top: 12px; border-top: 1px dashed #cbd5e1;">
+                    <div style="font-size: 12px; color: #64748b; margin-bottom: 8px; line-height: 1.4;">
+                        Vil en annen elev overta denne PC-en, eller vil du starte helt forfra fra Nivå 1?
+                    </div>
+                    <button type="button" class="btn-logout-modal" id="btn-logout-modal">🚪 Logg ut og start fra scratch</button>
+                </div>
+            </div>
+
+            <!-- FANE 2: LAST INN -->
+            <div id="load-tab-content" class="save-tab-content" style="display: none;">
+                <div style="font-size: 13px; color: #64748b; margin-bottom: 12px; line-height: 1.5;">
+                    Skriv inn navnet ditt og lagringskoden du fikk for å fortsette der du slapp:
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 12px; font-weight: 800; color: #334155; margin-bottom: 4px;">Elevens fulle navn:</label>
+                    <input type="text" id="load-player-name-input" class="save-input" placeholder="Navnet du brukte da du lagret..." spellcheck="false" autocomplete="name">
+                </div>
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 12px; font-weight: 800; color: #334155; margin-bottom: 4px;">Lagringskode (Hash):</label>
+                    <input type="text" id="load-code-input" class="save-input" placeholder="F.eks. MG-L2-..." style="font-family: monospace; text-transform: uppercase;" spellcheck="false">
+                </div>
+                <div id="load-feedback" style="display: none; font-size: 12px; font-weight: 700; margin-bottom: 10px;"></div>
+                <button type="button" class="modal-close-btn" id="btn-execute-load" style="width: 100%; margin-top: 4px;">🚀 Hent spill og fortsett</button>
+            </div>
+            
+            <button type="button" class="modal-close-btn" id="save-load-close-btn" style="margin-top: 14px; background: #e2e8f0; color: #1e293b;">Lukk</button>
+        </div>
+    </div>
+
     <!-- Diplom for fullført milliGame -->
     <div class="diploma-overlay" id="diploma-overlay">
         <div class="diploma-info-banner no-print">
             📄 <strong>SI-Mester!</strong> Skriv navnet ditt under og klikk <strong>«Skriv ut / Lagre som PDF»</strong> for å vise at du mestrer prefikser og enhetskonvertering!
         </div>
         <div class="diploma-card">
+            <div class="diploma-watermark" id="diploma-watermark">★ MODUS-K ★</div>
             <div class="diploma-seal">⚡ 🎓 ⚡</div>
             <h2 class="diploma-title">MILLIGAME DIPLOM</h2>
             <div class="diploma-subtitle">Mester i SI-prefikser og Enhetskonvertering</div>
             <div class="diploma-award-to">TILDELT TIL:</div>
             <input type="text" class="diploma-name-input" id="student-name-input" placeholder="Skriv ditt navn her..." value="" autocomplete="name" spellcheck="false">
+            <div id="diploma-locked-badge" class="diploma-locked-badge" style="display:none;">🔒 Låst til lagret elev: <span id="diploma-locked-name"></span></div>
             <div class="diploma-praise">«Perfekt Presisjon!»</div>
             <p class="diploma-desc">
                 Har demonstrert full mestring av metrisk enhetskonvertering og ingeniørnotasjon innen elektroteknikk:
@@ -679,10 +814,11 @@
                     <span>Dato</span>
                 </div>
                 <div class="diploma-signature">
-                    <div class="signature-line">Ingve</div>
+                    <div class="signature-line" id="diploma-sign-name">Ingve Bjørnå</div>
                     <span>Lærer / Elektro-Ingeniør</span>
                 </div>
             </div>
+            <div class="diploma-serial" id="diploma-serial"></div>
         </div>
         <div class="diploma-buttons no-print">
             <button type="button" class="diploma-btn diploma-btn-print" onclick="window.print()">🖨️ Skriv ut / Lagre som PDF</button>
@@ -775,7 +911,10 @@
             currentProblemText: '',
             decimalPlaces: 0,
             isReviewing: false,
-            explanation: ''
+            explanation: '',
+            playerName: '',
+            isNameLocked: false,
+            cheatUsed: false
         };
 
         function escapeHtml(str) {
@@ -988,6 +1127,12 @@
         function handleSubmission(e) {
             if (e) e.preventDefault();
 
+            // Sikkerhetssjekk: Hvis lærermenyen er aktiv når eleven leverer svar, regnes det som juks
+            const cheatPanelEl = document.getElementById('cheat-panel');
+            if (cheatPanelEl && cheatPanelEl.classList.contains('active')) {
+                markCheatUsed();
+            }
+
             const inputElement = document.getElementById('answer-input');
             const submitBtn = document.getElementById('submit-btn');
             const feedbackElement = document.getElementById('feedback');
@@ -1017,6 +1162,7 @@
                     document.getElementById('streak').textContent = gameState.streak;
                     feedbackElement.className = 'feedback correct';
                     feedbackElement.textContent = '🏆 GRATULERER! Du er en ekte SI-Mester! 🎆';
+                    saveToLocalStorage();
                     launchFireworks(3000, () => {
                         showDiploma();
                     });
@@ -1027,6 +1173,7 @@
                 if (gameState.streak >= lvlMeta.targetStreak && gameState.level < LEVEL_META.length) {
                     gameState.level++;
                     gameState.streak = 0;
+                    saveToLocalStorage();
                     showHelpModal(gameState.level);
                 }
 
@@ -1229,17 +1376,264 @@
             }, durationMs);
         }
 
+        // ==========================================
+        // LAGRE / LAST SPILL LOGIKK (HASH & NAVNELÅS)
+        // ==========================================
+        function generateGameHash(name, level, cheatUsed = false) {
+            const cleanName = (name || "").trim().toLowerCase().replace(/\s+/g, ' ');
+            const salt = cheatUsed ? "milliGame_Gamify_2026_Salt_Cheat_LK20" : "milliGame_Gamify_2026_Salt_LK20";
+            const str = `${cleanName}|lvl:${level}|${salt}`;
+
+            let h1 = 0x811c9dc5;
+            for (let i = 0; i < str.length; i++) {
+                h1 ^= str.charCodeAt(i);
+                h1 = Math.imul(h1, 0x01000193);
+            }
+            let h2 = 5381;
+            for (let i = str.length - 1; i >= 0; i--) {
+                h2 = ((h2 << 5) + h2) ^ str.charCodeAt(i);
+            }
+
+            const hex1 = (h1 >>> 0).toString(16).toUpperCase().padStart(8, '0');
+            const hex2 = (h2 >>> 0).toString(16).toUpperCase().padStart(8, '0');
+            const flagTag = cheatUsed ? 'K' : '';
+            return `MG-L${level}${flagTag}-${hex1.substring(0, 4)}${hex2.substring(0, 4)}`;
+        }
+
+        function validateGameCode(name, inputCode) {
+            const cleanName = (name || "").trim();
+            const cleanCode = (inputCode || "").trim().toUpperCase().replace(/\s+/g, '');
+            if (!cleanName || !cleanCode) return null;
+
+            for (let lvl = 1; lvl <= LEVEL_META.length; lvl++) {
+                for (const ch of [false, true]) {
+                    const expected = generateGameHash(cleanName, lvl, ch);
+                    if (expected === cleanCode) {
+                        return { level: lvl, name: cleanName, cheatUsed: ch };
+                    }
+                }
+            }
+            return null;
+        }
+
+        function updatePlayerStatusUI() {
+            const tag = document.getElementById('player-status-tag');
+            const nameSpan = document.getElementById('player-status-name');
+            if (tag && nameSpan) {
+                if (gameState.isNameLocked && gameState.playerName) {
+                    tag.style.display = 'inline-flex';
+                    nameSpan.textContent = gameState.playerName;
+                } else {
+                    tag.style.display = 'none';
+                }
+            }
+        }
+
+        function saveToLocalStorage() {
+            try {
+                if (gameState.isNameLocked && gameState.playerName) {
+                    const saveObj = {
+                        playerName: gameState.playerName,
+                        level: gameState.level,
+                        code: generateGameHash(gameState.playerName, gameState.level, !!gameState.cheatUsed),
+                        cheatUsed: !!gameState.cheatUsed,
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem('milliGame_save', JSON.stringify(saveObj));
+                }
+            } catch (e) {}
+        }
+
+        function updateDiplomaWatermark() {
+            const watermark = document.getElementById("diploma-watermark");
+            const serial = document.getElementById("diploma-serial");
+            const signName = document.getElementById("diploma-sign-name");
+            const nameInput = document.getElementById("student-name-input");
+            const dateSpan = document.getElementById("diploma-date");
+            
+            const pName = (gameState.playerName || (nameInput ? nameInput.value : "") || "elev").trim().toLowerCase();
+            let chk = 0;
+            for (let i = 0; i < pName.length; i++) chk = (chk * 31 + pName.charCodeAt(i)) & 0xffff;
+            const hexChk = (chk >>> 0).toString(16).toUpperCase().padStart(4, '0');
+
+            if (gameState.cheatUsed) {
+                if (watermark) watermark.classList.add("active");
+                if (serial) serial.textContent = `Sikkerhets-ID: MG-2026-K${hexChk}`;
+                if (dateSpan && !dateSpan.textContent.endsWith("·")) {
+                    dateSpan.textContent = dateSpan.textContent.replace(/\s*·?$/, "") + " ·";
+                }
+                if (signName) signName.innerHTML = `Ingve Bjørnå<span style="font-size:9px; color:#d97706; margin-left:3px; vertical-align:super;">*</span>`;
+            } else {
+                if (watermark) watermark.classList.remove("active");
+                if (serial) serial.textContent = `Sikkerhets-ID: MG-2026-V${hexChk}`;
+                if (dateSpan) dateSpan.textContent = dateSpan.textContent.replace(/\s*·?$/, "");
+                if (signName) signName.textContent = "Ingve Bjørnå";
+            }
+        }
+
+        function markCheatUsed() {
+            gameState.cheatUsed = true;
+            saveToLocalStorage();
+            updateDiplomaWatermark();
+        }
+
         function showDiploma() {
             const now = new Date();
             const dateStr = now.toLocaleDateString('no-NO', { year: 'numeric', month: 'long', day: 'numeric' });
             document.getElementById('diploma-date').textContent = dateStr;
+
+            const nameInput = document.getElementById('student-name-input');
+            const lockedBadge = document.getElementById('diploma-locked-badge');
+            const lockedName = document.getElementById('diploma-locked-name');
+
+            if (gameState.isNameLocked && gameState.playerName) {
+                nameInput.value = gameState.playerName;
+                nameInput.readOnly = true;
+                nameInput.style.backgroundColor = '#f8fafc';
+                nameInput.style.color = '#1e293b';
+                nameInput.style.cursor = 'default';
+                if (lockedBadge) lockedBadge.style.display = 'inline-flex';
+                if (lockedName) lockedName.textContent = gameState.playerName;
+            } else {
+                nameInput.readOnly = false;
+                nameInput.style.backgroundColor = 'transparent';
+                nameInput.style.color = '';
+                nameInput.style.cursor = 'text';
+                if (lockedBadge) lockedBadge.style.display = 'none';
+                nameInput.focus();
+            }
+
+            updateDiplomaWatermark();
             document.getElementById('diploma-overlay').classList.add('active');
-            document.getElementById('student-name-input').focus();
         }
 
         function closeDiploma() {
             document.getElementById('diploma-overlay').classList.remove('active');
             document.getElementById('answer-input').focus();
+        }
+
+        function openSaveLoadModal(defaultTab = 'save') {
+            const modal = document.getElementById('save-load-modal');
+            const statusSpan = document.getElementById('save-current-status');
+            const nameInput = document.getElementById('save-player-name-input');
+            const lockedNotice = document.getElementById('save-locked-notice');
+            const codeResult = document.getElementById('save-code-result');
+            const codeText = document.getElementById('save-code-text');
+            const activeBox = document.getElementById('save-active-user-box');
+
+            statusSpan.textContent = `Nivå ${gameState.level}: ${LEVEL_META[gameState.level - 1].name}`;
+
+            if (gameState.isNameLocked && gameState.playerName) {
+                nameInput.value = gameState.playerName;
+                nameInput.readOnly = true;
+                nameInput.style.backgroundColor = '#f1f5f9';
+                lockedNotice.style.display = 'block';
+
+                const code = generateGameHash(gameState.playerName, gameState.level, !!gameState.cheatUsed);
+                codeText.textContent = code;
+                codeResult.style.display = 'block';
+                if (activeBox) activeBox.style.display = 'block';
+            } else {
+                nameInput.readOnly = false;
+                nameInput.style.backgroundColor = '#ffffff';
+                lockedNotice.style.display = 'none';
+                codeResult.style.display = 'none';
+                if (activeBox) activeBox.style.display = 'none';
+            }
+
+            const loadFeedback = document.getElementById('load-feedback');
+            if (loadFeedback) loadFeedback.style.display = 'none';
+
+            switchSaveTab(defaultTab);
+            modal.classList.add('active');
+        }
+
+        function switchSaveTab(tab) {
+            const tabSave = document.getElementById('tab-btn-save');
+            const tabLoad = document.getElementById('tab-btn-load');
+            const contentSave = document.getElementById('save-tab-content');
+            const contentLoad = document.getElementById('load-tab-content');
+
+            if (tab === 'save') {
+                tabSave.classList.add('active');
+                tabLoad.classList.remove('active');
+                contentSave.style.display = 'block';
+                contentLoad.style.display = 'none';
+            } else {
+                tabLoad.classList.add('active');
+                tabSave.classList.remove('active');
+                contentLoad.style.display = 'block';
+                contentSave.style.display = 'none';
+
+                try {
+                    const raw = localStorage.getItem('milliGame_save');
+                    if (raw) {
+                        const data = JSON.parse(raw);
+                        const loadName = document.getElementById('load-player-name-input');
+                        const loadCode = document.getElementById('load-code-input');
+                        if (!loadName.value && data.playerName) loadName.value = data.playerName;
+                        if (!loadCode.value && data.code) loadCode.value = data.code;
+                    }
+                } catch(e) {}
+            }
+        }
+
+        function logoutPlayer() {
+            const confirmLogout = confirm(
+                "Er du sikker på at du vil logge ut og starte forfra?\n\n" +
+                "• All lokal fremgang på denne enheten blir slettet.\n" +
+                "• Navnet låses opp slik at en ny elev kan spille.\n\n" +
+                "(Har du tatt vare på lagringskoden din, kan du alltids laste den inn igjen senere under «Lagre / Hent».)"
+            );
+            if (!confirmLogout) return;
+
+            try {
+                localStorage.removeItem('milliGame_save');
+            } catch(e) {}
+
+            gameState.playerName = "";
+            gameState.isNameLocked = false;
+            gameState.cheatUsed = false;
+            gameState.streak = 0;
+            gameState.consecutiveWrong = 0;
+            gameState.isReviewing = false;
+            gameState.level = 1;
+
+            const saveNameInput = document.getElementById('save-player-name-input');
+            if (saveNameInput) {
+                saveNameInput.value = "";
+                saveNameInput.readOnly = false;
+                saveNameInput.style.backgroundColor = "#ffffff";
+            }
+            const loadNameInput = document.getElementById('load-player-name-input');
+            if (loadNameInput) loadNameInput.value = "";
+            const loadCodeInput = document.getElementById('load-code-input');
+            if (loadCodeInput) loadCodeInput.value = "";
+            const lockedNotice = document.getElementById('save-locked-notice');
+            if (lockedNotice) lockedNotice.style.display = "none";
+            const codeResult = document.getElementById('save-code-result');
+            if (codeResult) codeResult.style.display = "none";
+            const activeBox = document.getElementById('save-active-user-box');
+            if (activeBox) activeBox.style.display = "none";
+
+            const dipNameInput = document.getElementById('student-name-input');
+            if (dipNameInput) {
+                dipNameInput.value = "";
+                dipNameInput.readOnly = false;
+                dipNameInput.style.backgroundColor = "transparent";
+                dipNameInput.style.color = "";
+                dipNameInput.style.cursor = "text";
+            }
+            const dipBadge = document.getElementById('diploma-locked-badge');
+            if (dipBadge) dipBadge.style.display = "none";
+
+            const modal = document.getElementById('save-load-modal');
+            if (modal) modal.classList.remove('active');
+
+            updatePlayerStatusUI();
+            updateDiplomaWatermark();
+            generateProblem();
+            showHelpModal(1);
         }
 
         // ==========================================
@@ -1248,7 +1642,12 @@
         function toggleCheatMenu() {
             const panel = document.getElementById('cheat-panel');
             panel.classList.toggle('active');
-            if (panel.classList.contains('active')) updateCheatPanel();
+            if (panel.classList.contains('active')) {
+                if (gameState.level > 1 || gameState.streak > 0) {
+                    markCheatUsed();
+                }
+                updateCheatPanel();
+            }
         }
 
         function updateCheatPanel() {
@@ -1286,7 +1685,141 @@
             });
         });
 
-        // Hemmelig lærermeny: 7 klikk eller Ctrl+Alt+K
+        // Lagre / Hent modal hendelser
+        document.getElementById('save-load-btn').addEventListener('click', () => openSaveLoadModal('save'));
+        document.getElementById('save-load-close-btn').addEventListener('click', () => document.getElementById('save-load-modal').classList.remove('active'));
+        document.getElementById('save-load-close-x').addEventListener('click', () => document.getElementById('save-load-modal').classList.remove('active'));
+        document.getElementById('save-load-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'save-load-modal') document.getElementById('save-load-modal').classList.remove('active');
+        });
+        document.getElementById('tab-btn-save').addEventListener('click', () => switchSaveTab('save'));
+        document.getElementById('tab-btn-load').addEventListener('click', () => switchSaveTab('load'));
+
+        document.getElementById('btn-generate-save-code').addEventListener('click', () => {
+            const input = document.getElementById('save-player-name-input');
+            const name = input.value.trim();
+            if (!name || name.length < 2) {
+                alert('Vennligst skriv inn ditt fulle navn først!');
+                input.focus();
+                return;
+            }
+
+            gameState.playerName = name;
+            gameState.isNameLocked = true;
+            updatePlayerStatusUI();
+
+            input.readOnly = true;
+            input.style.backgroundColor = '#f1f5f9';
+            document.getElementById('save-locked-notice').style.display = 'block';
+
+            const code = generateGameHash(name, gameState.level, !!gameState.cheatUsed);
+            document.getElementById('save-code-text').textContent = code;
+            document.getElementById('save-code-result').style.display = 'block';
+            const activeBox = document.getElementById('save-active-user-box');
+            if (activeBox) activeBox.style.display = 'block';
+            saveToLocalStorage();
+        });
+
+        document.getElementById('btn-copy-save-code').addEventListener('click', () => {
+            const code = document.getElementById('save-code-text').textContent;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code);
+            } else {
+                const ta = document.createElement('textarea');
+                ta.value = code;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+            }
+            const copyBtn = document.getElementById('btn-copy-save-code');
+            const origText = copyBtn.textContent;
+            copyBtn.textContent = '✅ Kopiert!';
+            setTimeout(() => { copyBtn.textContent = origText; }, 2000);
+        });
+
+        document.getElementById('btn-execute-load').addEventListener('click', () => {
+            const name = document.getElementById('load-player-name-input').value.trim();
+            const code = document.getElementById('load-code-input').value.trim();
+            const fb = document.getElementById('load-feedback');
+
+            if (!name) {
+                fb.style.color = '#ef4444';
+                fb.textContent = '⚠️ Vennligst fyll inn navnet ditt.';
+                fb.style.display = 'block';
+                return;
+            }
+            if (!code) {
+                fb.style.color = '#ef4444';
+                fb.textContent = '⚠️ Vennligst fyll inn lagringskoden din.';
+                fb.style.display = 'block';
+                return;
+            }
+
+            const result = validateGameCode(name, code);
+            if (result) {
+                gameState.playerName = result.name;
+                gameState.isNameLocked = true;
+                if (result.cheatUsed) {
+                    gameState.cheatUsed = true;
+                }
+
+                try {
+                    const raw = localStorage.getItem('milliGame_save');
+                    if (raw) {
+                        const data = JSON.parse(raw);
+                        if (data && data.playerName && data.playerName.toLowerCase() === name.toLowerCase()) {
+                            if (data.cheatUsed) gameState.cheatUsed = true;
+                        }
+                    }
+                } catch(e) {}
+
+                fb.style.color = '#059669';
+                fb.textContent = `✅ Velkommen tilbake, ${result.name}! Laster inn Nivå ${result.level}...`;
+                fb.style.display = 'block';
+
+                gameState.level = result.level;
+                gameState.streak = 0;
+                gameState.consecutiveWrong = 0;
+                gameState.isReviewing = false;
+
+                updatePlayerStatusUI();
+                saveToLocalStorage();
+                generateProblem();
+                showHelpModal(gameState.level);
+
+                setTimeout(() => {
+                    document.getElementById('save-load-modal').classList.remove('active');
+                    fb.style.display = 'none';
+                }, 1000);
+            } else {
+                fb.style.color = '#ef4444';
+                fb.textContent = `❌ Ugyldig lagringskode for "${name}". Kontroller at navnet og koden er skrevet nøyaktig slik som da du lagret.`;
+                fb.style.display = 'block';
+            }
+        });
+
+        const btnLogoutTag = document.getElementById('btn-logout-tag');
+        if (btnLogoutTag) btnLogoutTag.addEventListener('click', (e) => { e.stopPropagation(); logoutPlayer(); });
+        const btnLogoutModal = document.getElementById('btn-logout-modal');
+        if (btnLogoutModal) btnLogoutModal.addEventListener('click', () => logoutPlayer());
+
+        const studentNameInput = document.getElementById('student-name-input');
+        if (studentNameInput) {
+            studentNameInput.addEventListener('input', () => {
+                updateDiplomaWatermark();
+            });
+        }
+
+        window.addEventListener('beforeprint', () => {
+            if (gameState.isNameLocked && gameState.playerName) {
+                const inp = document.getElementById('student-name-input');
+                if (inp) inp.value = gameState.playerName;
+                updateDiplomaWatermark();
+            }
+        });
+
+        // Hemmelig lærermeny: 7 klikk eller Ctrl+Alt+K / Ctrl+Shift+K
         let triggerClicks = 0;
         let triggerTimer = null;
         document.getElementById('secret-trigger-area').addEventListener('click', () => {
@@ -1300,14 +1833,20 @@
         });
 
         document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.altKey && (e.key === 'k' || e.key === 'K')) {
+            if (((e.ctrlKey && e.altKey) || (e.ctrlKey && e.shiftKey)) && (e.key === 'k' || e.key === 'K')) {
                 e.preventDefault();
                 toggleCheatMenu();
             }
             if (e.key === 'Escape') {
-                if (document.getElementById('modal-overlay').classList.contains('active')) closeModal();
-                if (document.getElementById('diploma-overlay').classList.contains('active')) closeDiploma();
-                if (document.getElementById('cheat-panel').classList.contains('active')) toggleCheatMenu();
+                if (document.getElementById('save-load-modal') && document.getElementById('save-load-modal').classList.contains('active')) {
+                    document.getElementById('save-load-modal').classList.remove('active');
+                } else if (document.getElementById('modal-overlay').classList.contains('active')) {
+                    closeModal();
+                } else if (document.getElementById('diploma-overlay').classList.contains('active')) {
+                    closeDiploma();
+                } else if (document.getElementById('cheat-panel').classList.contains('active')) {
+                    toggleCheatMenu();
+                }
             }
         });
 
@@ -1316,6 +1855,13 @@
         document.querySelectorAll('.cheat-lvl-btn[data-lvl]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const lvl = parseInt(btn.getAttribute('data-lvl'));
+                if (lvl === 1) {
+                    gameState.cheatUsed = false;
+                    saveToLocalStorage();
+                    updateDiplomaWatermark();
+                } else {
+                    markCheatUsed();
+                }
                 gameState.level = lvl;
                 gameState.streak = 0;
                 gameState.isReviewing = false;
@@ -1329,11 +1875,13 @@
         });
 
         document.getElementById('cheat-fill-btn').addEventListener('click', () => {
+            markCheatUsed();
             document.getElementById('answer-input').value = gameState.expectedAnswer;
             document.getElementById('answer-input').focus();
         });
 
         document.getElementById('cheat-skip-btn').addEventListener('click', () => {
+            markCheatUsed();
             gameState.isReviewing = false;
             document.getElementById('feedback').innerHTML = '';
             document.getElementById('submit-btn').textContent = 'Sjekk svar';
@@ -1344,14 +1892,45 @@
         });
 
         document.getElementById('cheat-streak-btn').addEventListener('click', () => {
+            markCheatUsed();
             gameState.streak++;
             document.getElementById('streak').textContent = gameState.streak;
+            const lvlMeta = LEVEL_META[gameState.level - 1];
+            if (gameState.level === 4 && gameState.streak >= lvlMeta.targetStreak) {
+                launchFireworks(3000, () => showDiploma());
+            } else if (gameState.streak >= lvlMeta.targetStreak && gameState.level < LEVEL_META.length) {
+                gameState.level++;
+                gameState.streak = 0;
+                showHelpModal(gameState.level);
+                generateProblem();
+            }
             updateCheatPanel();
         });
 
         document.getElementById('cheat-diploma-btn').addEventListener('click', () => {
+            markCheatUsed();
             showDiploma();
         });
+
+        // Sjekk om det finnes en aktiv lagret økt i localStorage ved oppstart
+        try {
+            const raw = localStorage.getItem('milliGame_save');
+            if (raw) {
+                const data = JSON.parse(raw);
+                if (data && data.playerName && data.code) {
+                    const res = validateGameCode(data.playerName, data.code);
+                    if (res) {
+                        gameState.playerName = res.name;
+                        gameState.isNameLocked = true;
+                        if (res.cheatUsed || data.cheatUsed) {
+                            gameState.cheatUsed = true;
+                        }
+                        gameState.level = res.level;
+                        updatePlayerStatusUI();
+                    }
+                }
+            }
+        } catch(e) {}
 
         // Start spillet ved innlasting
         generateProblem();

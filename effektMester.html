@@ -364,6 +364,91 @@
             font-size: 15px;
         }
 
+        /* INTERAKTIVE FAGORDFORKLARINGER / TOOLTIPS */
+        .term-hint {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            border-bottom: 1.5px dotted var(--primary);
+            font-weight: 600;
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.15s, border-color 0.15s;
+        }
+
+        .term-hint:hover,
+        .term-hint:focus,
+        .term-hint.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary-dark);
+            outline: none;
+        }
+
+        .term-hint::after {
+            content: " ⓘ";
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--primary);
+            opacity: 0.85;
+            vertical-align: super;
+            margin-left: 1px;
+        }
+
+        .term-hint .tooltip-card {
+            visibility: hidden;
+            opacity: 0;
+            width: 280px;
+            max-width: 85vw;
+            background: #0f172a;
+            color: #f8fafc;
+            text-align: left;
+            border-radius: 8px;
+            padding: 10px 13px;
+            position: absolute;
+            z-index: 9999;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) translateY(4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1.45;
+            pointer-events: none;
+            transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+            border: 1px solid #334155;
+            white-space: normal;
+        }
+
+        .term-hint .tooltip-card::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -6px;
+            border-width: 6px;
+            border-style: solid;
+            border-color: #0f172a transparent transparent transparent;
+        }
+
+        .term-hint .tooltip-card strong {
+            color: #38bdf8;
+            display: block;
+            font-size: 12.5px;
+            font-weight: 800;
+            margin-bottom: 4px;
+            border-bottom: 1px solid #1e293b;
+            padding-bottom: 3px;
+        }
+
+        .term-hint:hover .tooltip-card,
+        .term-hint:focus .tooltip-card,
+        .term-hint.active .tooltip-card {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+
         .theory-resources-box {
             margin-top: 14px;
             padding-top: 12px;
@@ -934,7 +1019,43 @@
             text-align: center;
             box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
             position: relative;
+            overflow: hidden;
             color: #292524;
+        }
+
+        .diploma-watermark {
+            position: absolute;
+            top: 52%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-24deg);
+            font-size: 50px;
+            font-weight: 900;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            letter-spacing: 10px;
+            color: rgba(180, 83, 9, 0.085);
+            border: 5px solid rgba(180, 83, 9, 0.085);
+            padding: 8px 30px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+            z-index: 1;
+            display: none;
+        }
+
+        .diploma-watermark.active {
+            display: block;
+        }
+
+        .diploma-serial {
+            margin-top: 16px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #a8a29e;
+            letter-spacing: 1.2px;
+            font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+            user-select: none;
         }
 
         .diploma-seal {
@@ -1332,6 +1453,10 @@
             .diploma-name-input {
                 border-bottom: none !important;
             }
+            .diploma-watermark, .diploma-serial {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
         }
 
         @keyframes fadeIn {
@@ -1574,6 +1699,7 @@
 <!-- DIPLOM OVERLAY -->
 <div class="diploma-overlay" id="diplomaOverlay">
     <div class="diploma-container">
+        <div class="diploma-watermark" id="diplomaWatermark">★ MODUS-K ★</div>
         <div class="diploma-seal">⚡ 🏅 ⚡</div>
         <h2 class="diploma-header" id="diplomaHeader">DIPLOM</h2>
         <div class="diploma-sub" id="diplomaSub">Sertifisert Effekt-Mester</div>
@@ -1590,10 +1716,11 @@
                 <span>Dato</span>
             </div>
             <div class="signature-item">
-                <span class="signature-line">Ingve Bjørnå</span>
+                <span class="signature-line" id="diplomaSignName">Ingve Bjørnå</span>
                 <span>Elektroingeniør</span>
             </div>
         </div>
+        <div class="diploma-serial" id="diplomaSerial"></div>
         <div class="diploma-actions">
             <button type="button" class="diploma-btn diploma-btn-print" onclick="window.print()">🖨️ Skriv ut / Lagre som PDF</button>
             <button type="button" class="diploma-btn" id="diplomaContinueVg2Btn" style="display: none; background: #2563eb; color: white;">Fortsett til Vg2 (Nivå 4–6) 🚀</button>
@@ -1734,11 +1861,104 @@ const GameState = {
     playerName: "",
     isNameLocked: false,
     hintUsed: false,
+    cheatUsed: false,
     completedLevels: new Set(),
-    levelStreaks: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 }
+    levelStreaks: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
+    levelQuestionDecks: { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] },
+    lastTypeByLevel: { 1: null, 2: null, 3: null, 4: null, 5: null, 6: null }
 };
 
-// 3. NIVÅKONFIGURASJONER OG TEORI
+// 3. ORDBOK OVER ELEKTRO-FAGBEGREPER (INTERAKTIVE INFOBOKSER)
+const ELECTRICAL_GLOSSARY = {
+    "straffetariffer": {
+        title: "Straffetariffer (Reaktiv avgift)",
+        desc: "Ekstra gebyr som nettselskapet fakturerer industrikunder dersom anlegget har dårlig effektfaktor (cos φ < 0,95). Formålet er å motivere kunden til å fasekompensere så strømnettet ikke overbelastes."
+    },
+    "kondensatorbatteri": {
+        title: "Kondensatorbatteri",
+        desc: "Flere sammenkoblede kraftkondensatorer som kobles i parallell med induktive laster for å levere kapasitiv reaktiv effekt (Qc). Dette opphever motorers induktive reaktive effekt og hever cos φ mot 1,0."
+    },
+    "induserer": {
+        title: "Induksjon & Selvinduksjon",
+        desc: "Når vekselstrømmen endrer seg i en spole, skapes et varierende magnetfelt. Dette lager (induserer) en motspenning (Lenz' lov) som bremser strømmen og gjør at den henger etter spenningen."
+    },
+    "selvinduksjon": {
+        title: "Selvinduksjon",
+        desc: "Når en spole lager en motspenning i seg selv idet strømmen gjennom den endrer seg. Dette motsetter seg alltid endringen i strømstyrken."
+    },
+    "motspenning": {
+        title: "Motspenning (Indusert spenning)",
+        desc: "En indusert elektromotorisk spenning som virker i motretning av den påtrykte spenningen ifølge Lenz' lov. Dette forsinker strømmen i spoler."
+    },
+    "lenz_lov": {
+        title: "Lenz' lov",
+        desc: "En fysisk naturlov: En indusert spenning eller strøm har alltid en slik retning at den motvirker årsaken (endringen i magnetfeltet) som skapte den."
+    },
+    "linjestørrelser": {
+        title: "Linjestørrelser vs. Fasestørrelser",
+        desc: "I et 3-faset anlegg er linjespenning (U = 400 V) målt mellom to faseledere, og linjestrøm (I) er strømmen i hver hovedkabel. Fasespenning (230 V) måles mellom fase og N-leder (U_linje = √3 · U_fase)."
+    },
+    "linjestrøm": {
+        title: "Linjestrøm (I)",
+        desc: "Strømmen som flyter i hver av de tre fasekablene fra fordelingstransformatoren til motoren. Formel: I = P₁ / (√3 · U · cos φ)."
+    },
+    "effektivverdi": {
+        title: "Effektivverdi (U_eff / RMS)",
+        desc: "Den verdien av en vekselspenning som gir nøyaktig samme varmeeffekt i en motstand som tilsvarende likespenning (DC). 230 V i stikkontakten er effektivverdien (toppverdien er ca. 325 V)."
+    },
+    "toppverdi": {
+        title: "Toppverdi (U_maks / Amplitude)",
+        desc: "Den maksimale spenningstoppen vekselspenningen når i løpet av en svingning. Formel: U_maks = U_eff · √2 ≈ 1,414 · U_eff."
+    },
+    "faseforskyvning": {
+        title: "Faseforskyvning (φ)",
+        desc: "Tidsforsinkelsen mellom spennings- og strømkurven målt i grader (°). Ved 50 Hz tilsvarer 20 ms én hel periode (360°), dvs. 1 ms = 18°."
+    },
+    "retureffekt": {
+        title: "Retureffekt (Negativ effekt)",
+        desc: "Oppstår når spenning og strøm har ulikt fortegn (u > 0 og i < 0). Da kollapser spolens magnetfelt og pumper energi i retur tilbake til strømnettet i stedet for å forbrukes."
+    },
+    "aktiv_effekt": {
+        title: "Aktiv effekt (P / P_t)",
+        desc: "Ekte effekt målt i Watt (W) som faktisk omdannes til nyttig arbeid: varme i en panelovn, lys i en lampe eller mekanisk rotasjon på en motoraksel."
+    },
+    "reaktiv_effekt": {
+        title: "Reaktiv effekt (Q)",
+        desc: "Magnetiseringsenergi målt i var (voltampere reaktiv). Den pendler fram og tilbake i kablene 100 ganger per sekund for å bygge opp og bryte ned magnetfelt, uten å utføre nyttig arbeid."
+    },
+    "tilsynelatende_effekt": {
+        title: "Tilsynelatende effekt (S)",
+        desc: "Den samlede belastningen målt i Voltampere (VA) gitt ved S = U · I eller hypotenusen S = √(P² + Q²). Kabler, sikringer og transformatorer må dimensjoneres for hele S."
+    },
+    "effektfaktor": {
+        title: "Effektfaktor (cos φ)",
+        desc: "Forholdet mellom aktiv og tilsynelatende effekt (cos φ = P / S). Viser hvor stor andel av strømmen som gjør nyttig arbeid. Nettleverandører krever normalt cos φ ≥ 0,95."
+    },
+    "virkningsgrad": {
+        title: "Virkningsgrad (η)",
+        desc: "Hvor stor prosentandel av den tilførte elektriske effekten (P₁) motoren klarer å levere som mekanisk kraft på akslingen (P₂). Formel: η% = (P₂ / P₁) · 100 %."
+    },
+    "akseleffekt": {
+        title: "Akseleffekt (P₂)",
+        desc: "Den mekaniske effekten motoren yter ut på akslingen. Det er alltid denne effekten som er oppgitt i kW på motorens merkeskilt!"
+    },
+    "overkompensering": {
+        title: "Overkompensering",
+        desc: "Når man kobler til for mye kondensatoreffekt (Qc > QL). Kretsen blir kapasitiv, strømmen skyter foran spenningen, og kabelstrømmen stiger igjen, med fare for resonans og overspenninger."
+    },
+    "fasekompensering": {
+        title: "Fasekompensering",
+        desc: "Å koble kondensatorer i parallell med induktive laster for å levere den nødvendige reaktive magnetiseringsstrømmen lokalt, slik at strømnettet og transformatoren avlastes."
+    }
+};
+
+function getTermTooltipHtml(key, displayText) {
+    const item = ELECTRICAL_GLOSSARY[key];
+    if (!item) return displayText;
+    return `<span class="term-hint" tabindex="0" data-term="${key}">${displayText}<span class="tooltip-card"><strong>${item.title}</strong>${item.desc}</span></span>`;
+}
+
+// 4. NIVÅKONFIGURASJONER OG TEORI
 const LEVEL_CONFIGS = {
     1: {
         title: "Nivå 1: Ohmsk motstand & Vekselspenning",
@@ -1746,16 +1966,16 @@ const LEVEL_CONFIGS = {
         defaultUnit: "W",
         theoryHtml: `
             <p><strong>Ohmsk motstand (varmeovn, glødetråd):</strong> I en ren motstand følger spenning og strøm hverandre i perfekt takt. Det er ingen tidsforsinkelse; spenning <em>U</em> og strøm <em>I</em> svinger i <em>hel fase</em> (<em>φ</em> = 0°).</p>
-            <p><strong>Hvorfor kalles det «Effektivverdi» (<em>U</em><sub>eff</sub>)?</strong> Vekselspenningen i stikkontakten svinger opp og ned 50 ganger i sekundet og er 0 V hele 100 ganger per sekund! <strong>230 V</strong> er <em>effektivverdien</em> – det betyr at den gir nøyaktig samme varmeutvikling i en motstand som 230 V likespenning (DC) ville gjort.</p>
+            <p><strong>Hvorfor kalles det ${getTermTooltipHtml('effektivverdi', '«Effektivverdi» (<em>U</em><sub>eff</sub>)')}?</strong> Vekselspenningen i stikkontakten svinger opp og ned 50 ganger i sekundet og er 0 V hele 100 ganger per sekund! <strong>230 V</strong> er <em>effektivverdien</em> – det betyr at den gir nøyaktig samme varmeutvikling i en motstand som 230 V likespenning (DC) ville gjort.</p>
             <div class="theory-tip-box">
-                <strong>💡 Toppverdi vs. Effektivverdi:</strong> Fordi spenningen svinger, må toppverdien nå helt opp til <strong>ca. 325 V</strong> for å gi en gjennomsnittlig varmeeffekt tilsvarende 230 V!
+                <strong>💡 ${getTermTooltipHtml('toppverdi', 'Toppverdi')} vs. Effektivverdi:</strong> Fordi spenningen svinger, må toppverdien nå helt opp til <strong>ca. 325 V</strong> for å gi en gjennomsnittlig varmeeffekt tilsvarende 230 V!
             </div>
             <div class="formula-box">
-                <span class="formula-highlight">P = U · I &nbsp;|&nbsp; I = P / U &nbsp;|&nbsp; P = U² / R</span>
+                <span class="formula-highlight">P = U · I &nbsp;|&nbsp; I = P / U &nbsp;|&nbsp; R = U² / P</span>
                 <span>U<sub>eff</sub> = U<sub>maks</sub> / √2 ≈ U<sub>maks</sub> / 1,414 ≈ 0,707 · U<sub>maks</sub></span>
                 <span>U<sub>maks</sub> = U<sub>eff</sub> · √2 ≈ 1,414 · U<sub>eff</sub></span>
             </div>
-            <p style="margin-top:8px; font-size:12px; color: var(--text-muted);"><em>Merk:</em> For en ren ohmsk last blir 100 % av energien til nyttig aktiv effekt (<em>P</em>) i form av varme eller lys.</p>
+            <p style="margin-top:8px; font-size:12px; color: var(--text-muted);"><em>Merk:</em> For en ren ohmsk last blir 100 % av energien til nyttig ${getTermTooltipHtml('aktiv_effekt', 'aktiv effekt (<em>P</em>)')} i form av varme eller lys.</p>
         `,
         resources: [
             {
@@ -1777,14 +1997,15 @@ const LEVEL_CONFIGS = {
         badge: "Faseforskyvning & Retureffekt",
         defaultUnit: "°",
         theoryHtml: `
-            <p><strong>Selvinduksjon i spoler:</strong> Elektromotorer, transformatorer og spoler bygger opp magnetfelt. Når strømmen endrer seg, induserer spolen en motspenning (Lenz' lov) som bremser strømmen. Derfor henger strømmen <em>I</em> alltid etter spenningen <em>U</em>.</p>
-            <p><strong>Periodetid og fasevinkel ved 50 Hz:</strong> Nettfrekvensen i Norge er <em>f</em> = 50 Hz. Det betyr at én hel svingning (360°) varer <em>T</em> = 1/50 s = <strong>20 ms</strong>. Hvert millisekund tilsvarer derfor 360° / 20 ms = <strong>18°</strong>!</p>
+            <p><strong>${getTermTooltipHtml('selvinduksjon', 'Selvinduksjon i spoler')}:</strong> Elektromotorer, transformatorer og spoler bygger opp magnetfelt. Når strømmen endrer seg, ${getTermTooltipHtml('induserer', 'induserer')} spolen en ${getTermTooltipHtml('motspenning', 'motspenning')} (${getTermTooltipHtml('lenz_lov', 'Lenz\' lov')}) som bremser strømmen. Derfor henger strømmen <em>I</em> alltid etter spenningen <em>U</em>.</p>
+            <p><strong>Periodetid og ${getTermTooltipHtml('faseforskyvning', 'fasevinkel (<em>φ</em>)')} ved 50 Hz:</strong> Nettfrekvensen i Norge er <em>f</em> = 50 Hz. Det betyr at én hel svingning (360°) varer <em>T</em> = 1/50 s = <strong>20 ms</strong>. Hvert millisekund tilsvarer derfor 360° / 20 ms = <strong>18°</strong>!</p>
             <div class="formula-box">
                 <span class="formula-highlight">φ = (Δt / 20 ms) · 360° &nbsp;(Finn vinkel fra ms)</span>
                 <span>Δt = (φ / 360°) · 20 ms &nbsp;(Finn forsinkelse i ms)</span>
+                <span>Spole (induktiv): I henger etter U &nbsp;|&nbsp; Kondensator: I ligger foran U</span>
             </div>
             <div class="theory-tip-box danger">
-                <strong>⚡ Hva er retureffekt?</strong> Når spenningen har snudd til negativ mens strømmen fremdeles er positiv, blir effekten negativ: <em>p(t) = u(t) · i(t) &lt; 0</em>. Da kollapser magnetfeltet i spolen og sender energi <strong>i retur</strong> tilbake til transformatoren/nettet!
+                <strong>⚡ Hva er ${getTermTooltipHtml('retureffekt', 'retureffekt')}?</strong> Når spenningen har snudd til negativ mens strømmen fremdeles er positiv, blir effekten negativ: <em>p(t) = u(t) · i(t) &lt; 0</em>. Da kollapser magnetfeltet i spolen og sender energi <strong>i retur</strong> tilbake til transformatoren/nettet!
             </div>
         `,
         resources: [
@@ -1808,13 +2029,13 @@ const LEVEL_CONFIGS = {
         defaultUnit: "var / VA / W",
         theoryHtml: `
             <p>I en vekselstrømkrets med spoler oppstår tre forskjellige effekter. Fordi strøm og spenning er forskjøvet med 90°, danner de en <strong>rettvinklet trekant</strong> hvor effektene ikke kan summeres aritmetisk, men med <strong>Pytagoras</strong>:</p>
-            <p><strong>1. Aktiv effekt (<em>P</em><sub>t</sub>) i Watt (W):</strong> Ekte, nyttbart arbeid som faktisk blir til varme, lys eller mekanisk rotasjon.</p>
-            <p><strong>2. Reaktiv effekt (<em>Q</em>) i voltampere reaktiv (var):</strong> Magnetiseringsenergi som svinger fram og tilbake mellom kilden og spolen uten å utføre nyttig arbeid.</p>
-            <p><strong>3. Tilsynelatende effekt (<em>S</em>) i Voltampere (VA):</strong> Den totale belastningen (<em>S = U · I</em>) som nettet, transformatorene og kablene må dimensjoneres for.</p>
+            <p><strong>1. ${getTermTooltipHtml('aktiv_effekt', 'Aktiv effekt (<em>P</em><sub>t</sub>)')} i Watt (W):</strong> Ekte, nyttbart arbeid som faktisk blir til varme, lys eller mekanisk rotasjon.</p>
+            <p><strong>2. ${getTermTooltipHtml('reaktiv_effekt', 'Reaktiv effekt (<em>Q</em>)')} i voltampere reaktiv (var):</strong> Magnetiseringsenergi som svinger fram og tilbake mellom kilden og spolen uten å utføre nyttig arbeid.</p>
+            <p><strong>3. ${getTermTooltipHtml('tilsynelatende_effekt', 'Tilsynelatende effekt (<em>S</em>)')} i Voltampere (VA):</strong> Den totale belastningen (<em>S = U · I</em>) som nettet, transformatorene og kablene må dimensjoneres for.</p>
             <div class="formula-box">
-                <span class="formula-highlight">S = U · I &nbsp;(Tilsynelatende effekt)</span>
-                <span>S² = P<sub>t</sub>² + Q² &nbsp;➔&nbsp; S = √(P<sub>t</sub>² + Q²)</span>
+                <span class="formula-highlight">S² = P<sub>t</sub>² + Q² &nbsp;➔&nbsp; S = √(P<sub>t</sub>² + Q²) &nbsp;(Hypotenus)</span>
                 <span>Q = √(S² - P<sub>t</sub>²) &nbsp;|&nbsp; P<sub>t</sub> = √(S² - Q²)</span>
+                <span>S = U · I &nbsp;➔&nbsp; I = S / U &nbsp;(1-fase maksimalstrøm)</span>
             </div>
             <div class="theory-tip-box">
                 <strong>🍺 Ølglass-analogien:</strong> <em>P</em><sub>t</sub> er væsken i glasset (nyttig arbeid), <em>Q</em> er skummet på toppen (nødvendig for å holde feltet, men slukker ikke tørsten), og <em>S</em> er hele glassets volum som kablene må holde!
@@ -1840,11 +2061,11 @@ const LEVEL_CONFIGS = {
         badge: "Trigonometri & Utnyttelsesgrad",
         defaultUnit: "W",
         theoryHtml: `
-            <p><strong>Effektfaktoren (cos <em>φ</em>):</strong> Viser hvor stor andel av den totale tilsynelatende effekten som faktisk utfører nyttig arbeid: cos <em>φ</em> = <em>P</em><sub>t</sub> / <em>S</em>.</p>
+            <p><strong>${getTermTooltipHtml('effektfaktor', 'Effektfaktoren (cos <em>φ</em>)')}:</strong> Viser hvor stor andel av den totale tilsynelatende effekten som faktisk utfører nyttig arbeid: cos <em>φ</em> = <em>P</em><sub>t</sub> / <em>S</em>.</p>
             <p>Effektfaktoren ligger alltid mellom 0 og 1,0. Hvis cos <em>φ</em> = 0,80, betyr det at 80 % av strømmen utnyttes til ekte arbeid, mens resten er reaktiv belastning.</p>
             <div class="formula-box">
                 <span class="formula-highlight">P<sub>t</sub> = S · cos φ = U · I · cos φ &nbsp;(1-fase)</span>
-                <span>cos φ = P<sub>t</sub> / S = P<sub>t</sub> / (U · I)</span>
+                <span>cos φ = P<sub>t</sub> / S &nbsp;|&nbsp; S = P<sub>t</sub> / cos φ &nbsp;|&nbsp; I = P<sub>t</sub> / (U · cos φ)</span>
                 <span>φ = arccos(cos φ) &nbsp;(Fasevinkelen i grader)</span>
             </div>
             <div class="theory-tip-box">
@@ -1877,16 +2098,16 @@ const LEVEL_CONFIGS = {
         badge: "3-Fase & Mekanisk Avgitt Effekt",
         defaultUnit: "W / % / A",
         theoryHtml: `
-            <p><strong>3-fase asynkronmotorer:</strong> I 3-fasesystemer opptrer faktoren √3 ≈ 1,732 mellom fase- og linjestørrelser.</p>
+            <p><strong>3-fase asynkronmotorer:</strong> I 3-fasesystemer opptrer faktoren √3 ≈ 1,732 mellom fase- og ${getTermTooltipHtml('linjestørrelser', 'linjestørrelser')}. ${getTermTooltipHtml('linjestrøm', 'Linjestrømmen (<em>I</em>)')} er strømmen som flyter i hver tilførselskabel fra fordelingen til motoren.</p>
             <div class="theory-tip-box danger">
                 <strong>⚠️ Den store merkeskilt-fellen:</strong><br>
-                Effekten som står oppgitt i kW på motorens merkeskilt er <strong>ALLTID avgitt mekanisk effekt på akslingen (<em>P</em><sub>2</sub>)</strong>! Fordi motoren har tap i varme og friksjon (virkningsgrad <em>η</em> &lt; 1), må motoren trekke <em>mer</em> elektrisk effekt fra nettet enn den avgir: <strong><em>P</em><sub>1</sub> = <em>P</em><sub>2</sub> / <em>η</em></strong>.
+                Effekten som står oppgitt i kW på motorens merkeskilt er <strong>ALLTID ${getTermTooltipHtml('akseleffekt', 'avgitt mekanisk effekt på akslingen (<em>P</em><sub>2</sub>)')}</strong>! Fordi motoren har tap i varme og friksjon (${getTermTooltipHtml('virkningsgrad', 'virkningsgrad <em>η</em>')} &lt; 1), må motoren trekke <em>mer</em> elektrisk effekt fra nettet enn den avgir: <strong><em>P</em><sub>1</sub> = <em>P</em><sub>2</sub> / <em>η</em></strong>.
             </div>
             <div class="formula-box">
                 <span class="formula-highlight">1) Tilført elektrisk effekt: P<sub>1</sub> = P<sub>2</sub> / η</span>
-                <span>2) Linjestrøm: I = P<sub>1</sub> / (√3 · U · cos φ)</span>
-                <span>Virkningsgrad: η = P<sub>2</sub> / P<sub>1</sub> &nbsp;(η% = η · 100%)</span>
-                <span>P<sub>1</sub> = √3 · U · I · cos φ &nbsp;(hvor √3 ≈ 1,732)</span>
+                <span>2) Linjestrøm: I = P<sub>1</sub> / (√3 · U · cos φ) &nbsp;|&nbsp; cos φ = P<sub>1</sub> / (√3 · U · I)</span>
+                <span>Virkningsgrad: η = P<sub>2</sub> / P<sub>1</sub> &nbsp;|&nbsp; Effekttap: P<sub>tap</sub> = P<sub>1</sub> - P<sub>2</sub> (Watt)</span>
+                <span>P<sub>1</sub> = √3 · U · I · cos φ &nbsp;(hvor U = 400 V linjespenning, √3 ≈ 1,732)</span>
             </div>
             <p style="margin-top:8px; font-size:12px; color: var(--text-muted);"><em>Huskeregel:</em> Skal du dimensjonere kabel eller vern for motoren, må du alltid beregne <em>I</em> ut fra <strong>P<sub>1</sub></strong> (elektrisk tilført effekt)!</p>
         `,
@@ -1916,18 +2137,21 @@ const LEVEL_CONFIGS = {
         badge: "Kondensatorbatteri & Økonomi",
         defaultUnit: "A / kvar",
         theoryHtml: `
-            <p><strong>Hvorfor fasekompensere industrianlegg?</strong> Asynkronmotorer trekker induktiv reaktiv effekt for magnetisering. Dette gir lav cos <em>φ</em> (typisk 0,70–0,80), som gjør at unødvendig store strømmer går i kabler, transformatorer og generatorer. Nettselskapet krever <strong>cos <em>φ</em> ≥ 0,95</strong> og ilegger dyre <em>straffetariffer</em> for overforbruk av reaktiv effekt!</p>
-            <p><strong>Løsningen – Kondensatorbatteri (<em>Q</em><sub>c</sub>):</strong> Kondensatorer trekker <em>kapasitiv</em> reaktiv effekt, som har stikk motsatt retning av spolers <em>induktive</em> reaktive effekt. Ved å koble kondensatorer i parallell med motoren nøytraliseres spolens reaktive effekt lokalt:</p>
+            <p><strong>Hvorfor ${getTermTooltipHtml('fasekompensering', 'fasekompensere')} industrianlegg?</strong> Asynkronmotorer trekker induktiv reaktiv effekt for magnetisering. Dette gir lav cos <em>φ</em> (typisk 0,70–0,80), som gjør at unødvendig store strømmer går i kabler, transformatorer og generatorer. Nettselskapet krever <strong>cos <em>φ</em> ≥ 0,95</strong> og ilegger dyre ${getTermTooltipHtml('straffetariffer', '<em>straffetariffer</em>')} for overforbruk av reaktiv effekt!</p>
+            <p><strong>Løsningen – ${getTermTooltipHtml('kondensatorbatteri', 'Kondensatorbatteri (<em>Q</em><sub>c</sub>)')}:</strong> Kondensatorer trekker <em>kapasitiv</em> reaktiv effekt, som har stikk motsatt retning av spolers <em>induktive</em> reaktive effekt. Ved å koble kondensatorer i parallell med motoren nøytraliseres spolens reaktive effekt lokalt:</p>
             <div class="formula-box">
                 <span class="formula-highlight">Q<sub>ny</sub> = Q<sub>L</sub> - Q<sub>C</sub> &nbsp;➔&nbsp; Q<sub>C</sub> = Q<sub>1</sub> - Q<sub>2</sub></span>
-                <span>Redusert linjestrøm: I = P<sub>t</sub> / (√3 · U · cos φ)</span>
-                <span>Kabelstrøm-reduksjon: ΔI = I<sub>før</sub> - I<sub>etter</sub></span>
+                <span>Redusert linjestrøm: I = P<sub>t</sub> / (√3 · U · cos φ) &nbsp;|&nbsp; ΔI = I<sub>før</sub> - I<sub>etter</sub></span>
+                <span>Tilsynelatende effekt: S = P<sub>t</sub> / cos φ &nbsp;➔&nbsp; Frigjort trafo: ΔS = S<sub>før</sub> - S<sub>etter</sub> (kVA)</span>
             </div>
             <div class="theory-tip-box success">
                 <strong>💰 Gevinstene ved kompensering:</strong><br>
                 1. <strong>Mindre strøm i kablene:</strong> Når cos <em>φ</em> heves fra 0,65 til 0,95 synker linjestrømmen med over 30 % ved samme motorbelastning!<br>
-                2. <strong>Lavere tap:</strong> Mindre varmeutvikling og spenningsfall i ledningsnettet.<br>
+                2. <strong>Frigjort trafo-kapasitet:</strong> Bedriften kan koble til nye maskiner uten å måtte kjøpe dyrere transformator.<br>
                 3. <strong>0 kr i straffetillegg:</strong> Ingen reaktive gebyrer på strømregningen fra netteier.
+            </div>
+            <div class="theory-tip-box danger" style="margin-top:8px;">
+                <strong>⚠️ Advarsel om ${getTermTooltipHtml('overkompensering', 'overkompensering')}:</strong> Dersom man kobler inn for mange kondensatorer (cos <em>φ</em> passerer 1,0 og blir kapasitiv), begynner strømmen å ligge <em>foran</em> spenningen, og kabelstrømmen vil begynne å stige igjen!
             </div>
         `,
         resources: [
@@ -2969,13 +3193,97 @@ function formatMathText(str) {
         });
 }
 
-// NIVÅ 1 SPØRSMÅL
-function generateLevel1() {
-    const type = getRandomInt(1, 3);
+// Beriker tekst med interaktive infobokser på faguttrykk
+function enrichTextWithTooltips(str) {
+    if (!str || typeof str !== 'string') return "";
+
+    const termMap = [
+        { re: /\b(straffetariffer|straffetariff|straffetillegg)\b/gi, key: "straffetariffer" },
+        { re: /\b(kondensatorbatteri|kondensatorbatteriet)\b/gi, key: "kondensatorbatteri" },
+        { re: /\b(selvinduksjon|selvinduksjonen)\b/gi, key: "selvinduksjon" },
+        { re: /\b(motspenning|motspenningen)\b/gi, key: "motspenning" },
+        { re: /\b(linjestørrelser|linjestørrelse)\b/gi, key: "linjestørrelser" },
+        { re: /\b(linjestrøm|linjestrømmen)\b/gi, key: "linjestrøm" },
+        { re: /\b(effektivverdi|effektivverdien|effektivverdier)\b/gi, key: "effektivverdi" },
+        { re: /\b(toppverdi|toppverdien|toppverdier)\b/gi, key: "toppverdi" },
+        { re: /\b(faseforskyvning|faseforskyvningen)\b/gi, key: "faseforskyvning" },
+        { re: /\b(effektfaktor|effektfaktoren)\b/gi, key: "effektfaktor" },
+        { re: /\b(virkningsgrad|virkningsgraden)\b/gi, key: "virkningsgrad" },
+        { re: /\b(overkompensering|overkompensert)\b/gi, key: "overkompensering" },
+        { re: /\b(retureffekt|retureffekten)\b/gi, key: "retureffekt" },
+        { re: /\b(Lenz' lov)\b/gi, key: "lenz_lov" }
+    ];
+
+    const parts = str.split(/(<[^>]+>)/g);
+    let inTooltip = false;
+    const seenTerms = new Set();
+
+    for (let i = 0; i < parts.length; i++) {
+        const p = parts[i];
+        if (p.startsWith('<span') && p.includes('term-hint')) {
+            inTooltip = true;
+        } else if (p.includes('</span>') && inTooltip) {
+            inTooltip = false;
+        } else if (!p.startsWith('<') && !inTooltip) {
+            let text = p;
+            for (const { re, key } of termMap) {
+                if (seenTerms.has(key)) continue;
+                if (re.test(text)) {
+                    re.lastIndex = 0;
+                    text = text.replace(re, (match) => {
+                        seenTerms.add(key);
+                        return getTermTooltipHtml(key, match);
+                    });
+                }
+            }
+            parts[i] = text;
+        }
+    }
+    return parts.join('');
+}
+
+function shuffleArray(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+// Bunkemekanisme som garanterer at alle 5 oppgavetyper per nivå oppleves i løpet av en runde
+function getNextQuestionType(level) {
+    if (!GameState.levelQuestionDecks) {
+        GameState.levelQuestionDecks = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
+    }
+    if (!GameState.lastTypeByLevel) {
+        GameState.lastTypeByLevel = { 1: null, 2: null, 3: null, 4: null, 5: null, 6: null };
+    }
+    if (!GameState.levelQuestionDecks[level] || GameState.levelQuestionDecks[level].length === 0) {
+        const pool = [1, 2, 3, 4, 5];
+        for (let i = pool.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+        // Unngå umiddelbar repetisjon av forrige type dersom bunken stokkes om
+        if (GameState.lastTypeByLevel[level] === pool[pool.length - 1] && pool.length > 1) {
+            const swapIdx = Math.floor(Math.random() * (pool.length - 1));
+            [pool[pool.length - 1], pool[swapIdx]] = [pool[swapIdx], pool[pool.length - 1]];
+        }
+        GameState.levelQuestionDecks[level] = pool;
+    }
+    const chosenType = GameState.levelQuestionDecks[level].pop();
+    GameState.lastTypeByLevel[level] = chosenType;
+    return chosenType;
+}
+
+// NIVÅ 1 SPØRSMÅL (Ohmsk motstand & AC)
+function generateLevel1(forcedType) {
+    const type = (typeof forcedType === 'number') ? forcedType : getRandomInt(1, 5);
     let q = {};
 
     if (type === 1) {
-        // Beregne P gitt U og I
+        // Beregne P gitt U og I (varmeovn)
         const U = 230;
         const I = getRandomFloat(2.0, 16.0, 1);
         const P = U * I;
@@ -2990,7 +3298,7 @@ function generateLevel1() {
             signature: `L1_T1_${U}_${I}`
         };
     } else if (type === 2) {
-        // Beregne Ueff fra Umaks
+        // Beregne Ueff fra Umaks (oscilloskop)
         const Umaks = getRandomInt(310, 340);
         const Ueff = Umaks / Math.SQRT2;
         q = {
@@ -3003,10 +3311,10 @@ function generateLevel1() {
             explanation: `U_eff = U_maks / √2 = ${Umaks} V / 1,414 ≈ ${Ueff.toFixed(1)} V.`,
             signature: `L1_T2_${Umaks}`
         };
-    } else {
-        // Beregne strøm I = P / U
+    } else if (type === 3) {
+        // Beregne strøm I = P / U (varmtvannsbereder)
         const U = 230;
-        const P = getRandomInt(500, 3000);
+        const P = getRandomInt(5, 30) * 100; // 500 W til 3000 W i pene trinn
         const I = P / U;
         q = {
             badge: "Strømberegning (I = P / U)",
@@ -3018,13 +3326,43 @@ function generateLevel1() {
             explanation: `I = P / U = ${P} W / ${U} V ≈ ${I.toFixed(1)} A.`,
             signature: `L1_T3_${P}_${U}`
         };
+    } else if (type === 4) {
+        // [NY] Beregne Umaks = Ueff * sqrt(2)
+        const voltages = [12, 24, 230, 400];
+        const Ueff = voltages[getRandomInt(0, voltages.length - 1)];
+        const Umaks = Ueff * Math.SQRT2;
+        q = {
+            badge: "Toppverdi fra Effektivverdi",
+            text: `Et multimeter måler effektivverdien av en vekselspenning til <em>U</em><sub>eff</sub> = ${Ueff} V. Hva er toppverdien (amplituden) <em>U</em><sub>maks</sub> som et oscilloskop vil vise?`,
+            hint: "Formel: U_maks = U_eff · √2 (eller U_eff · 1,414)",
+            unit: "V",
+            expectedAnswer: Math.round(Umaks),
+            tolerance: Math.max(1.0, Umaks * 0.02),
+            explanation: `U_maks = U_eff · √2 = ${Ueff} V · 1,414 ≈ ${Math.round(Umaks)} V.`,
+            signature: `L1_T4_${Ueff}`
+        };
+    } else {
+        // [NY] Beregne motstand R = U^2 / P (panelovn)
+        const U = 230;
+        const P = getRandomInt(8, 24) * 100; // 800 W til 2400 W
+        const R = (U * U) / P;
+        q = {
+            badge: "Motstandsberegning (R = U² / P)",
+            text: `En panelovn er merket med ${P} W ved ${U} V. Hva er varmeelementets resistans (motstand) <em>R</em> i ohm?`,
+            hint: "Formel: R = U² / P (eller finn først I = P / U, deretter R = U / I)",
+            unit: "Ω",
+            expectedAnswer: parseFloat(R.toFixed(1)),
+            tolerance: Math.max(0.5, R * 0.02),
+            explanation: `R = U² / P = (${U} V)² / ${P} W = ${U * U} / ${P} ≈ ${R.toFixed(1)} Ω. (Alternativt: I = P / U = ${(P / U).toFixed(2)} A, deretter R = U / I = ${R.toFixed(1)} Ω).`,
+            signature: `L1_T5_${P}_${U}`
+        };
     }
     return q;
 }
 
-// NIVÅ 2 SPØRSMÅL
-function generateLevel2() {
-    const type = getRandomInt(1, 3);
+// NIVÅ 2 SPØRSMÅL (Induktiv last & Faseforskyvning)
+function generateLevel2(forcedType) {
+    const type = (typeof forcedType === 'number') ? forcedType : getRandomInt(1, 5);
     let q = {};
 
     if (type === 1) {
@@ -3055,29 +3393,61 @@ function generateLevel2() {
             explanation: `Δt = (${phi}° / 360°) · 20 ms ≈ ${dt.toFixed(1)} ms.`,
             signature: `L2_T2_${phi}`
         };
-    } else {
+    } else if (type === 3) {
         // Flervalg: Retureffekt
         q = {
             isChoice: true,
             badge: "Begrepsforståelse: Retureffekt",
             text: "Hva skjer med effekten i en vekselstrømkrets når spenningen og strømmen har motsatt fortegn (<em>u</em> > 0 og <em>i</em> < 0)?",
             hint: "Tenk på momentaneffekt p(t) = u(t) · i(t)",
-            choices: [
+            choices: shuffleArray([
                 { text: "Effekten er negativ, og energi strømmer tilbake til nettet.", correct: true },
                 { text: "Effekten dobles fordi motstanden halveres.", correct: false },
                 { text: "Kretsen kortsluttes og sikringen ryker umiddelbart.", correct: false },
                 { text: "Det oppstår ren ohmsk varme uten magnetfelt.", correct: false }
-            ],
+            ]),
             explanation: "Når spenning og strøm har ulikt fortegn blir produktet negativt: p(t) < 0. Dette betyr at magnetfeltet i spolen lader seg ut og leverer energi tilbake til kilden.",
             signature: "L2_T3_CHOICE"
+        };
+    } else if (type === 4) {
+        // [NY] Flervalg: Selvinduksjon & Lenz' lov
+        q = {
+            isChoice: true,
+            badge: "Begrepsforståelse: Selvinduksjon & Lenz' lov",
+            text: "I en spole (induktiv last) henger strømmen etter spenningen med opptil 90°. Hva er den fysiske årsaken til dette?",
+            hint: "Tenk på hva som skjer i et varierende magnetfelt når strømmen prøver å endre seg (selvinduksjon).",
+            choices: shuffleArray([
+                { text: "Det induseres en motspenning i spolen (Lenz' lov) som motsetter seg strømendringen.", correct: true },
+                { text: "Elektronene møter stor mekanisk friksjon og beveger seg saktere gjennom kobbertråden.", correct: false },
+                { text: "Spenningen forbrukes i spolens kjerne slik at strømmen må vente på ny ladning.", correct: false },
+                { text: "Frekvensen på 50 Hz er for høy for at vekselstrøm kan passere gjennom metall.", correct: false }
+            ]),
+            explanation: "Når vekselstrømmen endrer seg, oppstår et varierende magnetfelt. Ifølge Lenz' lov induseres det en elektromotorisk motspenning som motsetter seg endringen. Dette forsinker strømmen i forhold til spenningen (strømmen henger etter).",
+            signature: "L2_T4_CHOICE"
+        };
+    } else {
+        // [NY] Flervalg: Induktiv vs Kapasitiv last
+        q = {
+            isChoice: true,
+            badge: "Begrepsforståelse: Induktiv vs. Kapasitiv last",
+            text: "Hvordan oppfører strømmen seg i en ren kondensator (kapasitiv last) sammenlignet med en spole?",
+            hint: "Huskeregel: I en spole henger strømmen etter. I en kondensator må ladning flyte inn først (strømmen ligger foran)!",
+            choices: shuffleArray([
+                { text: "I en kondensator ligger strømmen 90° foran spenningen (strømmen lader opp kondensatoren først).", correct: true },
+                { text: "I en kondensator henger strømmen 180° etter spenningen.", correct: false },
+                { text: "Kondensatoren blokkerer vekselstrøm helt og slipper bare gjennom likespenning.", correct: false },
+                { text: "Strøm og spenning svinger i hel fase akkurat som i en ren varmeovn.", correct: false }
+            ]),
+            explanation: "I en ren kondensator ligger strømmen 90° foran spenningen (faseforskyvning φ = -90°). Strøm må flyte inn for å bygge opp ladning og spenning på platene. Dette er det motsatte av en induktiv spole der strømmen henger etter.",
+            signature: "L2_T5_CHOICE"
         };
     }
     return q;
 }
 
-// NIVÅ 3 SPØRSMÅL
-function generateLevel3() {
-    const type = getRandomInt(1, 4);
+// NIVÅ 3 SPØRSMÅL (Effekttrekanten P, Q, S)
+function generateLevel3(forcedType) {
+    const type = (typeof forcedType === 'number') ? forcedType : getRandomInt(1, 5);
     let q = {};
 
     if (type === 1) {
@@ -3097,7 +3467,7 @@ function generateLevel3() {
         };
     } else if (type === 2) {
         // Pytagoras for Q = sqrt(S^2 - P^2)
-        const S = getRandomInt(2000, 5000);
+        const S = getRandomInt(20, 50) * 100;
         const P = Math.round(S * getRandomFloat(0.65, 0.85, 2));
         const Q = Math.sqrt(S * S - P * P);
         q = {
@@ -3112,7 +3482,7 @@ function generateLevel3() {
         };
     } else if (type === 3) {
         // Pytagoras for Pt = sqrt(S^2 - Q^2)
-        const S = getRandomInt(2500, 6000);
+        const S = getRandomInt(25, 60) * 100;
         const Q = Math.round(S * getRandomFloat(0.40, 0.65, 2));
         const Pt = Math.sqrt(S * S - Q * Q);
         q = {
@@ -3125,29 +3495,45 @@ function generateLevel3() {
             explanation: `Pt = √(S² - Q²) = √(${S}² - ${Q}²) = √(${S*S - Q*Q}) ≈ ${Math.round(Pt)} W.`,
             signature: `L3_T3_${S}_${Q}`
         };
-    } else {
-        // Flervalg: Enheter
+    } else if (type === 4) {
+        // [NY] Hypotenus S = sqrt(Pt^2 + Q^2)
+        const Pt = getRandomInt(15, 50) * 100;
+        const Q = getRandomInt(10, 40) * 100;
+        const S = Math.sqrt(Pt * Pt + Q * Q);
         q = {
-            isChoice: true,
-            badge: "Enhetsforståelse i effekttrekanten",
-            text: "Hvilken måleenhet tilhører reaktiv effekt (<em>Q</em>)?",
-            hint: "Aktiv effekt måles i W, tilsynelatende i VA.",
-            choices: [
-                { text: "var (voltampere reaktiv)", correct: true },
-                { text: "W (Watt)", correct: false },
-                { text: "VA (Voltampere)", correct: false },
-                { text: "Joule (J)", correct: false }
-            ],
-            explanation: "Reaktiv effekt måles i voltampere reaktiv (var). Aktiv effekt måles i Watt (W) og tilsynelatende effekt i Voltampere (VA).",
-            signature: "L3_T4_CHOICE"
+            badge: "Tilsynelatende effekt (Hypotenus S)",
+            text: `En 1-faset industrilast trekker aktiv effekt <em>P</em><sub>t</sub> = ${Pt} W og reaktiv effekt <em>Q</em> = ${Q} var. Hva er den totale tilsynelatende effekten <em>S</em> i VA?`,
+            hint: "Pytagoras: S = √(Pt² + Q²)",
+            unit: "VA",
+            expectedAnswer: Math.round(S),
+            tolerance: Math.max(5, S * 0.02),
+            explanation: `S = √(Pt² + Q²) = √(${Pt}² + ${Q}²) = √(${Pt*Pt + Q*Q}) ≈ ${Math.round(S)} VA.`,
+            signature: `L3_T4_${Pt}_${Q}`
+        };
+    } else {
+        // [NY] Trafo linjestrøm I = S / U
+        const voltages = [230, 400];
+        const U = voltages[getRandomInt(0, 1)];
+        const S_vals = [3000, 4500, 6000, 7500, 10000, 12500, 15000];
+        const S = S_vals[getRandomInt(0, S_vals.length - 1)];
+        const I = S / U;
+        q = {
+            badge: "Strøm fra tilsynelatende effekt (I = S / U)",
+            text: `En forsyningstransformator med spenning ${U} V belastes med en total tilsynelatende effekt på <em>S</em> = ${S} VA. Hvor stor linjestrøm <em>I</em> belaster dette transformatoren og tilførslene med?`,
+            hint: "Formel: I = S / U (husk at sikringer og kabler må dimensjoneres etter S, ikke bare P!)",
+            unit: "A",
+            expectedAnswer: parseFloat(I.toFixed(1)),
+            tolerance: 0.3,
+            explanation: `I = S / U = ${S} VA / ${U} V ≈ ${I.toFixed(1)} A. Transformatoren og kablene må bære hele denne strømmen, selv om deler av effekten er reaktiv!`,
+            signature: `L3_T5_${S}_${U}`
         };
     }
     return q;
 }
 
-// NIVÅ 4 SPØRSMÅL
-function generateLevel4() {
-    const type = getRandomInt(1, 3);
+// NIVÅ 4 SPØRSMÅL (Effektfaktor cos φ)
+function generateLevel4(forcedType) {
+    const type = (typeof forcedType === 'number') ? forcedType : getRandomInt(1, 5);
     let q = {};
 
     if (type === 1) {
@@ -3168,7 +3554,7 @@ function generateLevel4() {
         };
     } else if (type === 2) {
         // cosPhi = Pt / S
-        const S = getRandomInt(3000, 8000);
+        const S = getRandomInt(30, 80) * 100;
         const cosPhi = getRandomFloat(0.70, 0.93, 2);
         const Pt = Math.round(S * cosPhi);
         q = {
@@ -3181,7 +3567,7 @@ function generateLevel4() {
             explanation: `cos φ = Pt / S = ${Pt} W / ${S} VA ≈ ${cosPhi.toFixed(2)}.`,
             signature: `L4_T2_${S}_${Pt}`
         };
-    } else {
+    } else if (type === 3) {
         // Fasevinkel phi = acos(cosPhi)
         const cosPhi = getRandomFloat(0.65, 0.92, 2);
         const phiDeg = Math.acos(cosPhi) * (180 / Math.PI);
@@ -3195,13 +3581,44 @@ function generateLevel4() {
             explanation: `φ = arccos(${cosPhi.toFixed(2)}) ≈ ${phiDeg.toFixed(1)}°.`,
             signature: `L4_T3_${cosPhi}`
         };
+    } else if (type === 4) {
+        // [NY] 1-fase linjestrøm I = Pt / (U * cosPhi)
+        const U = 230;
+        const Pt = getRandomInt(12, 35) * 100; // 1200 W til 3500 W
+        const cosPhi = getRandomFloat(0.70, 0.90, 2);
+        const I = Pt / (U * cosPhi);
+        q = {
+            badge: "Strømberegning med cos φ",
+            text: `En 1-faset industrivifte yter <em>P</em><sub>t</sub> = ${Pt} W ved ${U} V og har cos <em>φ</em> = ${cosPhi.toFixed(2)}. Hvor stor strøm <em>I</em> må tilførselskabelen tåle?`,
+            hint: "Formel: I = Pt / (U · cos φ)",
+            unit: "A",
+            expectedAnswer: parseFloat(I.toFixed(1)),
+            tolerance: 0.2,
+            explanation: `I = Pt / (U · cos φ) = ${Pt} W / (${U} V · ${cosPhi.toFixed(2)}) = ${Pt} / ${(U * cosPhi).toFixed(1)} ≈ ${I.toFixed(1)} A. Legg merke til at lavere cos φ gir høyere strøm i kabelen!`,
+            signature: `L4_T4_${Pt}_${cosPhi}`
+        };
+    } else {
+        // [NY] Tilsynelatende effekt S = Pt / cosPhi
+        const Pt = getRandomInt(20, 60) * 100; // 2000 W til 6000 W
+        const cosPhi = getRandomFloat(0.65, 0.85, 2);
+        const S = Pt / cosPhi;
+        q = {
+            badge: "Tilsynelatende effekt fra cos φ",
+            text: `En maskin har aktiv effekt <em>P</em><sub>t</sub> = ${Pt} W og effektfaktor cos <em>φ</em> = ${cosPhi.toFixed(2)}. Hva er anleggets tilsynelatende effekt <em>S</em> i VA?`,
+            hint: "Formel: S = Pt / cos φ",
+            unit: "VA",
+            expectedAnswer: Math.round(S),
+            tolerance: Math.max(5, S * 0.02),
+            explanation: `S = Pt / cos φ = ${Pt} W / ${cosPhi.toFixed(2)} ≈ ${Math.round(S)} VA.`,
+            signature: `L4_T5_${Pt}_${cosPhi}`
+        };
     }
     return q;
 }
 
-// NIVÅ 5 SPØRSMÅL
-function generateLevel5() {
-    const type = getRandomInt(1, 3);
+// NIVÅ 5 SPØRSMÅL (3-fase Motor & Merkeskilt)
+function generateLevel5(forcedType) {
+    const type = (typeof forcedType === 'number') ? forcedType : getRandomInt(1, 5);
     let q = {};
 
     if (type === 1) {
@@ -3235,7 +3652,7 @@ function generateLevel5() {
             explanation: `η% = (P2 / P1) · 100% = (${P2_kW.toFixed(1)} kW / ${P1_kW.toFixed(2)} kW) · 100% = ${eta_pct}%.`,
             signature: `L5_T2_${P2_kW}_${eta_pct}`
         };
-    } else {
+    } else if (type === 3) {
         // Beregne strøm I gitt P2, eta, U=400, cosPhi
         const P2_kW = getRandomFloat(3.0, 9.0, 1);
         const P2_W = P2_kW * 1000;
@@ -3255,13 +3672,48 @@ function generateLevel5() {
             explanation: `1) P1 = P2 / η = ${P2_W} W / ${(eta_pct/100).toFixed(2)} ≈ ${Math.round(P1_W)} W.\n2) I = P1 / (√3 · U · cos φ) = ${Math.round(P1_W)} / (1,732 · 400 · ${cosPhi.toFixed(2)}) ≈ ${I.toFixed(1)} A.`,
             signature: `L5_T3_${P2_kW}_${eta_pct}_${cosPhi}`
         };
+    } else if (type === 4) {
+        // [NY] Motorens interne effekttap Ptap = P1 - P2 i Watt
+        const P1_kW = getRandomFloat(3.5, 15.0, 1);
+        const P1_W = Math.round(P1_kW * 1000);
+        const eta_pct = getRandomInt(80, 92);
+        const P2_W = Math.round(P1_W * (eta_pct / 100));
+        const Ptap = P1_W - P2_W;
+
+        q = {
+            badge: "Effekttap i motor (Ptap = P1 - P2)",
+            text: `En 3-faset elektromotor trekker <em>P</em><sub>1</sub> = ${P1_kW.toFixed(1)} kW elektrisk effekt fra nettet. Motoren har en virkningsgrad på <em>η</em> = ${eta_pct} %. Hvor stor effekt går tapt som ren varmeutvikling i motoren (<em>P</em><sub>tap</sub>) i Watt?`,
+            hint: "Trinn 1: Beregn nyttig mekanisk effekt P2 = P1 · (η / 100). Trinn 2: Effekttap Ptap = P1 - P2 (husk å svare i Watt!).",
+            unit: "W",
+            expectedAnswer: Math.round(Ptap),
+            tolerance: Math.max(5, Ptap * 0.03),
+            explanation: `1) Nyttig effekt: P2 = ${P1_W} W · ${(eta_pct/100).toFixed(2)} = ${P2_W} W.\n2) Varmetap: Ptap = P1 - P2 = ${P1_W} W - ${P2_W} W = ${Ptap} W (som må bortledes via motorens kjøleribber og vifte).`,
+            signature: `L5_T4_${P1_kW}_${eta_pct}`
+        };
+    } else {
+        // [NY] Beregne cosPhi = P1 / (sqrt(3) * U * I) fra merkeskilt
+        const U = 400;
+        const I = getRandomFloat(8.0, 25.0, 1);
+        const cosPhi = getRandomFloat(0.74, 0.88, 2);
+        const P1_calc = Math.round(Math.sqrt(3) * U * I * cosPhi);
+
+        q = {
+            badge: "Beregne cos φ fra merkeskilt",
+            text: `På en 3-faset asynkronmotor tilkoblet ${U} V måles tilført elektrisk effekt til <em>P</em><sub>1</sub> = ${P1_calc} W ved en linjestrøm på <em>I</em> = ${I.toFixed(1)} A. Hva er motorens effektfaktor (cos <em>φ</em>)?`,
+            hint: "Formel: cos φ = P1 / (√3 · U · I). Tips: √3 · 400 ≈ 692,8.",
+            unit: "",
+            expectedAnswer: parseFloat(cosPhi.toFixed(2)),
+            tolerance: 0.02,
+            explanation: `cos φ = P1 / (√3 · U · I) = ${P1_calc} W / (1,732 · ${U} V · ${I.toFixed(1)} A) = ${P1_calc} / ${(Math.sqrt(3)*U*I).toFixed(1)} ≈ ${cosPhi.toFixed(2)}.`,
+            signature: `L5_T5_${P1_calc}_${I}`
+        };
     }
     return q;
 }
 
 // NIVÅ 6 SPØRSMÅL (Boss-nivå: Fasekompensering)
-function generateLevel6() {
-    const type = getRandomInt(1, 3);
+function generateLevel6(forcedType) {
+    const type = (typeof forcedType === 'number') ? forcedType : getRandomInt(1, 5);
     let q = {};
 
     if (type === 1) {
@@ -3302,7 +3754,7 @@ function generateLevel6() {
             explanation: `Qc = Q1 - Q2 = ${Q1_kvar} kvar - ${Q2_kvar} kvar = ${Qc} kvar.`,
             signature: `L6_T2_${Q1_kvar}_${Q2_kvar}`
         };
-    } else {
+    } else if (type === 3) {
         // Tilsynelatende effekt S fra Pt og cosPhi
         const Pt_kW = getRandomInt(15, 45);
         const cosPhi = getRandomFloat(0.68, 0.76, 2);
@@ -3318,24 +3770,60 @@ function generateLevel6() {
             explanation: `S = Pt / cos φ = ${Pt_kW} kW / ${cosPhi.toFixed(2)} ≈ ${S_kVA.toFixed(1)} kVA.`,
             signature: `L6_T3_${Pt_kW}_${cosPhi}`
         };
+    } else if (type === 4) {
+        // [NY] Frigjort transformatorkapasitet ΔS = S1 - S2
+        const Pt_kW = getRandomInt(6, 16) * 5; // 30 til 80 kW i trinn på 5 kW
+        const cos1 = 0.68;
+        const cos2 = 0.95;
+        const S1 = Pt_kW / cos1;
+        const S2 = Pt_kW / cos2;
+        const deltaS = S1 - S2;
+
+        q = {
+            badge: "Frigjort transformatorkapasitet (ΔS)",
+            text: `Et industribygg har en aktiv effekt på <em>P</em><sub>t</sub> = ${Pt_kW} kW. Før kompensering er cos <em>φ</em>₁ = ${cos1}. Ved å installere et kondensatorbatteri heves den til cos <em>φ</em>₂ = ${cos2}. Hvor mange kVA med transformatorkapasitet (<em>ΔS = S₁ - S₂</em>) frigjøres for annet utstyr?`,
+            hint: "Trinn 1: S1 = Pt / cos φ1. Trinn 2: S2 = Pt / cos φ2. Trinn 3: Frigjort kapasitet ΔS = S1 - S2.",
+            unit: "kVA",
+            expectedAnswer: parseFloat(deltaS.toFixed(1)),
+            tolerance: 1.0,
+            explanation: `S1 = ${Pt_kW} kW / ${cos1} ≈ ${S1.toFixed(1)} kVA.\nS2 = ${Pt_kW} kW / ${cos2} ≈ ${S2.toFixed(1)} kVA.\nFrigjort transformatorkapasitet: ΔS = ${S1.toFixed(1)} kVA - ${S2.toFixed(1)} kVA = ${deltaS.toFixed(1)} kVA.`,
+            signature: `L6_T4_${Pt_kW}`
+        };
+    } else {
+        // [NY] Flervalg: Faren ved overkompensering
+        q = {
+            isChoice: true,
+            badge: "Begrepsforståelse: Faren ved overkompensering",
+            text: "Hva skjer dersom en installasjon kobler inn for mange kondensatorer slik at anlegget blir kraftig overkompensert (kapasitivt)?",
+            hint: "Tenk på effekttrekanten hvis reaktiv effekt tipper over til motsatt side (Qc > QL).",
+            choices: shuffleArray([
+                { text: "Kretsen blir kapasitiv, strømmen går foran spenningen, og den totale linjestrømmen begynner å øke igjen.", correct: true },
+                { text: "All reaktiv effekt forsvinner permanent og sikringene blir overflødige.", correct: false },
+                { text: "Spenningen faller til 0 V fordi kondensatorene kortslutter nettet.", correct: false },
+                { text: "Motorene snur automatisk rotasjonsretning og transformatoren overbelastes med DC-strøm.", correct: false }
+            ]),
+            explanation: "Ved overkompensering leverer kondensatorene mer reaktiv effekt enn spolen trenger (Qc > QL). Anlegget blir da kapasitivt (strømmen foran spenningen). Den tilsynelatende effekten S og linjestrømmen I begynner da å øke igjen, og det kan oppstå uheldige overspenninger og resonans i nettet!",
+            signature: "L6_T5_CHOICE"
+        };
     }
     return q;
 }
 
-// Felles generator med duplikatsjekk
+// Felles generator med duplikatsjekk og rundebunke
 function generateQuestion(level) {
     let q = null;
     let attempts = 0;
+    const type = getNextQuestionType(level);
 
-    while (attempts < 50) {
+    while (attempts < 20) {
         attempts++;
         switch(level) {
-            case 1: q = generateLevel1(); break;
-            case 2: q = generateLevel2(); break;
-            case 3: q = generateLevel3(); break;
-            case 4: q = generateLevel4(); break;
-            case 5: q = generateLevel5(); break;
-            case 6: q = generateLevel6(); break;
+            case 1: q = generateLevel1(type); break;
+            case 2: q = generateLevel2(type); break;
+            case 3: q = generateLevel3(type); break;
+            case 4: q = generateLevel4(type); break;
+            case 5: q = generateLevel5(type); break;
+            case 6: q = generateLevel6(type); break;
         }
         if (q && q.signature !== GameState.lastQuestionSignature) {
             break;
@@ -3358,10 +3846,10 @@ function generateQuestion(level) {
 // 5. UI-OPPDATERING & VISNING
 function renderQuestionUI(q) {
     document.getElementById('questionBadge').textContent = q.badge;
-    document.getElementById('questionText').innerHTML = formatMathText(q.text);
+    document.getElementById('questionText').innerHTML = enrichTextWithTooltips(formatMathText(q.text));
 
     const hintEl = document.getElementById('questionHint');
-    hintEl.innerHTML = `<strong>Tips:</strong> ${formatMathText(q.hint)}<div style="font-size:11px; color:#d97706; margin-top:4px; font-weight:700;">⚠️ Hint benyttet: Riktig svar gir ingen ny stjerne på rekken, men rekken beholdes uendret.</div>`;
+    hintEl.innerHTML = `<strong>Tips:</strong> ${enrichTextWithTooltips(formatMathText(q.hint))}<div style="font-size:11px; color:#d97706; margin-top:4px; font-weight:700;">⚠️ Hint benyttet: Riktig svar gir ingen ny stjerne på rekken, men rekken beholdes uendret.</div>`;
     hintEl.style.display = 'none';
 
     const hintBtn = document.getElementById('btnToggleHint');
@@ -3522,6 +4010,7 @@ function switchLevel(lvl) {
 
     if (!GameState.completedLevels) GameState.completedLevels = new Set();
     if (!GameState.levelStreaks) GameState.levelStreaks = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+    if (GameState.levelQuestionDecks) GameState.levelQuestionDecks[lvl] = [];
 
     if (GameState.completedLevels.has(lvl)) {
         GameState.streak = 5;
@@ -3571,6 +4060,11 @@ function checkAnswer() {
         // Trykket for å gå videre
         generateQuestion(GameState.currentLevel);
         return;
+    }
+
+    const cheatPanel = document.getElementById('cheat-panel');
+    if (cheatPanel && cheatPanel.classList.contains('active')) {
+        markCheatUsed();
     }
 
     const q = GameState.currentQuestion;
@@ -3656,6 +4150,9 @@ function checkAnswer() {
         }
     } else {
         sfx.wrong();
+        if (GameState.levelQuestionDecks) {
+            GameState.levelQuestionDecks[GameState.currentLevel] = [];
+        }
         if (GameState.completedLevels && GameState.completedLevels.has(GameState.currentLevel)) {
             GameState.streak = 5;
             GameState.levelStreaks[GameState.currentLevel] = 5;
@@ -3673,7 +4170,7 @@ function checkAnswer() {
         feedbackBox.innerHTML = `<span>❌</span> <span>Beklager, det var ikke helt riktig.${completedMsg}</span>`;
         feedbackBox.style.display = 'flex';
 
-        explText.innerHTML = formatMathText(q.explanation).replace(/\n/g, '<br>');
+        explText.innerHTML = enrichTextWithTooltips(formatMathText(q.explanation)).replace(/\n/g, '<br>');
 
         const primaryRes = LEVEL_CONFIGS[GameState.currentLevel].resources?.[0];
         if (primaryRes) {
@@ -3786,7 +4283,36 @@ function showDiploma(mode = GameState.currentMode) {
         nameInput.focus();
     }
 
+    updateDiplomaWatermark(mode);
+
     document.getElementById("diplomaOverlay").classList.add("active");
+}
+
+function updateDiplomaWatermark(mode = GameState.currentMode) {
+    const watermark = document.getElementById("diplomaWatermark");
+    const serial = document.getElementById("diplomaSerial");
+    const signName = document.getElementById("diplomaSignName");
+    const nameInput = document.getElementById("diplomaStudentName");
+    const dateSpan = document.getElementById("diplomaDate");
+    
+    const pName = (GameState.playerName || (nameInput ? nameInput.value : "") || "elev").trim().toLowerCase();
+    let chk = 0;
+    for (let i = 0; i < pName.length; i++) chk = (chk * 31 + pName.charCodeAt(i)) & 0xffff;
+    const hexChk = (chk >>> 0).toString(16).toUpperCase().padStart(4, '0');
+
+    if (GameState.cheatUsed) {
+        if (watermark) watermark.classList.add("active");
+        if (serial) serial.textContent = `Sikkerhets-ID: EM-2026-${mode.toUpperCase()}-K${hexChk}`;
+        if (dateSpan && !dateSpan.textContent.endsWith("·")) {
+            dateSpan.textContent = dateSpan.textContent.replace(/\s*·?$/, "") + " ·";
+        }
+        if (signName) signName.innerHTML = `Ingve Bjørnå<span style="font-size:9px; color:#d97706; margin-left:3px; vertical-align:super;">*</span>`;
+    } else {
+        if (watermark) watermark.classList.remove("active");
+        if (serial) serial.textContent = `Sikkerhets-ID: EM-2026-${mode.toUpperCase()}-V${hexChk}`;
+        if (dateSpan) dateSpan.textContent = dateSpan.textContent.replace(/\s*·?$/, "");
+        if (signName) signName.textContent = "Ingve Bjørnå";
+    }
 }
 
 // FYRVERKERI PÅ CANVAS
@@ -3863,9 +4389,9 @@ function launchFireworks(durationMs = 3000, callback) {
 }
 
 // 8. LAGRE / LAST SPILL LOGIKK (HASH & NAVNELÅS)
-function generateGameHash(name, level, mode) {
+function generateGameHash(name, level, mode, cheatUsed = false) {
     const cleanName = (name || "").trim().toLowerCase().replace(/\s+/g, ' ');
-    const salt = "EffektMesteren_Gamify_2026_Salt_LK20";
+    const salt = cheatUsed ? "EffektMesteren_Gamify_2026_Salt_Cheat_LK20" : "EffektMesteren_Gamify_2026_Salt_LK20";
     const str = `${cleanName}|lvl:${level}|mode:${mode}|${salt}`;
 
     let h1 = 0x811c9dc5;
@@ -3880,7 +4406,8 @@ function generateGameHash(name, level, mode) {
 
     const hex1 = (h1 >>> 0).toString(16).toUpperCase().padStart(8, '0');
     const hex2 = (h2 >>> 0).toString(16).toUpperCase().padStart(8, '0');
-    return `EM-L${level}-${hex1.substring(0, 4)}${hex2.substring(0, 4)}`;
+    const flagTag = cheatUsed ? 'K' : '';
+    return `EM-L${level}${flagTag}-${hex1.substring(0, 4)}${hex2.substring(0, 4)}`;
 }
 
 function validateGameCode(name, inputCode) {
@@ -3888,12 +4415,14 @@ function validateGameCode(name, inputCode) {
     const cleanCode = (inputCode || "").trim().toUpperCase().replace(/\s+/g, '');
     if (!cleanName || !cleanCode) return null;
 
-    // Sjekk over alle nivåer (1-6) og moduser (vg1, vg2)
+    // Sjekk over alle nivåer (1-6), moduser (vg1, vg2) og cheatUsed (false, true)
     for (let lvl = 1; lvl <= 6; lvl++) {
         for (const m of ['vg1', 'vg2']) {
-            const expected = generateGameHash(cleanName, lvl, m);
-            if (expected === cleanCode) {
-                return { level: lvl, mode: m, name: cleanName };
+            for (const ch of [false, true]) {
+                const expected = generateGameHash(cleanName, lvl, m, ch);
+                if (expected === cleanCode) {
+                    return { level: lvl, mode: m, name: cleanName, cheatUsed: ch };
+                }
             }
         }
     }
@@ -3918,9 +4447,10 @@ function saveToLocalStorage() {
                 playerName: GameState.playerName,
                 level: GameState.currentLevel,
                 mode: GameState.currentMode,
-                code: generateGameHash(GameState.playerName, GameState.currentLevel, GameState.currentMode),
+                code: generateGameHash(GameState.playerName, GameState.currentLevel, GameState.currentMode, !!GameState.cheatUsed),
                 completedLevels: Array.from(GameState.completedLevels || []),
                 levelStreaks: GameState.levelStreaks || {},
+                cheatUsed: !!GameState.cheatUsed,
                 timestamp: Date.now()
             };
             localStorage.setItem('effektMester_save', JSON.stringify(saveObj));
@@ -3945,7 +4475,7 @@ function openSaveLoadModal(defaultTab = 'save') {
         nameInput.style.backgroundColor = '#f1f5f9';
         lockedNotice.style.display = 'block';
 
-        const code = generateGameHash(GameState.playerName, GameState.currentLevel, GameState.currentMode);
+        const code = generateGameHash(GameState.playerName, GameState.currentLevel, GameState.currentMode, !!GameState.cheatUsed);
         codeText.textContent = code;
         codeResult.style.display = 'block';
         if (activeBox) activeBox.style.display = 'block';
@@ -3979,12 +4509,15 @@ function logoutPlayer() {
 
     GameState.playerName = "";
     GameState.isNameLocked = false;
+    GameState.cheatUsed = false;
     GameState.streak = 0;
     GameState.totalSolved = 0;
     GameState.vg1Completed = false;
     GameState.vg2Completed = false;
     GameState.completedLevels = new Set();
     GameState.levelStreaks = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+    GameState.levelQuestionDecks = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
+    GameState.lastTypeByLevel = { 1: null, 2: null, 3: null, 4: null, 5: null, 6: null };
 
     // Tilbakestill felter i Lagre / Hent modal
     const saveNameInput = document.getElementById('savePlayerNameInput');
@@ -4059,11 +4592,20 @@ function switchSaveTab(tab) {
 }
 
 // 9. HEMMELIG LÆRERMENY (Ctrl + Shift + K)
+function markCheatUsed() {
+    GameState.cheatUsed = true;
+    saveToLocalStorage();
+    updateDiplomaWatermark();
+}
+
 function toggleCheatMenu() {
     const panel = document.getElementById('cheat-panel');
     if (!panel) return;
     panel.classList.toggle('active');
     if (panel.classList.contains('active')) {
+        if (GameState.currentLevel > 1 || GameState.streak > 0) {
+            markCheatUsed();
+        }
         updateCheatPanel();
     }
 }
@@ -4110,6 +4652,7 @@ function updateCheatPanel() {
 }
 
 function cheatFillAnswer() {
+    markCheatUsed();
     const q = GameState.currentQuestion;
     if (!q) return;
 
@@ -4136,6 +4679,41 @@ function cheatFillAnswer() {
 
 // 10. EVENT LISTENERS OG OPPSTART
 document.addEventListener('DOMContentLoaded', () => {
+    // Interaktive fagord-tooltips: Klikk/touch-støtte og kantsjekk
+    document.addEventListener('click', (e) => {
+        const hint = e.target.closest ? e.target.closest('.term-hint') : null;
+        if (hint) {
+            const wasActive = hint.classList.contains('active');
+            document.querySelectorAll('.term-hint.active').forEach(el => el.classList.remove('active'));
+            if (!wasActive) hint.classList.add('active');
+            e.stopPropagation();
+        } else {
+            document.querySelectorAll('.term-hint.active').forEach(el => el.classList.remove('active'));
+        }
+    });
+
+    const adjustTooltipPosition = (e) => {
+        const hint = e.target.closest && e.target.closest('.term-hint');
+        if (!hint) return;
+        const card = hint.querySelector('.tooltip-card');
+        if (!card) return;
+        card.style.left = '50%';
+        card.style.transform = 'translateX(-50%)';
+        card.style.right = 'auto';
+        const rect = card.getBoundingClientRect();
+        const margin = 10;
+        if (rect.left < margin) {
+            card.style.left = `${margin - rect.left + card.offsetLeft}px`;
+            card.style.transform = 'none';
+        } else if (rect.right > window.innerWidth - margin) {
+            card.style.left = 'auto';
+            card.style.right = '0';
+            card.style.transform = 'none';
+        }
+    };
+    document.addEventListener('mouseover', adjustTooltipPosition);
+    document.addEventListener('focusin', adjustTooltipPosition);
+
     // Nivåvelgere
     document.querySelectorAll('.level-badge').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -4244,7 +4822,7 @@ document.addEventListener('DOMContentLoaded', () => {
         input.style.backgroundColor = '#f1f5f9';
         document.getElementById('saveLockedNotice').style.display = 'block';
 
-        const code = generateGameHash(name, GameState.currentLevel, GameState.currentMode);
+        const code = generateGameHash(name, GameState.currentLevel, GameState.currentMode, !!GameState.cheatUsed);
         document.getElementById('saveCodeText').textContent = code;
         document.getElementById('saveCodeResult').style.display = 'block';
         const activeBox = document.getElementById('saveActiveUserBox');
@@ -4294,6 +4872,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (result) {
             GameState.playerName = result.name;
             GameState.isNameLocked = true;
+            if (result.cheatUsed) {
+                GameState.cheatUsed = true;
+            }
             if (!GameState.completedLevels) GameState.completedLevels = new Set();
             if (!GameState.levelStreaks) GameState.levelStreaks = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
 
@@ -4303,6 +4884,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (raw) {
                     const data = JSON.parse(raw);
                     if (data && data.playerName && data.playerName.toLowerCase() === name.toLowerCase()) {
+                        if (data.cheatUsed) {
+                            GameState.cheatUsed = true;
+                        }
                         if (data.completedLevels && Array.isArray(data.completedLevels)) {
                             data.completedLevels.forEach(lvl => GameState.completedLevels.add(lvl));
                         }
@@ -4380,6 +4964,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const dipStudentName = document.getElementById('diplomaStudentName');
+    if (dipStudentName) {
+        dipStudentName.addEventListener('input', () => {
+            updateDiplomaWatermark();
+        });
+    }
+
+    window.addEventListener('beforeprint', () => {
+        if (GameState.isNameLocked && GameState.playerName) {
+            const inp = document.getElementById('diplomaStudentName');
+            if (inp) inp.value = GameState.playerName;
+            updateDiplomaWatermark();
+        }
+    });
+
     // Hemmelig lærermeny: Ctrl + Shift + K (støtter også Ctrl + Alt + K), samt Escape for lukking
     document.addEventListener('keydown', (e) => {
         if (((e.ctrlKey && e.shiftKey) || (e.ctrlKey && e.altKey)) && (e.key === 'k' || e.key === 'K')) {
@@ -4419,6 +5018,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.cheat-lvl-btn[data-lvl]').forEach(btn => {
         btn.addEventListener('click', () => {
             const lvl = parseInt(btn.getAttribute('data-lvl'));
+            if (lvl === 1) {
+                GameState.cheatUsed = false;
+                saveToLocalStorage();
+                updateDiplomaWatermark();
+            } else {
+                markCheatUsed();
+            }
             switchLevel(lvl);
             updateCheatPanel();
         });
@@ -4427,6 +5033,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cheatVg1 = document.getElementById('cheat-mode-vg1');
     if (cheatVg1) {
         cheatVg1.addEventListener('click', () => {
+            if (GameState.currentLevel > 1 || GameState.streak > 0) markCheatUsed();
             switchMode('vg1');
             updateCheatPanel();
         });
@@ -4435,6 +5042,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cheatVg2 = document.getElementById('cheat-mode-vg2');
     if (cheatVg2) {
         cheatVg2.addEventListener('click', () => {
+            if (GameState.currentLevel > 1 || GameState.streak > 0) markCheatUsed();
             switchMode('vg2');
             updateCheatPanel();
         });
@@ -4450,6 +5058,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cheatSkip = document.getElementById('cheat-skip-btn');
     if (cheatSkip) {
         cheatSkip.addEventListener('click', () => {
+            markCheatUsed();
             generateQuestion(GameState.currentLevel);
             updateCheatPanel();
         });
@@ -4458,6 +5067,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cheatStreak = document.getElementById('cheat-streak-btn');
     if (cheatStreak) {
         cheatStreak.addEventListener('click', () => {
+            markCheatUsed();
             GameState.streak = Math.min(5, GameState.streak + 1);
             updateStreakUI();
             updateCheatPanel();
@@ -4467,6 +5077,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cheatComplete = document.getElementById('cheat-complete-btn');
     if (cheatComplete) {
         cheatComplete.addEventListener('click', () => {
+            markCheatUsed();
             GameState.streak = GameState.targetStreak;
             if (!GameState.completedLevels) GameState.completedLevels = new Set();
             if (!GameState.levelStreaks) GameState.levelStreaks = {};
@@ -4482,6 +5093,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cheatVg1Dip = document.getElementById('cheat-vg1-diploma-btn');
     if (cheatVg1Dip) {
         cheatVg1Dip.addEventListener('click', () => {
+            markCheatUsed();
             showDiploma('vg1');
         });
     }
@@ -4489,6 +5101,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cheatVg2Dip = document.getElementById('cheat-vg2-diploma-btn');
     if (cheatVg2Dip) {
         cheatVg2Dip.addEventListener('click', () => {
+            markCheatUsed();
             showDiploma('vg2');
         });
     }
@@ -4498,6 +5111,14 @@ document.addEventListener('DOMContentLoaded', () => {
         cheatReset.addEventListener('click', () => {
             logoutPlayer();
             updateCheatPanel();
+        });
+    }
+
+    // Sanntids oppdatering av diplomets sikkerhets-ID hvis eleven taster navn manuelt
+    const dipStudentNameInput = document.getElementById('diplomaStudentName');
+    if (dipStudentNameInput) {
+        dipStudentNameInput.addEventListener('input', () => {
+            updateDiplomaWatermark();
         });
     }
 
@@ -4511,6 +5132,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (res) {
                     GameState.playerName = res.name;
                     GameState.isNameLocked = true;
+                    if (res.cheatUsed || data.cheatUsed) {
+                        GameState.cheatUsed = true;
+                    }
                     if (!GameState.completedLevels) GameState.completedLevels = new Set();
                     if (!GameState.levelStreaks) GameState.levelStreaks = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
 
