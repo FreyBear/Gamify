@@ -449,6 +449,23 @@
             pointer-events: auto;
         }
 
+        /* Sikring mot nøstede infobokser (hindrer at overliggende tooltips popper opp) */
+        .tooltip-card .term-hint {
+            border-bottom: none !important;
+            cursor: text !important;
+            color: inherit !important;
+            pointer-events: none !important;
+        }
+        .tooltip-card .term-hint::after {
+            display: none !important;
+        }
+        .tooltip-card .tooltip-card {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
         .theory-resources-box {
             margin-top: 14px;
             padding-top: 12px;
@@ -3193,7 +3210,7 @@ function formatMathText(str) {
         });
 }
 
-// Beriker tekst med interaktive infobokser på faguttrykk
+// Beriker tekst med interaktive infobokser på faguttrykk (uten nøsting)
 function enrichTextWithTooltips(str) {
     if (!str || typeof str !== 'string') return "";
 
@@ -3215,31 +3232,46 @@ function enrichTextWithTooltips(str) {
     ];
 
     const parts = str.split(/(<[^>]+>)/g);
-    let inTooltip = false;
+    let inTooltipSpanDepth = 0;
     const seenTerms = new Set();
+    const placeholders = [];
 
     for (let i = 0; i < parts.length; i++) {
         const p = parts[i];
         if (p.startsWith('<span') && p.includes('term-hint')) {
-            inTooltip = true;
-        } else if (p.includes('</span>') && inTooltip) {
-            inTooltip = false;
-        } else if (!p.startsWith('<') && !inTooltip) {
+            inTooltipSpanDepth++;
+        } else if (p.startsWith('<span') && inTooltipSpanDepth > 0) {
+            inTooltipSpanDepth++;
+        } else if (p.startsWith('</span') && inTooltipSpanDepth > 0) {
+            inTooltipSpanDepth--;
+        } else if (!p.startsWith('<') && inTooltipSpanDepth === 0) {
             let text = p;
             for (const { re, key } of termMap) {
                 if (seenTerms.has(key)) continue;
                 if (re.test(text)) {
                     re.lastIndex = 0;
                     text = text.replace(re, (match) => {
+                        if (seenTerms.has(key)) return match;
                         seenTerms.add(key);
-                        return getTermTooltipHtml(key, match);
+                        const placeholder = `___TERM_HINT_${placeholders.length}___`;
+                        placeholders.push({
+                            placeholder,
+                            html: getTermTooltipHtml(key, match)
+                        });
+                        return placeholder;
                     });
                 }
             }
             parts[i] = text;
         }
     }
-    return parts.join('');
+
+    let result = parts.join('');
+    // Sett inn ferdigformaterte tooltips etter at all tekstsøk er fullført
+    for (const item of placeholders) {
+        result = result.replace(item.placeholder, item.html);
+    }
+    return result;
 }
 
 function shuffleArray(arr) {

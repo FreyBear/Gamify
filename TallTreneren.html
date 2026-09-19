@@ -178,49 +178,156 @@
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
 
-        .button-group {
+        .hex-keypad {
             display: flex;
+            flex-direction: column;
             gap: 6px;
-            justify-content: center;
-            flex-wrap: wrap;
+            width: 100%;
+            user-select: none;
+            margin-top: 4px;
+        }
+
+        .keypad-row {
+            display: grid;
+            gap: 5px;
+            width: 100%;
+        }
+
+        .digits-row {
+            grid-template-columns: repeat(10, 1fr);
+        }
+
+        .hex-row {
+            grid-template-columns: repeat(6, 1fr) 1.25fr 0.75fr;
+        }
+
+        .submit-row {
+            grid-template-columns: 1fr;
+            margin-top: 2px;
         }
 
         .shortcut-btn {
-            padding: 8px 12px;
+            padding: 9px 0;
             font-size: 15px;
-            font-weight: bold;
+            font-weight: 700;
             font-family: ui-monospace, monospace;
             background-color: #f8fafc;
             border: 1px solid #cbd5e1;
             border-radius: 6px;
             cursor: pointer;
-            color: #334155;
-            min-width: 38px;
-            transition: all 0.15s ease;
+            color: #1e293b;
+            text-align: center;
+            transition: all 0.12s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            -webkit-tap-highlight-color: transparent;
         }
 
         .shortcut-btn:hover {
             background-color: #e2e8f0;
             border-color: #94a3b8;
+            transform: translateY(-1px);
+        }
+
+        .shortcut-btn:active {
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+
+        .shortcut-btn.key-digit {
+            background-color: #ffffff;
+        }
+
+        .shortcut-btn.key-digit:hover {
+            background-color: #f1f5f9;
+        }
+
+        /* Binærsifre 0 og 1 har en subtil ren ramme */
+        .shortcut-btn.key-bin {
+            border-color: #93c5fd;
+            background-color: #f0f9ff;
+            color: #0369a1;
+        }
+
+        .shortcut-btn.key-bin:hover {
+            background-color: #e0f2fe;
+            border-color: #38bdf8;
+        }
+
+        /* Hexadesimale bokstaver A-F */
+        .shortcut-btn.key-hex {
+            background-color: #eff6ff;
+            border-color: #bfdbfe;
+            color: #1d4ed8;
+            font-weight: 800;
+        }
+
+        .shortcut-btn.key-hex:hover {
+            background-color: #dbeafe;
+            border-color: #93c5fd;
+            color: #1e40af;
+        }
+
+        /* Handlingsknapper (Slett & Tøm) */
+        .shortcut-btn.key-action {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-size: 13px;
+            font-family: system-ui, -apple-system, sans-serif;
+            font-weight: 600;
+        }
+
+        .shortcut-btn.key-action:hover {
+            background-color: #fee2e2;
+            color: #dc2626;
+            border-color: #fca5a5;
+        }
+
+        #btn-clear {
+            font-family: ui-monospace, monospace;
+            font-weight: 800;
         }
 
         #submit-btn {
-            padding: 10px 24px;
+            padding: 12px 20px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             background-color: #2563eb;
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            flex-grow: 1;
-            transition: background-color 0.15s, transform 0.05s;
+            width: 100%;
+            transition: background-color 0.15s, transform 0.05s, box-shadow 0.15s;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
         }
 
-        #submit-btn:hover { background-color: #1d4ed8; }
-        #submit-btn:active { transform: scale(0.98); }
-        #submit-btn.btn-next { background-color: #0f172a; }
-        #submit-btn.btn-next:hover { background-color: #1e293b; }
+        #submit-btn:hover {
+            background-color: #1d4ed8;
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.25);
+        }
+
+        #submit-btn:active {
+            transform: scale(0.99);
+        }
+
+        #submit-btn.btn-next {
+            background-color: #0f172a;
+            box-shadow: 0 2px 4px rgba(15, 23, 42, 0.2);
+        }
+
+        #submit-btn.btn-next:hover {
+            background-color: #1e293b;
+        }
+
+        @media (max-width: 440px) {
+            .shortcut-btn {
+                padding: 8px 0;
+                font-size: 14px;
+            }
+            .shortcut-btn.key-action {
+                font-size: 11.5px;
+            }
+        }
 
         .feedback {
             margin: 12px 0;
@@ -763,6 +870,7 @@
                 <div class="brand-subtitle" id="secret-trigger-area">binær • heksadesimal • desimal ⚡</div>
             </div>
             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <a href="index.html" class="help-btn" style="text-decoration:none;" title="Tilbake til Hovedportalen med alle spill">🏠 Hovedportal</a>
                 <button type="button" class="help-btn" id="help-btn" title="Åpne teori og konverteringstabeller">
                     💡 Teori & Tabeller
                 </button>
@@ -795,19 +903,40 @@
                 id="answer-input" 
                 placeholder="Skriv svaret ditt her..." 
                 autocomplete="off" 
-                spellcheck="false"
+                spellcheck="false" 
                 required
             >
-            <div class="button-group">
-                <button type="button" class="shortcut-btn" data-char="0">0</button>
-                <button type="button" class="shortcut-btn" data-char="1">1</button>
-                <button type="button" class="shortcut-btn" data-char="A">A</button>
-                <button type="button" class="shortcut-btn" data-char="B">B</button>
-                <button type="button" class="shortcut-btn" data-char="C">C</button>
-                <button type="button" class="shortcut-btn" data-char="D">D</button>
-                <button type="button" class="shortcut-btn" data-char="E">E</button>
-                <button type="button" class="shortcut-btn" data-char="F">F</button>
-                <button type="submit" id="submit-btn">Sjekk svar</button>
+            <div class="hex-keypad">
+                <!-- Rad 1: Tallene 0-9 -->
+                <div class="keypad-row digits-row">
+                    <button type="button" class="shortcut-btn key-digit key-bin" data-char="0" title="0 (Binær / Desimal / Hex)">0</button>
+                    <button type="button" class="shortcut-btn key-digit key-bin" data-char="1" title="1 (Binær / Desimal / Hex)">1</button>
+                    <button type="button" class="shortcut-btn key-digit" data-char="2">2</button>
+                    <button type="button" class="shortcut-btn key-digit" data-char="3">3</button>
+                    <button type="button" class="shortcut-btn key-digit" data-char="4">4</button>
+                    <button type="button" class="shortcut-btn key-digit" data-char="5">5</button>
+                    <button type="button" class="shortcut-btn key-digit" data-char="6">6</button>
+                    <button type="button" class="shortcut-btn key-digit" data-char="7">7</button>
+                    <button type="button" class="shortcut-btn key-digit" data-char="8">8</button>
+                    <button type="button" class="shortcut-btn key-digit" data-char="9">9</button>
+                </div>
+
+                <!-- Rad 2: Heksadesimale sifre A-F + Slett og Tøm -->
+                <div class="keypad-row hex-row">
+                    <button type="button" class="shortcut-btn key-hex" data-char="A" title="A = 10">A</button>
+                    <button type="button" class="shortcut-btn key-hex" data-char="B" title="B = 11">B</button>
+                    <button type="button" class="shortcut-btn key-hex" data-char="C" title="C = 12">C</button>
+                    <button type="button" class="shortcut-btn key-hex" data-char="D" title="D = 13">D</button>
+                    <button type="button" class="shortcut-btn key-hex" data-char="E" title="E = 14">E</button>
+                    <button type="button" class="shortcut-btn key-hex" data-char="F" title="F = 15">F</button>
+                    <button type="button" class="shortcut-btn key-action" id="btn-backspace" title="Slett siste tegn (Backspace)">⌫ Slett</button>
+                    <button type="button" class="shortcut-btn key-action" id="btn-clear" title="Tøm svarfelt (Clear)">C</button>
+                </div>
+
+                <!-- Rad 3: Hovedhandlingsknapp -->
+                <div class="keypad-row submit-row">
+                    <button type="submit" id="submit-btn">Sjekk svar</button>
+                </div>
             </div>
         </form>
 
@@ -1859,18 +1988,50 @@
 
         document.getElementById('diploma-close-btn').addEventListener('click', closeDiploma);
 
-        // Snarveiknapper
-        document.querySelectorAll('.shortcut-btn').forEach(btn => {
+        // Snarveiknapper (Sett inn siffer / hex-bokstav)
+        document.querySelectorAll('.shortcut-btn[data-char]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const char = btn.getAttribute('data-char');
+                if (!char) return;
                 const input = document.getElementById('answer-input');
-                const start = input.selectionStart || input.value.length;
-                const end = input.selectionEnd || input.value.length;
+                const start = (input.selectionStart !== null) ? input.selectionStart : input.value.length;
+                const end = (input.selectionEnd !== null) ? input.selectionEnd : input.value.length;
                 input.value = input.value.substring(0, start) + char + input.value.substring(end);
                 input.focus();
                 input.selectionStart = input.selectionEnd = start + char.length;
             });
         });
+
+        // Slett siste tegn (Backspace)
+        const btnBackspace = document.getElementById('btn-backspace');
+        if (btnBackspace) {
+            btnBackspace.addEventListener('click', () => {
+                const input = document.getElementById('answer-input');
+                const start = (input.selectionStart !== null) ? input.selectionStart : input.value.length;
+                const end = (input.selectionEnd !== null) ? input.selectionEnd : input.value.length;
+                if (start === end && start > 0) {
+                    input.value = input.value.substring(0, start - 1) + input.value.substring(end);
+                    input.focus();
+                    input.selectionStart = input.selectionEnd = start - 1;
+                } else if (start !== end) {
+                    input.value = input.value.substring(0, start) + input.value.substring(end);
+                    input.focus();
+                    input.selectionStart = input.selectionEnd = start;
+                } else {
+                    input.focus();
+                }
+            });
+        }
+
+        // Tøm svarfelt (Clear)
+        const btnClear = document.getElementById('btn-clear');
+        if (btnClear) {
+            btnClear.addEventListener('click', () => {
+                const input = document.getElementById('answer-input');
+                input.value = '';
+                input.focus();
+            });
+        }
 
         // Lagre / Hent modal hendelser
         document.getElementById('save-load-btn').addEventListener('click', () => openSaveLoadModal('save'));

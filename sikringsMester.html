@@ -658,6 +658,23 @@
             pointer-events: auto;
         }
 
+        /* Sikring mot nøstede infobokser (hindrer at overliggende tooltips popper opp) */
+        .tooltip-card .term-hint {
+            border-bottom: none !important;
+            cursor: text !important;
+            color: inherit !important;
+            pointer-events: none !important;
+        }
+        .tooltip-card .term-hint::after {
+            display: none !important;
+        }
+        .tooltip-card .tooltip-card {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
         /* OPPGAVEKORT (HØYRE KOLONNE) */
         .task-badge-row {
             display: flex;
@@ -1238,6 +1255,8 @@
             <button type="button" class="header-btn" id="soundToggleBtn" title="Slå lyd av/på">🔊 Lyd: På</button>
             <button type="button" class="header-btn" id="introBtn" title="Hva er en sikring?">💡 Hva er en sikring?</button>
             <button type="button" class="header-btn" id="viewTheoryBtn">📖 Teorioversikt</button>
+            <a href="kursBeregneren.html" class="header-btn" title="Åpne fullt kursberegningsskjema for saksbehandling" style="text-decoration:none;">📋 Kursberegning</a>
+            <a href="index.html" class="header-btn" title="Tilbake til Hovedportalen med alle spill" style="text-decoration:none;">🏠 Hovedportal</a>
             <button type="button" class="header-btn" id="saveLoadBtn" title="Lagre eller hent spill">💾 Lagre / Hent</button>
         </div>
     </header>
@@ -1389,7 +1408,9 @@
                                     <option value="heater">Panelovn / Ohmsk last (1.0× In)</option>
                                     <option value="std_motor" selected>Standard pumpe/motor (7.0× In, 250ms)</option>
                                     <option value="heavy_motor">Tung kompressor / trafo (12× In, 400ms)</option>
-                                    <option value="overload">Varig overlast (1.6× In, ingen inrush)</option>
+                                    <option value="motor_overload">Motor mekanisk overlast (1.25× In - Kun motorvern kutter!)</option>
+                                    <option value="motor_phase">Fasebrudd elmotor (1.73× In - To-fasedrift!)</option>
+                                    <option value="overload">Varig overlast på kabel (1.6× In)</option>
                                 </select>
                             </div>
 
@@ -1406,6 +1427,13 @@
                             <div class="sim-control-group">
                                 <label class="sim-label">Kontinuerlig driftstrøm: <span class="sim-val" id="valRunI">0.9× In</span></label>
                                 <input type="range" id="simRunI" class="sim-input" min="0.5" max="2.5" step="0.1" value="0.9" oninput="window.SimManager.updateKarakteristikk()">
+                            </div>
+
+                            <div class="sim-control-group" style="grid-column: 1 / -1; display:flex; align-items:center; gap:8px; background:rgba(168,85,247,0.12); padding:8px 12px; border-radius:6px; border:1px solid rgba(168,85,247,0.35);">
+                                <input type="checkbox" id="simShowMotorRelay" checked onchange="window.SimManager.updateKarakteristikk()" style="accent-color:#a855f7; cursor:pointer; width:16px; height:16px; margin:0;">
+                                <label for="simShowMotorRelay" style="color:#f3e8ff; font-size:12.5px; cursor:pointer; font-weight:600; margin:0;">
+                                    🛡️ Sammenlign med termisk motorvern (Bimetallrelé innstilt på In, Klasse 10A)
+                                </label>
                             </div>
 
                             <div class="sim-control-group" style="display:flex; justify-content:flex-end; align-items:flex-end;">
@@ -1635,6 +1663,33 @@
                     • <strong style="color: #fde047;">[ 10000 ] i firkantramme:</strong> Nominell bryteevne Icn = 10 000 A (10 kA). Vernet kan trygt slukke en kortslutning på inntil 10 000 A uten å eksplodere!<br>
                     • <strong style="color: #fde047;">[ 3 ] i boks:</strong> Energibegrensningsklasse 3 (høyeste klasse, slipper gjennom minimalt med skadelig I²t-energi).<br>
                     • <strong style="color: #fde047;">230V / 400V ~:</strong> Merkespenning for vekselstrøm (AC).
+                </div>
+            </div>
+
+            <div>
+                <h3 style="color: var(--text-dark); font-size: 15px; margin-bottom: 6px;">⚙️ Hva med motorkurser? (Sikring vs. Motorvern)</h3>
+                <div style="background: #fdf4ff; border: 1px solid #f5d0fe; border-left: 4px solid #a855f7; border-radius: 8px; padding: 12px 14px; font-size: 13px; line-height: 1.6;">
+                    <p style="margin-bottom: 8px;">
+                        En vanlig misforståelse er å tro at sikringen i fordelingsskapet alene beskytter elmotoren mot all overbelastning. <strong>Det gjør den aldri!</strong>
+                    </p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div style="background: #ffffff; padding: 10px; border-radius: 6px; border: 1px solid #e9d5ff;">
+                            <strong style="color: #7e22ce; font-size: 13.5px;">🔌 Sikringen (MCB / Smeltesikring)</strong><br>
+                            <span style="font-size: 12px; color: #475569;">
+                                Har som oppgave å beskytte <em>tilførselskabelen</em> mot kortslutning og grove overstrømmer. Den velges ofte med C- eller D-karakteristikk for å tåle startstrømstøtet (6–8 × In) uten å trippe momentant.
+                            </span>
+                        </div>
+                        <div style="background: #ffffff; padding: 10px; border-radius: 6px; border: 1px solid #e9d5ff;">
+                            <strong style="color: #7e22ce; font-size: 13.5px;">🛡️ Motorvernet (Termisk bimetall / MPCB)</strong><br>
+                            <span style="font-size: 12px; color: #475569;">
+                                Beskytter <em>selve motoren</em> mot mekanisk overlast og fasebrudd. Stilles alltid inn nøyaktig på <strong>motorens merkeskiltstrøm (I_innstilt = In)</strong>!
+                            </span>
+                        </div>
+                    </div>
+                    <ul style="margin: 0; padding-left: 18px; font-size: 12.5px; color: #3b0764;">
+                        <li><strong>Fasebrudd (to-fasedrift):</strong> Hvis én sikring ryker i et 3-fase anlegg, må de to gjenværende fasene levere hele effekten. Strømmen stiger med ca. &radic;3 (&approx; 1,73). Uten et differensial-motorvern vil viklingene brenne opp i løpet av kort tid!</li>
+                        <li><strong>Hjelpekontakter (NC 95-96 &amp; NO 97-98):</strong> Det termiske bimetallreléet bryter normalt ikke selve hovedstrømmen direkte. Den lukkede kontakten <em>NC 95-96</em> er koblet i serie med kontaktorspolen og kutter styrestrømmen ved utløsning. Samtidig lukker den åpne kontakten <em>NO 97-98</em> for feillampe eller varsel til PLS.</li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -1879,6 +1934,18 @@ const ELECTRICAL_GLOSSARY = {
     'TNnett': {
         title: 'TN-nett (400 V)',
         def: 'Direkte jordet nøytralpunkt ført frem til installasjonen som PE/PEN-leder. Jordfeil blir en full kortslutning mot fase.'
+    },
+    'Motorvern': {
+        title: 'Motorvern (Termisk bimetall / MPCB)',
+        def: 'Beskytter elmotorens viklinger mot overoppheting ved mekanisk overbelastning eller fasebrudd. Må stilles inn på motorens merkeskiltstrøm (I_innstilt = In).'
+    },
+    'Fasebrudd': {
+        title: 'Fasebrudd (To-fasedrift)',
+        def: 'Oppstår når en fase forsvinner (f.eks. ved at en sikring ryker). Strømmen i de to gjenværende fasene øker med ca. 1,73 (√3), noe som raskt brenner viklingene uten differensialvern.'
+    },
+    'Hjelpekontakt': {
+        title: 'Hjelpekontakter (NC 95-96 / NO 97-98)',
+        def: 'Signal- og styrekontakter på motorvernet. NC 95-96 bryter styrestrømmen til kontaktorspolen ved overlast, mens NO 97-98 slutter for varsellampe eller PLS-alarm.'
     }
 };
 
@@ -1940,20 +2007,22 @@ const LEVEL_CONFIGS = {
     },
     3: {
         title: "Utløserkarakteristikker (B, C, D) & Motorstartere",
-        sub: "Elektromagnetisk utløsergrense (I₅), inrush-strøm og motorvern",
+        sub: "Elektromagnetisk utløsergrense (I₅), inrush-strøm og termisk motorvern",
         vg1: {
-            text: "Automater deles inn i karakteristikker etter hvor stor strøm som skal til for å løse ut vernet momentant (I₅): B-karakteristikk (3–5 × In), C-karakteristikk (5–10 × In) og D-karakteristikk (10–20 × In). Resistiv varme bruker B eller C, mens motorer krever C for å tåle startstrømstøtet.",
-            formula: "I₅ (B) = 5 · In\\nI₅ (C) = 10 · In\\nI₅ (D) = 20 · In",
-            tip: "⚡ Hvis en 10A B-automat tripper idet en vinkelsliper starter, skyldes det at startstrømmen overstiger 30–50 A!"
+            text: "Automater deles inn i karakteristikker etter hvor stor strøm som skal til for å løse ut vernet momentant (I₅): B-karakteristikk (3–5 × In), C-karakteristikk (5–10 × In) og D-karakteristikk (10–20 × In). Resistiv varme bruker B eller C, mens motorer krever C eller D for å tåle startstrømstøtet (6–8 × In).<br><br>" +
+                  "<strong>Sikring vs. Motorvern:</strong> Sikringen i tavla beskytter kabelen mot kortslutning. Selve elmotoren beskyttes av et separat termisk motorvern (bimetallrelé) som stilles inn nøyaktig på motorens merkestrøm (In). Hjelpekontakt NC 95-96 kutter kontaktorspolen ved overlast.",
+            formula: "I₅ (B) = 5 · In\\nI₅ (C) = 10 · In\\nI₅ (D) = 20 · In\\nMotorvern-innstilling: I_innstilt = In (merkeskilt)\\nHjelpekontakter: NC 95-96 (bryter spole), NO 97-98 (feillampe)",
+            tip: "⚡ Sikringen beskytter kabelen mot kortslutning, mens motorvernet stilles på motorens In for å hindre at viklingene brenner opp!"
         },
         vg2: {
-            text: "Utløserkurven har et toleransebånd: Under nedre grense (3× for B, 5× for C) skal vernet ALDRI trippe momentant. Over øvre grense (5× for B, 10× for C) skal det ALLTID trippe momentant (t ≤ 0,1s). Asynkronmotorer har direktestart-støt på 6–8 × In. Det termiske bimetallmotorvernet stilles alltid inn på motorens merkestrøm (In).",
-            formula: "Toleransebånd C: [5 · In , 10 · In]\\nMotorstart: Istart = 6–8 · In (varighet 100–400 ms)\\nMotorvern-innstilling: Iinnstilt = In (merkeskilt)",
-            tip: "🏭 Vg2-fokus: For store transformatorer kreves ofte D-karakteristikk for å håndtere magnetiseringsstrømmen (12–15 × In)!"
+            text: "Utløserkurven har et toleransebånd: Under nedre grense (3× for B, 5× for C) skal vernet ALDRI trippe momentant. Over øvre grense (5× for B, 10× for C) skal det ALLTID trippe momentant (t ≤ 0,1s). Asynkronmotorer har direktestart-støt på 6–8 × In.<br><br>" +
+                  "<strong>Fasebrudd og differensialutløser:</strong> Hvis én fase forsvinner (f.eks. ved at en sikring ryker), må de to gjenværende fasene bære hele effekten (to-fasedrift). Strømmen øker til ca. √3 (≈ 1,73) · In. Termiske bimetallreléer har en mekanisk differensialbro som detekterer ulik utbøyning og tripper ekstra raskt for å berge motoren.",
+            formula: "Toleransebånd C: [5 · In , 10 · In]\\nMotorstart: Istart = 6–8 · In (varighet 100–400 ms)\\nMotorvern-innstilling: I_innstilt = In\\nTo-fasedrift ved fasebrudd: I_2fase ≈ √3 · In ≈ 1,73 · In\\nStyrestrøm: NC 95-96 kutter kontaktorspole, NO 97-98 gir alarm",
+            tip: "🏭 Vg2-fokus: Motorvern har differensialbeskyttelse mot fasebrudd. Sikringen kan ikke beskytte mot to-fasedrift fordi strømmen ligger under kabelens Iz!"
         },
         resources: [
             { type: 'ndla', title: 'NDLA: Hovedkomponenter i motoranlegg', url: 'https://ndla.no/r/energi--og-styresystemer-el-ele-vg1/hovedkomponenter-i-motoranlegg/d48257ea41' },
-            { type: 'ndla', title: 'NDLA: Termisk vern i motoranlegg', url: 'https://ndla.no/nn/r/energi--og-styresystem-el-ele-vg1/termisk-vern/873d5619ab' }
+            { type: 'ndla', title: 'NDLA: Termisk vern i motoranlegg', url: 'https://ndla.no/nn/r/energi--og-styresystemer-el-ele-vg1/termisk-vern/873d5619ab' }
         ]
     },
     4: {
@@ -2433,6 +2502,18 @@ const SimManager = {
             document.getElementById('simInrush').value = 12;
             document.getElementById('simDuration').value = 400;
             document.getElementById('simRunI').value = 0.95;
+        } else if (preset === 'motor_overload') {
+            document.getElementById('simInrush').value = 7;
+            document.getElementById('simDuration').value = 250;
+            document.getElementById('simRunI').value = 1.25;
+            const motorCb = document.getElementById('simShowMotorRelay');
+            if (motorCb) motorCb.checked = true;
+        } else if (preset === 'motor_phase') {
+            document.getElementById('simInrush').value = 7;
+            document.getElementById('simDuration').value = 250;
+            document.getElementById('simRunI').value = 1.73;
+            const motorCb = document.getElementById('simShowMotorRelay');
+            if (motorCb) motorCb.checked = true;
         } else if (preset === 'overload') {
             document.getElementById('simInrush').value = 1.6;
             document.getElementById('simDuration').value = 100;
@@ -2446,6 +2527,7 @@ const SimManager = {
         const inrush = parseFloat(document.getElementById('simInrush').value);
         const duration = parseFloat(document.getElementById('simDuration').value);
         const runI = parseFloat(document.getElementById('simRunI').value);
+        const showMotor = document.getElementById('simShowMotorRelay')?.checked;
 
         this.pulseAnim = {
             startTime: Date.now(),
@@ -2461,14 +2543,22 @@ const SimManager = {
         const readout = document.getElementById('readoutKarakteristikk');
         if (inrush >= limits.max && (duration >= 20)) {
             SoundEffects.playBreakerTrip();
-            readout.innerHTML = `<span style="color:#f87171; font-weight:800;">🚨 TRIPPET MOMENTANT! Startstrømmen (${inrush.toFixed(1)}× In) oversteg vernets momentangrense I₅ (${limits.max}× In).</span>`;
+            readout.innerHTML = `<span style="color:#f87171; font-weight:800;">🚨 SIKRING TRIPPET MOMENTANT! Startstrømmen (${inrush.toFixed(1)}× In) oversteg sikringens momentangrense I₅ (${limits.max}× In). Sikringen kutter tilførselen!</span>`;
         } else if (inrush >= limits.min && inrush < limits.max) {
-            readout.innerHTML = `<span style="color:#fde047; font-weight:800;">⚠️ USIKKERT OMRÅDE! Startstrømmen (${inrush.toFixed(1)}× In) ligger i vernets toleransebånd. Kan løse ut utilsiktet!</span>`;
+            readout.innerHTML = `<span style="color:#fde047; font-weight:800;">⚠️ USIKKERT OMRÅDE FOR SIKRING! Startstrømmen (${inrush.toFixed(1)}× In) ligger i sikringens elektromagnetiske toleransebånd (${limits.min}–${limits.max}× In). Kan løse ut utilsiktet!</span>`;
+        } else if (showMotor && runI > 1.05 && runI <= 1.45) {
+            // Motor protection trips, but breaker does NOT!
+            const tripSec = Math.max(15, Math.round(25 / Math.pow(runI - 1.0, 1.7)));
+            readout.innerHTML = `<span style="color:#c084fc; font-weight:800;">🛡️ MOTORVERN LØSER UT! Driftsstrømmen (${runI.toFixed(1)}× In) overbelaster motoren. Termisk bimetall åpner hjelpekontakt NC 95-96 etter ca. ${tripSec} sekunder og kutter kontaktorspolen! (Merk: Sikringen ville ALDRI løst ut her da ${runI.toFixed(1)} < 1,45× In!)</span>`;
         } else if (runI > 1.45) {
             const tripSec = (80 / Math.pow(runI - 1.05, 2.2)).toFixed(1);
-            readout.innerHTML = `<span style="color:#fb923c; font-weight:800;">🔥 TERMISK OVERLAST! Driftsstrømmen (${runI.toFixed(1)}× In) fører til utkobling etter ca. ${tripSec} sekunder.</span>`;
+            if (showMotor) {
+                readout.innerHTML = `<span style="color:#fb923c; font-weight:800;">🔥 KRAFTIG OVERLAST! Driftsstrømmen (${runI.toFixed(1)}× In) er så høy at motorvernet kutter styrestrømmen raskt (NC 95-96), og automatsikringen ville eventuelt koblet ut etter ca. ${tripSec} sekunder.</span>`;
+            } else {
+                readout.innerHTML = `<span style="color:#fb923c; font-weight:800;">🔥 TERMISK OVERLAST PÅ SIKRING! Driftsstrømmen (${runI.toFixed(1)}× In) fører til utkobling av automatsikringen etter ca. ${tripSec} sekunder.</span>`;
+            }
         } else {
-            readout.innerHTML = `<span style="color:#4ade80; font-weight:800;">✅ SIKKER START & DRIFT! Vernet tåler startstrømmen og stabiliserer seg i normal drift.</span>`;
+            readout.innerHTML = `<span style="color:#4ade80; font-weight:800;">✅ SIKKER START & NORMAL DRIFT! Sikringen tåler startstøtet uten å trippe, og motorvernet tillater kontinuerlig drift (${runI.toFixed(1)}× In ≤ 1,0× In).</span>`;
         }
     },
 
@@ -2524,7 +2614,7 @@ const SimManager = {
         const pyTop = logY(0.1);
         ctx.fillRect(pxMin, pyTop, pxMax - pxMin, pyMag - pyTop);
 
-        // Termisk kurve
+        // Termisk kurve for automatsikring
         ctx.strokeStyle = limits.color;
         ctx.lineWidth = 3;
         ctx.beginPath();
@@ -2541,7 +2631,32 @@ const SimManager = {
         ctx.lineTo(logX(30), logY(0.01));
         ctx.stroke();
 
-        // Forklarende tekst
+        // Tegn termisk motorvern dersom krysset av
+        const showMotor = document.getElementById('simShowMotorRelay')?.checked;
+        if (showMotor) {
+            ctx.strokeStyle = '#c084fc';
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([5, 4]);
+            ctx.beginPath();
+            let firstM = true;
+            for (let ratio = 1.08; ratio <= 10; ratio += 0.1) {
+                let tM = 24 / Math.pow(ratio - 1.0, 1.7);
+                const px = logX(ratio);
+                const py = logY(Math.max(tM, 0.05));
+                if (firstM) { ctx.moveTo(px, py); firstM = false; }
+                else { ctx.lineTo(px, py); }
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Motor legend at top right
+            ctx.fillStyle = '#c084fc';
+            ctx.font = 'bold 10.5px system-ui';
+            ctx.textAlign = 'right';
+            ctx.fillText('--- Motorvern (Klasse 10A, I_innstilt = In)', pad.left + w - 5, pad.top + 20);
+        }
+
+        // Forklarende tekst for automatsikring
         ctx.fillStyle = limits.color;
         ctx.font = 'bold 11px system-ui';
         ctx.textAlign = 'left';
@@ -3010,70 +3125,158 @@ function generateLevel2Question(type, isVg2, typeInfo) {
 // NIVÅ 3: UTLØSERKARAKTERISTIKKER & MOTORSTARTERE
 // ----------------------------------------------------
 function generateLevel3Question(type, isVg2, typeInfo) {
-    if (type === 1) { // Type A: Begrep
-        return {
-            level: 3, type: 1, typeName: typeInfo.name, typeClass: typeInfo.css, isChoice: true,
-            text: "Hva er det elektromagnetiske momentanutløserområdet (I₅) for en standard <strong>C-karakteristikk</strong> automatsikring?",
-            choices: shuffleArray([
-                { text: "Mellom 5 · In og 10 · In", correct: true },
-                { text: "Mellom 3 · In og 5 · In", correct: false },
-                { text: "Mellom 10 · In og 20 · In", correct: false },
-                { text: "Nøyaktig 1,45 · In", correct: false }
-            ]),
-            hint: "B er 3–5, C er midt i mellom, og D er for tunge trafoer (10–20).",
-            explanation: "I henhold til EN 60898 har **C-karakteristikk** momentant utkoblingsområde mellom <code>5 · In</code> og <code>10 · In</code>."
-        };
-    } else if (type === 2) { // Type B: Beregning av I5
-        const In = [10, 16, 20, 25, 32][Math.floor(Math.random() * 5)];
-        const curve = isVg2 ? ['C', 'D'][Math.floor(Math.random() * 2)] : 'C';
-        const mult = curve === 'B' ? 5 : (curve === 'C' ? 10 : 20);
-        const ans = In * mult;
-        return {
-            level: 3, type: 2, typeName: typeInfo.name, typeClass: typeInfo.css, isChoice: false,
-            text: `Hva er minste kortslutningsstrøm (I₅) som <strong>garanterer</strong> momentanutkobling (t ≤ 0,1s) for en <strong>${In} A ${curve}-automat</strong>?`,
-            expectedAnswer: ans, tolerance: 0, unit: "A",
-            hint: `For ${curve}-karakteristikk er øvre grense for garantert utkobling ${mult} · In.`,
-            explanation: `Garantert elektromagnetisk utkobling for ${curve}-karakteristikk krever øvre grense:<br><code>I₅ = ${mult} · In = ${mult} · ${In} A = ${ans} A</code>.`
-        };
-    } else if (type === 3) { // Type C: Variabelanalyse / Toleransebånd
-        return {
-            level: 3, type: 3, typeName: typeInfo.name, typeClass: typeInfo.css, isChoice: true,
-            text: "En startstrøm på nøyaktig <strong>4,0 · In</strong> oppstår under start av en motor sikret med en <strong>B-karakteristikk</strong> (toleransebånd 3–5 · In). Hva kan vi garantere om utkoblingen?",
-            choices: shuffleArray([
-                { text: "Utkoblingen er usikker; vernet kan koble ut momentant, eller det kan holde uten å trippe.", correct: true },
-                { text: "Vernet vil garantert løse ut momentant på under 0,01s.", correct: false },
-                { text: "Vernet vil garantert aldri løse ut.", correct: false },
-                { text: "Bimetallet vil smelte momentant.", correct: false }
-            ]),
-            hint: "Mellom 3x og 5x ligger vernets produsentspesifikke usikkerhetssone.",
-            explanation: "Mellom nedre grense (3 · In) og øvre grense (5 · In) ligger **toleransebåndet**. Vernet *kan* trippe, men det er ikke *garantert*. For sikker motorstart må startstrømmen ligge under nedre grense!"
-        };
+    if (type === 1) { // Type A: Begrep & Prinsipp
+        const variant = Math.floor(Math.random() * 3);
+        if (variant === 0) {
+            return {
+                level: 3, type: 1, typeName: typeInfo.name, typeClass: typeInfo.css, isChoice: true,
+                text: "Hva er hovedforskjellen på sikringen i fordelingsskapet og det termiske motorvernet (bimetallreléet) på en motorkurs?",
+                choices: shuffleArray([
+                    { text: "Sikringen beskytter kabelen mot kortslutning, mens motorvernet beskytter elmotoren mot overoppheting ved mekanisk overlast og fasebrudd.", correct: true },
+                    { text: "Sikringen beskytter motoren, mens motorvernet kun er en nødstoppbryter for styrestrømmen.", correct: false },
+                    { text: "Det er ingen forskjell; begge komponenter har identisk utløserkurve og funksjon.", correct: false },
+                    { text: "Motorvernet beskytter mot jordfeil, mens sikringen beskytter mot overspenning fra lyn.", correct: false }
+                ]),
+                hint: "Tenk over: Hva ville skje med en motor som overbelastes med 20 % dersom kun en 16A sikring sto for vernet?",
+                explanation: "En automatsikring beskytter tilførselskabelen og tillater motorstart uten å trippe. Den løser ikke ut på moderate overbelastninger (f.eks. 1,2 · In). <strong>Det termiske motorvernet</strong> stilles inn nøyaktig på motorens In for å berge viklingene mot termisk sammenbrudd."
+            };
+        } else if (variant === 1) {
+            return {
+                level: 3, type: 1, typeName: typeInfo.name, typeClass: typeInfo.css, isChoice: true,
+                text: "I styrestrømkretsen til en motorstarter, hvilken funksjon har motorvernets hjelpekontakter <strong>NC 95-96</strong> og <strong>NO 97-98</strong>?",
+                choices: shuffleArray([
+                    { text: "NC 95-96 åpner og bryter kontaktorspolen ved overlast, mens NO 97-98 lukker for å aktivere feillampe eller PLS-alarm.", correct: true },
+                    { text: "NC 95-96 bryter selve 400 V trefase-hovedstrømmen til motoren direkte.", correct: false },
+                    { text: "NO 97-98 kobler motoren fra stjerne til trekant etter tidsforsinkelse.", correct: false },
+                    { text: "Begge kontaktene er reservesikringer dersom en fase faller ut.", correct: false }
+                ]),
+                hint: "NC står for Normally Closed (hvilekontakt), og NO står for Normally Open (arbeidskontakt).",
+                explanation: "Det termiske bimetallreléet bryter ikke hovedstrømmen selv. Den lukkede kontakten <strong>NC 95-96</strong> ligger i serie med kontaktorspolen (A1-A2) og de-aktiverer kontaktoren. Den åpne kontakten <strong>NO 97-98</strong> slutter og gir feilvarsel."
+            };
+        } else {
+            return {
+                level: 3, type: 1, typeName: typeInfo.name, typeClass: typeInfo.css, isChoice: true,
+                text: "Hva er det elektromagnetiske momentanutløserområdet (I₅) for en standard <strong>C-karakteristikk</strong> automatsikring?",
+                choices: shuffleArray([
+                    { text: "Mellom 5 · In og 10 · In", correct: true },
+                    { text: "Mellom 3 · In og 5 · In", correct: false },
+                    { text: "Mellom 10 · In og 20 · In", correct: false },
+                    { text: "Nøyaktig 1,45 · In", correct: false }
+                ]),
+                hint: "B er 3–5, C er midt i mellom, og D er for tunge trafoer (10–20).",
+                explanation: "I henhold til EN 60898 har **C-karakteristikk** momentant utkoblingsområde mellom <code>5 · In</code> og <code>10 · In</code>."
+            };
+        }
+    } else if (type === 2) { // Type B: Beregning
+        const sub = Math.random() < 0.5 ? 'I5' : 'motor';
+        if (sub === 'I5') {
+            const In = [10, 16, 20, 25, 32][Math.floor(Math.random() * 5)];
+            const curve = isVg2 ? ['C', 'D'][Math.floor(Math.random() * 2)] : 'C';
+            const mult = curve === 'B' ? 5 : (curve === 'C' ? 10 : 20);
+            const ans = In * mult;
+            return {
+                level: 3, type: 2, typeName: typeInfo.name, typeClass: typeInfo.css, isChoice: false,
+                text: `Hva er minste kortslutningsstrøm (I₅) som <strong>garanterer</strong> momentanutkobling (t ≤ 0,1s) for en <strong>${In} A ${curve}-automat</strong>?`,
+                expectedAnswer: ans, tolerance: 0, unit: "A",
+                hint: `For ${curve}-karakteristikk er øvre grense for garantert utkobling ${mult} · In.`,
+                explanation: `Garantert elektromagnetisk utkobling for ${curve}-karakteristikk krever øvre grense:<br><code>I₅ = ${mult} · In = ${mult} · ${In} A = ${ans} A</code>.`
+            };
+        } else {
+            const In = [5.5, 7.2, 8.4, 11.0, 14.5][Math.floor(Math.random() * 5)];
+            const mult = [6, 7, 8][Math.floor(Math.random() * 3)];
+            const ans = +(In * mult).toFixed(1);
+            return {
+                level: 3, type: 2, typeName: typeInfo.name, typeClass: typeInfo.css, isChoice: false,
+                text: `En elmotor har merkestrøm <strong>In = ${In} A</strong>. Ved direktestart måles et startstrømstøt på <strong>${mult} · In</strong>. Hvor stor blir startstrømmen (Istart) i Ampere?`,
+                expectedAnswer: ans, tolerance: 0.1, unit: "A",
+                hint: `Gang merkestrømmen med startstrømsfaktoren: Istart = ${mult} · In.`,
+                explanation: `Startstrømstøtet ved direktestart beregnes som:<br><code>Istart = ${mult} · In = ${mult} · ${In} A = ${ans} A</code>. Dette viser hvorfor motorkurser trenger C- eller D-vern som tåler strømstøtet uten å løse ut momentant!`
+            };
+        }
+    } else if (type === 3) { // Type C: Variabelanalyse / Fasebrudd / Toleransebånd
+        if (Math.random() < 0.5) {
+            return {
+                level: 3, type: 3, typeName: typeInfo.name, typeClass: typeInfo.css, isChoice: true,
+                text: "En startstrøm på nøyaktig <strong>4,0 · In</strong> oppstår under start av en motor sikret med en <strong>B-karakteristikk</strong> (toleransebånd 3–5 · In). Hva kan vi garantere om utkoblingen?",
+                choices: shuffleArray([
+                    { text: "Utkoblingen er usikker; vernet kan koble ut momentant, eller det kan holde uten å trippe.", correct: true },
+                    { text: "Vernet vil garantert løse ut momentant på under 0,01s.", correct: false },
+                    { text: "Vernet vil garantert aldri løse ut.", correct: false },
+                    { text: "Bimetallet vil smelte momentant.", correct: false }
+                ]),
+                hint: "Mellom 3x og 5x ligger vernets produsentspesifikke usikkerhetssone.",
+                explanation: "Mellom nedre grense (3 · In) og øvre grense (5 · In) ligger **toleransebåndet**. Vernet *kan* trippe, men det er ikke *garantert*. For sikker motorstart må startstrømmen ligge under nedre grense!"
+            };
+        } else {
+            return {
+                level: 3, type: 3, typeName: typeInfo.name, typeClass: typeInfo.css, isChoice: true,
+                text: "En 3-fase asynkronmotor trekker normalt en merkestrøm på <strong>10 A</strong> i hver fase. Plutselig ryker én av forankoblede sikringer (fasebrudd), men motoren fortsetter å gå under full mekanisk last. Hva skjer med strømmen i de to gjenværende fasene?",
+                choices: shuffleArray([
+                    { text: "Strømmen i de to gjenværende fasene stiger med ca. √3 (til ca. 17,3 A), og motoren vil raskt brenne dersom differensial-motorvernet ikke kobler ut.", correct: true },
+                    { text: "Strømmen halveres til 5 A i hver av de to gjenværende fasene.", correct: false },
+                    { text: "Strømmen forblir uendret på 10 A i de to fasene.", correct: false },
+                    { text: "Strømmen faller momentant til 0 A i alle ledere.", correct: false }
+                ]),
+                hint: "Ved to-fasedrift må to faser utføre 100 % av arbeidet. Formelen innebærer faktoren √3 (ca. 1,73).",
+                explanation: "Når en fase forsvinner (<strong>fasebrudd / to-fasedrift</strong>), øker strømmen i de to gjenværende viklingene med en faktor på ca. <code>√3 ≈ 1,73</code> (dvs. fra 10 A til 17,3 A). Viklingene overopphetes raskt. Det termiske motorvernet har en differensialmekanisme som oppdager skjevlasten og løser ut hurtig for å redde motoren!"
+            };
+        }
     } else if (type === 4) { // Type D: Skjema & Merkeskilt Motor
-        return {
-            level: 3, type: 4, typeName: typeInfo.name, typeClass: typeInfo.css, isChoice: true,
-            text: "Merkeskiltet på en asynkronmotor oppgir: <strong>400 V Y, 5,5 kW, In = 11,2 A, cosφ = 0,84</strong>. Hva skal det tilhørende termiske motorvernet (bimetallreléet) innstilles på?",
-            choices: shuffleArray([
-                { text: "Nøyaktig 11,2 A (motorens merkestrøm In)", correct: true },
-                { text: "16 A (sikringens merkestrøm)", correct: false },
-                { text: "1,45 · 11,2 A = 16,24 A", correct: false },
-                { text: "7 · 11,2 A = 78,4 A (for å tåle startstrømmen)", correct: false }
-            ]),
-            hint: "Termisk motorvern skal beskytte viklingene mot kontinuerlig overoppheting under drift.",
-            explanation: "Det termiske motorvernet (bimetallreléet i kontaktorstyringen) skal **alltid stilles inn på motorens nominelle merkestrøm (In = 11,2 A)**. Startstrømmen håndteres av vernets tidsforsinkelse."
-        };
-    } else { // Type E: Yrkescase
-        return {
-            level: 3, type: 5, typeName: typeInfo.name, typeClass: typeInfo.css, isChoice: true,
-            text: "En kunde har installert en stor kompressor med startstrømstøt på <strong>95 A</strong> i 200 ms. Kursen er sikret med en <strong>10 A B-automat</strong>, og sikringen tripper i startøyeblikket. Hva er den faglig korrekte løsningen?",
-            choices: shuffleArray([
-                { text: "Bytt til C- eller D-karakteristikk (f.eks. 16A C eller 10A D) som tåler startstøtet, forutsatt at kabelen og Ik,min tillater det.", correct: true },
-                { text: "Fjern bimetallet fra automatsikringen.", correct: false },
-                { text: "Bytt ut kompressormotoren med en motstand.", correct: false },
-                { text: "Koble kompressoren forbi sikringen under start.", correct: false }
-            ]),
-            hint: "10 A B-vern har momentanutkobling mellom 30 A og 50 A. 95 A er langt over grensen!",
-            explanation: "For et 10 A B-vern er I₅ = 30–50 A. Startstrømmen på 95 A (9,5 · In) treffer det elektromagnetiske utløserfeltet direkte. Løsning: Skift til C- eller D-karakteristikk, og sjekk at minste kortslutningsstrøm (Ik,min ≥ I₅) fortsatt er oppfylt!"
-        };
+        if (isVg2 || Math.random() < 0.5) {
+            return {
+                level: 3, type: 4, typeName: typeInfo.name, typeClass: typeInfo.css, isChoice: true,
+                text: "Merkeskiltet på en 3-fase asynkronmotor oppgir: <strong>230 V Δ / 400 V Y | 14,2 A / 8,2 A | 4,0 kW | cosφ = 0,83</strong>. Motoren kobles i et <strong>400 V TN-nett</strong> i stjerne (Y). Hvilken strømverdi skal det termiske motorvernet stilles inn på?",
+                choices: shuffleArray([
+                    { text: "8,2 A (motorens merkestrøm for 400 V stjernekobling)", correct: true },
+                    { text: "14,2 A (merkestrømmen for 230 V trekantkobling)", correct: false },
+                    { text: "16,0 A (nærmeste standard automatsikringsstørrelse)", correct: false },
+                    { text: "1,45 · 8,2 A = 11,9 A", correct: false }
+                ]),
+                hint: "Se nøye på paret mellom spenning og strøm: 400 V tilhører Y-koblingen og den laveste strømmen.",
+                explanation: "På 400 V tilkobling i stjerne (Y) oppgir merkeskiltet <code>In = 8,2 A</code>. Termisk motorvern (bimetallrelé) skal **alltid innstilles nøyaktig på motorens merkestrøm for den aktuelle spenningen (I_innstilt = 8,2 A)**!"
+            };
+        } else {
+            return {
+                level: 3, type: 4, typeName: typeInfo.name, typeClass: typeInfo.css, isChoice: true,
+                text: "Merkeskiltet på en asynkronmotor oppgir: <strong>400 V Y, 5,5 kW, In = 11,2 A, cosφ = 0,84</strong>. Kursen er sikret med 16 A C-automat i fordelingsskapet. Hva skal det tilhørende termiske motorvernet innstilles på?",
+                choices: shuffleArray([
+                    { text: "Nøyaktig 11,2 A (motorens merkestrøm In)", correct: true },
+                    { text: "16 A (sikringens merkestrøm)", correct: false },
+                    { text: "1,45 · 11,2 A = 16,24 A", correct: false },
+                    { text: "7 · 11,2 A = 78,4 A (for å tåle startstrømmen)", correct: false }
+                ]),
+                hint: "Termisk motorvern skal beskytte viklingene mot kontinuerlig overoppheting under drift.",
+                explanation: "Det termiske motorvernet (bimetallreléet i kontaktorstyringen) skal **alltid stilles inn på motorens nominelle merkestrøm (In = 11,2 A)**. Startstrømmen håndteres av vernets tidsforsinkelse."
+            };
+        }
+    } else { // Type E: Yrkescase & Feilsøking
+        if (Math.random() < 0.5) {
+            return {
+                level: 3, type: 5, typeName: typeInfo.name, typeClass: typeInfo.css, isChoice: true,
+                text: "En avtrekksvifte med merkestrøm In = 6,8 A er sikret med en <strong>16 A C-automat</strong> i sikringsskapet og et termisk motorvern innstilt på <strong>6,8 A</strong> ved motoren. Sikringen i skapet tripper aldri, men motorvernet løser ut etter ca. 15 minutters kontinuerlig drift. Hva er den faglig korrekte analysen?",
+                choices: shuffleArray([
+                    { text: "Mekanisk overbelastning (f.eks. slitt lager/tett spjeld) eller fasebrudd gjør at motoren trekker f.eks. 8,5 A. Sikringen løser ikke ut fordi strømmen er langt under 1,45 · 16 A = 23,2 A.", correct: true },
+                    { text: "Automatsikringen på 16 A er defekt siden den ikke har løst ut før motorvernet.", correct: false },
+                    { text: "Motorvernet er feilkoblet og må byttes til en ekstra treg D-sikring.", correct: false },
+                    { text: "16 A C-sikringen 'dytter' for mye strøm inn i motoren og må byttes til en 6 A sikring.", correct: false }
+                ]),
+                hint: "Sikringen beskytter kabelen og reagerer først over 1,45 · 16 A. Hvem overvåker strømmen mellom 6,8 A og 23,2 A?",
+                explanation: "Sikringen (C16) beskytter kabelen mot overbelastning og kortslutning, og tillater opptil <code>1,45 · 16 A = 23,2 A</code> i inntil én time. Motorvernet overvåker motoren nøyaktig ved 6,8 A. Når motorvernet tripper etter 15 minutter mens sikringen holder, beviser dette at vernet fungerer nøyaktig etter hensikten: Det redder motoren fra mekanisk overbelastning eller to-fasedrift!"
+            };
+        } else {
+            return {
+                level: 3, type: 5, typeName: typeInfo.name, typeClass: typeInfo.css, isChoice: true,
+                text: "En kunde har installert en stor kompressor med startstrømstøt på <strong>95 A</strong> i 200 ms. Kursen er sikret med en <strong>10 A B-automat</strong>, og sikringen tripper i startøyeblikket. Hva er den faglig korrekte løsningen?",
+                choices: shuffleArray([
+                    { text: "Bytt til C- eller D-karakteristikk (f.eks. 16A C eller 10A D) som tåler startstøtet, forutsatt at kabelen og Ik,min tillater det.", correct: true },
+                    { text: "Fjern bimetallet fra automatsikringen.", correct: false },
+                    { text: "Bytt ut kompressormotoren med en motstand.", correct: false },
+                    { text: "Koble kompressoren forbi sikringen under start.", correct: false }
+                ]),
+                hint: "10 A B-vern har momentanutkobling mellom 30 A og 50 A. 95 A er langt over grensen!",
+                explanation: "For et 10 A B-vern er I₅ = 30–50 A. Startstrømmen på 95 A (9,5 · In) treffer det elektromagnetiske utløserfeltet direkte. Løsning: Skift til C- eller D-karakteristikk, og sjekk at minste kortslutningsstrøm (Ik,min ≥ I₅) fortsatt er oppfylt!"
+            };
+        }
     }
 }
 
@@ -3372,8 +3575,7 @@ function loadFromLocalStorage() {
 
 // 8. TEKSTBERIKELSE MED VERKTØYTIPS (GLOSSARY ENRICHMENT)
 function enrichTextWithTooltips(text) {
-    if (!text) return "";
-    let out = text;
+    if (!text || typeof text !== 'string') return "";
 
     const termReplacements = [
         { key: 'Ib', match: /\b(Ib|I_b)\b/g },
@@ -3402,19 +3604,51 @@ function enrichTextWithTooltips(text) {
         { key: 'TypeB', match: /\b(Type B|Type B-vern)\b/g },
         { key: 'ITnett', match: /\b(IT-nett|IT-anlegg)\b/gi },
         { key: 'TTnett', match: /\b(TT-nett|TT-anlegg)\b/gi },
-        { key: 'TNnett', match: /\b(TN-nett|TN-anlegg)\b/gi }
+        { key: 'TNnett', match: /\b(TN-nett|TN-anlegg)\b/gi },
+        { key: 'Motorvern', match: /\b(motorvern|motorvernet|MPCB)\b/gi },
+        { key: 'Fasebrudd', match: /\b(fasebrudd|fasebruddet|to-fasedrift)\b/gi },
+        { key: 'Hjelpekontakt', match: /\b(hjelpekontakt|hjelpekontakter|hjelpekontakten|95-96|97-98)\b/gi }
     ];
 
-    termReplacements.forEach(({ key, match }) => {
-        const item = ELECTRICAL_GLOSSARY[key];
-        if (!item) return;
+    const parts = text.split(/(<[^>]+>)/g);
+    let inTooltipSpanDepth = 0;
+    const placeholders = [];
 
-        out = out.replace(match, (found) => {
-            return `<span class="term-hint" tabindex="0">${found}<span class="tooltip-card"><strong>${item.title}</strong>${item.def}</span></span>`;
-        });
-    });
+    for (let i = 0; i < parts.length; i++) {
+        const p = parts[i];
+        if (p.startsWith('<span') && p.includes('term-hint')) {
+            inTooltipSpanDepth++;
+        } else if (p.startsWith('<span') && inTooltipSpanDepth > 0) {
+            inTooltipSpanDepth++;
+        } else if (p.startsWith('</span') && inTooltipSpanDepth > 0) {
+            inTooltipSpanDepth--;
+        } else if (!p.startsWith('<') && inTooltipSpanDepth === 0) {
+            let partText = p;
+            for (const { key, match } of termReplacements) {
+                const item = ELECTRICAL_GLOSSARY[key];
+                if (!item) continue;
+                match.lastIndex = 0;
+                if (match.test(partText)) {
+                    match.lastIndex = 0;
+                    partText = partText.replace(match, (found) => {
+                        const ph = `___TERM_HINT_${placeholders.length}___`;
+                        placeholders.push({
+                            placeholder: ph,
+                            html: `<span class="term-hint" tabindex="0">${found}<span class="tooltip-card"><strong>${item.title}</strong>${item.def}</span></span>`
+                        });
+                        return ph;
+                    });
+                }
+            }
+            parts[i] = partText;
+        }
+    }
 
-    return out;
+    let result = parts.join('');
+    for (const ph of placeholders) {
+        result = result.replace(ph.placeholder, ph.html);
+    }
+    return result;
 }
 
 // 9. BRUKERGRENSESNITT & SPILL-KJERNE

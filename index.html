@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamify – Læringsspill for Elektro & Teknologi</title>
+    <meta name="description" content="Enkle, interaktive læringsspill og fagverktøy for videregående opplæring etter LK20.">
+    <style>
+        :root {
+            --bg-page: #0b0f19;
+            --bg-card: #151d30;
+            --bg-card-hover: #1c2640;
+            --border: #24304f;
+            --border-hover: #38bdf8;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.15);
+            --radius: 14px;
+            --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        [data-theme="light"] {
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f1f5f9;
+            --border: #e2e8f0;
+            --border-hover: #0284c7;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent: #0284c7;
+            --accent-glow: rgba(2, 132, 199, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font);
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.2s, color 0.2s;
+            padding: 0 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1040px;
+            margin: 0 auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        header {
+            padding: 36px 0 28px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 32px;
+            gap: 16px;
+        }
+
+        .brand-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .brand-title {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-main);
+        }
+
+        .brand-title span {
+            color: var(--accent);
+        }
+
+        .brand-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .theme-btn:hover {
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        /* GAMES GRID */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 18px;
+            margin-bottom: 40px;
+        }
+
+        .game-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .game-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--border-hover);
+            box-shadow: 0 8px 24px var(--accent-glow);
+            background: var(--bg-card-hover);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .card-icon {
+            font-size: 26px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
+
+        [data-theme="light"] .card-icon {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 700;
+            line-height: 1.25;
+            color: var(--text-main);
+        }
+
+        .card-desc {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 18px;
+            flex-grow: 1;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent);
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        [data-theme="light"] .card-footer {
+            border-top-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .card-arrow {
+            transition: transform 0.15s ease;
+        }
+
+        .game-card:hover .card-arrow {
+            transform: translateX(4px);
+        }
+
+        /* FOOTER */
+        footer {
+            padding: 24px 0 32px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+
+        .footer-links span {
+            opacity: 0.4;
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 16px;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            max-width: 480px;
+            width: 100%;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 24px 0 20px 0;
+            }
+            .header-actions {
+                align-self: flex-end;
+                margin-top: -36px;
+            }
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- TOPP -->
+        <header>
+            <div class="brand-group">
+                <h1 class="brand-title">⚡ Gami<span>fy</span></h1>
+                <p class="brand-desc">Interaktive læringsspill og fagverktøy for elektro og teknologi (LK20)</p>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="theme-btn" id="themeBtn" title="Bytt mellom lyst og mørkt tema">☀️</button>
+            </div>
+        </header>
+
+        <!-- SPILLKORT -->
+        <main class="games-grid">
+
+            <!-- 1. SIKRINGSMESTEREN -->
+            <a href="sikringsMester.html" class="game-card">
+                <div>
+                    <div class="card-header">
+                        <div class="card-icon">⚡</div>
+                        <h2 class="card-title">SikringsMesteren</h2>
+                    </div>
+                    <p class="card-desc">
+                        Dimensjonering av kabel og vern etter NEK 400. Mestre Ib, In, Iz, kurvekarakteristikker (B, C, D), termisk motorvern og kortslutningsstrømmer.
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <span>Start spillet</span>
+                    <span class="card-arrow">➔</span>
+                </div>
+            </a>
+
+            <!-- 2. KURSEREGNEREN -->
+            <a href="kursBeregneren.html" class="game-card">
+                <div>
+                    <div class="card-header">
+                        <div class="card-icon">📋</div>
+                        <h2 class="card-title">KursBeregneren</h2>
+                    </div>
+                    <p class="card-desc">
+                        Digitalt dimensjoneringsskjema og sjekkliste for kurser etter NEK 400. Inkluderer øvingsmodus og tosidig A4-utskrift for penn eller PDF.
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <span>Åpne skjema</span>
+                    <span class="card-arrow">➔</span>
+                </div>
+            </a>
+
+            <!-- 3. EFFEKTMESTEREN -->
+            <a href="effektMester.html" class="game-card">
+                <div>
+                    <div class="card-header">
+                        <div class="card-icon">🌀</div>
+                        <h2 class="card-title">EffektMesteren</h2>
+                    </div>
+                    <p class="card-desc">
+                        Vekselstrøm, effekttrekanten (P, Q, S), cosφ, fasekompensering og beregninger på trefasede asynkronmotorer.
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <span>Start spillet</span>
+                    <span class="card-arrow">➔</span>
+                </div>
+            </a>
+
+            <!-- 4. KRETSMESTEREN -->
+            <a href="kretsMester.html" class="game-card">
+                <div>
+                    <div class="card-header">
+                        <div class="card-icon">🔌</div>
+                        <h2 class="card-title">KretsMesteren</h2>
+                    </div>
+                    <p class="card-desc">
+                        Grunnleggende likestrømskretser, Ohms lov (U = R · I), serie- og parallellkoblede motstander og Kirchhoffs lover.
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <span>Start spillet</span>
+                    <span class="card-arrow">➔</span>
+                </div>
+            </a>
+
+            <!-- 5. KRETSMESTER BEAST MODE -->
+            <a href="kretsMesterBM.html" class="game-card">
+                <div>
+                    <div class="card-header">
+                        <div class="card-icon">🧠</div>
+                        <h2 class="card-title">KretsMester: BEAST MODE</h2>
+                    </div>
+                    <p class="card-desc">
+                        Avansert kretsanalyse for Vg2 og fordypning: Wheatstone-målebro, superposisjonsprinsippet og komplekse motstandsnettverk.
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <span>Start utfordringen</span>
+                    <span class="card-arrow">➔</span>
+                </div>
+            </a>
+
+            <!-- 6. MILLIGAME -->
+            <a href="milliGame.html" class="game-card">
+                <div>
+                    <div class="card-header">
+                        <div class="card-icon">📏</div>
+                        <h2 class="card-title">MilliGame</h2>
+                    </div>
+                    <p class="card-desc">
+                        Mengdetrening på SI-prefikser (piko, nano, mikro, milli, kilo, mega, giga) og konvertering av elektrotekniske enheter.
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <span>Start spillet</span>
+                    <span class="card-arrow">➔</span>
+                </div>
+            </a>
+
+            <!-- 7. TALLTRENEREN -->
+            <a href="TallTreneren.html" class="game-card">
+                <div>
+                    <div class="card-header">
+                        <div class="card-icon">🔢</div>
+                        <h2 class="card-title">TallTreneren</h2>
+                    </div>
+                    <p class="card-desc">
+                        Tallsystemer og konvertering: binære tall (4-bit nibbles og 8-bit bytes), heksadesimal og desimal med virtuelt tastatur.
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <span>Start treningen</span>
+                    <span class="card-arrow">➔</span>
+                </div>
+            </a>
+
+            <!-- 8. FSE-PRØVEN -->
+            <a href="FSE/fseProve.html" class="game-card">
+                <div>
+                    <div class="card-header">
+                        <div class="card-icon">🦺</div>
+                        <h2 class="card-title">FSE-Prøven</h2>
+                    </div>
+                    <p class="card-desc">
+                        Kunnskapstest i Forskrift om sikkerhet ved arbeid i og drift av elektriske anlegg (FSE), de 5 sikre trinn for frakobling (LOTO) og førstehjelp.
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <span>Start prøven</span>
+                    <span class="card-arrow">➔</span>
+                </div>
+            </a>
+
+        </main>
+
+        <!-- BUNNTEKST -->
+        <footer>
+            <div class="footer-links">
+                <a href="#" id="openTeacherModalBtn">👨‍🏫 For lærere</a>
+                <span>•</span>
+                <a href="https://github.com/FreyBear/Gamify" target="_blank" rel="noopener">GitHub</a>
+            </div>
+            <p>Gamify Prosjektet – Videregående opplæring etter LK20 (Elektro og datateknologi)</p>
+        </footer>
+    </div>
+
+    <!-- LÆRERVEILEDNING MODAL -->
+    <div class="modal-overlay" id="teacherModal">
+        <div class="modal-card">
+            <button type="button" class="modal-close" id="closeTeacherModalBtn">✕</button>
+            <h2 style="font-size: 18px; margin-bottom: 12px; color: var(--accent);">👨‍🏫 Lærerveiledning</h2>
+            <div style="font-size: 13.5px; line-height: 1.6; color: var(--text-muted); display: flex; flex-direction: column; gap: 10px;">
+                <p>
+                    Alle spillene er <strong>100% frittstående enkeltfiler (HTML5)</strong> uten behov for database, server eller innlogging.
+                </p>
+                <div style="background: rgba(56, 189, 248, 0.08); border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 6px;">
+                    <strong style="color: var(--text-main);">🔑 Lærermeny i spillene:</strong><br>
+                    Trykk <code style="font-weight: bold; color: var(--accent);">Ctrl + Shift + K</code> (eller 7 klikk på undertittelen) for å åpne diagnosepanelet med fasit, nivåhopp og diplom.
+                </div>
+                <p>
+                    Elevene kan lagre øktene sine med en kryptografisk hash-kode som låser elevens navn til diplomet og hindrer juks.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tema-håndtering (lys / mørk)
+        const themeBtn = document.getElementById('themeBtn');
+        const savedTheme = localStorage.getItem('gamify_theme') || 'dark';
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            themeBtn.textContent = (theme === 'dark') ? '☀️' : '🌙';
+            localStorage.setItem('gamify_theme', theme);
+        }
+
+        applyTheme(savedTheme);
+
+        themeBtn.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            applyTheme(current === 'dark' ? 'light' : 'dark');
+        });
+
+        // Lærer-modal
+        const modal = document.getElementById('teacherModal');
+        const openBtn = document.getElementById('openTeacherModalBtn');
+        const closeBtn = document.getElementById('closeTeacherModalBtn');
+
+        openBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            modal.style.display = 'flex';
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.style.display = 'none';
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.style.display === 'flex') {
+                modal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

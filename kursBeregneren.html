@@ -1,0 +1,1759 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KursBeregneren - Sjekkliste & Beregningsskjema for Kursdimensjonering (NEK 400:2022)</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;          /* Dyp marin marin / tavlefag */
+            --primary-light: #dbeafe;
+            --accent: #d97706;           /* Amber / Montør / Vernevern */
+            --accent-light: #fef3c7;
+            --success: #059669;          /* Godkjent installasjon */
+            --success-light: #d1fae5;
+            --danger: #dc2626;           /* Avvik / Feil */
+            --danger-light: #fee2e2;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #cbd5e1;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-dark);
+            min-height: 100vh;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 980px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* HEADER / KONTROLLPANEL */
+        header.app-header {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            font-size: 32px;
+            background: linear-gradient(135deg, #1e3a8a, #d97706);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+
+        .brand-title {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--text-dark);
+            letter-spacing: -0.5px;
+        }
+
+        .brand-subtitle {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background-color: #f1f5f9;
+            color: var(--text-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 7px 12px;
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .btn:hover {
+            background-color: #e2e8f0;
+            border-color: #94a3b8;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: #1e40af;
+        }
+
+        .btn-accent {
+            background-color: #d97706;
+            color: #ffffff;
+            border-color: #d97706;
+        }
+
+        .btn-accent:hover {
+            background-color: #b45309;
+        }
+
+        /* MODUS & CASE VELGER */
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .control-label {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .mode-toggle {
+            display: flex;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #e2e8f0;
+        }
+
+        .mode-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .mode-btn.active {
+            background: #ffffff;
+            color: var(--primary);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .case-select {
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 12.5px;
+            font-weight: 600;
+            background: #ffffff;
+            color: var(--text-dark);
+            max-width: 380px;
+        }
+
+        /* SKJEMA-KORT & SEKSJONER */
+        .sheet-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sheet-header {
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .sheet-title {
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        .sheet-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .sheet-section {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .section-title {
+            font-size: 14.5px;
+            font-weight: 800;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .norm-tag {
+            font-size: 11px;
+            font-weight: 800;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-family: monospace;
+        }
+
+        /* TABELLER OG FELTER */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field-label {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .field-input, .field-select {
+            padding: 7px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            background: #ffffff;
+            color: var(--text-dark);
+        }
+
+        .field-input:focus, .field-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            font-size: 13px;
+            align-items: center;
+        }
+
+        .checkbox-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* REFERANSEBOKS / OPPGANG */
+        .ref-box {
+            background: #f8fafc;
+            border-left: 3px solid #3b82f6;
+            border-radius: 0 6px 6px 0;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: #475569;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .ref-links {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .ref-link {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .ref-link:hover {
+            text-decoration: underline;
+        }
+
+        .quick-table-btn {
+            background: #ffffff;
+            border: 1px solid #93c5fd;
+            color: #1e40af;
+            border-radius: 5px;
+            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .quick-table-btn:hover {
+            background: #dbeafe;
+        }
+
+        /* BEREGNINGSLINJER OG RESULTAT */
+        .calc-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: #ffffff;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .calc-formula {
+            font-family: monospace;
+            font-size: 12.5px;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .calc-input-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .calc-input {
+            width: 100px;
+            padding: 5px 8px;
+            border: 1.5px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            text-align: right;
+            font-family: monospace;
+        }
+
+        .calc-status {
+            font-size: 11.5px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-ok {
+            background: var(--success-light);
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .status-error {
+            background: var(--danger-light);
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .status-pending {
+            background: #f1f5f9;
+            color: var(--text-muted);
+            border: 1px solid #e2e8f0;
+        }
+
+        /* CASE-BANNER */
+        .case-banner {
+            background: #fffbeb;
+            border: 1.5px solid #fde68a;
+            border-radius: 10px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .case-banner-text {
+            font-size: 12.5px;
+            color: #92400e;
+            line-height: 1.5;
+        }
+
+        /* MODAL FOR TABELLER */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(3px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #ffffff;
+            border-radius: 14px;
+            max-width: 760px;
+            width: 100%;
+            max-height: 88vh;
+            overflow-y: auto;
+            padding: 22px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            position: relative;
+            border: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .modal-close-x {
+            position: absolute;
+            top: 16px;
+            right: 18px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #94a3b8;
+        }
+
+        .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+
+        .table-custom th, .table-custom td {
+            border: 1px solid #cbd5e1;
+            padding: 6px 10px;
+            text-align: left;
+        }
+
+        .table-custom th {
+            background: #f1f5f9;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .table-custom tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        /* PRINT-CSS FOR A4 */
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 !important;
+                font-size: 9.5pt !important;
+            }
+
+            .main-container {
+                max-width: 100% !important;
+                gap: 0 !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .sheet-card {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                gap: 12px !important;
+            }
+
+            .sheet-section {
+                border: 1px solid #333 !important;
+                border-radius: 4px !important;
+                padding: 8px 10px !important;
+                gap: 6px !important;
+                page-break-inside: avoid;
+            }
+
+            .section-header {
+                border-bottom: 1px solid #333 !important;
+                padding-bottom: 4px !important;
+            }
+
+            .norm-tag {
+                border: 1px solid #555 !important;
+                color: #000 !important;
+                background: transparent !important;
+            }
+
+            .ref-box {
+                display: none !important; /* Skjuler digitale lenker på utskrift */
+            }
+
+            .calc-input {
+                border: none !important;
+                border-bottom: 1px dotted #000 !important;
+                background: transparent !important;
+            }
+
+            .field-input, .field-select {
+                border: none !important;
+                border-bottom: 1px dotted #000 !important;
+                background: transparent !important;
+            }
+
+            /* HVIS UTSKRIFTEN ER BLANK (Penn og papir) */
+            body.print-blank .field-input,
+            body.print-blank .field-select,
+            body.print-blank .calc-input {
+                color: transparent !important;
+            }
+
+            body.print-blank .calc-status,
+            body.print-blank .calc-auto-val {
+                display: none !important;
+            }
+
+            body.print-blank .blank-handwrite-line {
+                display: inline-block !important;
+                border-bottom: 1px dotted #444;
+                width: 90px;
+                height: 14px;
+            }
+
+            .page-break-print {
+                page-break-before: always;
+                break-before: page;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+
+    <!-- 1. HEADER (KUN PÅ SKJERM) -->
+    <header class="app-header no-print">
+        <div class="header-top">
+            <div class="brand-group">
+                <span class="brand-icon">⚡</span>
+                <div>
+                    <h1 class="brand-title">KursBeregneren</h1>
+                    <div class="brand-subtitle">Dimensjonering, sjekkliste og dokumentasjon etter NEK 400:2022 og FEL</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="btn" id="btnTablesModal">📖 Hurtigtabeler (NEK)</button>
+                <button type="button" class="btn" id="btnPrintBlank">🖨️ Skriv ut tomt skjema</button>
+                <button type="button" class="btn btn-primary" id="btnPrintFilled">💾 / 🖨️ Generer PDF / Rapport</button>
+                <a href="sikringsMester.html" class="btn" title="Gå til SikringsMesteren spill" style="text-decoration:none;">🎮 SikringsMesteren</a>
+                <a href="index.html" class="btn" title="Tilbake til Hovedportalen med alle spill" style="text-decoration:none;">🏠 Hovedportal</a>
+                <button type="button" class="btn" id="btnReset">🔄 Nullstill</button>
+            </div>
+        </div>
+
+        <div class="controls-bar">
+            <div class="control-group">
+                <span class="control-label">Arbeidsmodus:</span>
+                <div class="mode-toggle">
+                    <button type="button" class="mode-btn active" id="modePracticeBtn">🟢 Øvingsmodus (Hurtigoppslag PÅ)</button>
+                    <button type="button" class="mode-btn" id="modeExamBtn">🔒 Prøvemodus (Slå opp selv)</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <span class="control-label">Velg Oppdrag / Case:</span>
+                <select class="case-select" id="caseSelector">
+                    <option value="custom">📝 Egendefinert prosjekt (Tomt skjema)</option>
+                    <option value="case1">Case 1 (Vg1): Varmtvannsbereder i bolig (2000 W, A1, 230V 1-fase)</option>
+                    <option value="case2">Case 2 (Vg1/Vg2): Elbillader i garasje (7,4 kW, 32A, C, 35m spenningsfall)</option>
+                    <option value="case3">Case 3 (Vg2): Industrimotor på kabelbro (11 kW, TN 400V 3-fase, k1·k2, inrush)</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. CASE-BESKRIVELSE (VISES NÅR EN FERDIG CASE ER VALGT) -->
+    <div class="case-banner no-print" id="caseBanner" style="display: none;">
+        <span style="font-size: 24px;">📋</span>
+        <div class="case-banner-text" id="caseBannerText"></div>
+    </div>
+
+    <!-- 3. SELVE BEREGNINGSSKJEMAET -->
+    <main class="sheet-card" id="printableSheet">
+
+        <!-- DOKUMENTHODE -->
+        <div class="sheet-header">
+            <div>
+                <div class="sheet-title">SJEKKLISTE & BEREGNINGSSKJEMA FOR KURSDIMENSJONERING</div>
+                <div class="sheet-sub">Prosjektering og dokumentasjon i henhold til FEL og NEK 400:2022</div>
+            </div>
+            <div style="text-align: right; font-size: 11px; font-weight: 700; color: var(--text-muted);">
+                FEL § 12 & § 16 / NEK 400 Del 5<br>
+                <span id="docModeTag" style="color: #059669;">[ ØVINGSMODUS ]</span>
+            </div>
+        </div>
+
+        <!-- 0. PROSJEKTINFORMASJON -->
+        <section class="sheet-section">
+            <div class="section-header">
+                <span class="section-title">Prosjekt- og anleggsinformasjon</span>
+                <span class="norm-tag">FEL § 12 (Dokumentasjon)</span>
+            </div>
+            <div class="info-grid">
+                <div class="field-group">
+                    <label class="field-label">Prosjekt / Kunde:</label>
+                    <input type="text" class="field-input" id="inpProject" placeholder="F.eks. Enebolig Hansen">
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Anleggsadresse:</label>
+                    <input type="text" class="field-input" id="inpAddress" placeholder="F.eks. Skoleveien 4, 0123 Oslo">
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Fordeling / Skap:</label>
+                    <input type="text" class="field-input" id="inpCabinet" value="Hovedtavle (-H1)">
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Kursbetegnelse:</label>
+                    <input type="text" class="field-input" id="inpCircuit" placeholder="F.eks. Kurs 4: Garasje">
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Utført av (Saksbehandler):</label>
+                    <input type="text" class="field-input" id="inpAuthor" placeholder="Elevens fulle navn">
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Dato:</label>
+                    <input type="text" class="field-input" id="inpDate">
+                </div>
+            </div>
+        </section>
+
+        <!-- 1. GRUNNLAGSDATA OG INSTALLASJONSMILJØ -->
+        <section class="sheet-section">
+            <div class="section-header">
+                <span class="section-title">1. Grunnlagsdata og installasjonsmiljø</span>
+                <span class="norm-tag">NEK 400-303 & Tabell 52</span>
+            </div>
+
+            <div class="ref-box" data-ref="miljo">
+                <div><span>📘 <strong>Referanse:</strong> Nettsystem (NEK 400-303), Forlegningsmåte (Tabell 52-1), Kabelvalg (Tabell 52B)</span></div>
+                <div class="ref-links">
+                    <a href="https://ndla.no/r/energi--og-styresystemer-el-ele-vg1/koble-i-et-fordelingsskap/5941c82611" target="_blank" class="ref-link">NDLA: Fordeling</a>
+                    <button type="button" class="quick-table-btn" onclick="openTableModal('forlegning')">👁️ Forlegningsmåter</button>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="field-group">
+                    <label class="field-label">Nettsystem (U):</label>
+                    <select class="field-select" id="selGrid">
+                        <option value="IT_230">IT (230 V - 3-fase / 1-fase)</option>
+                        <option value="TT_230">TT (230 V - 3-fase / 1-fase)</option>
+                        <option value="TN_400" selected>TN-C-S / TN-S (400 V / 230 V)</option>
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Fasesystem:</label>
+                    <select class="field-select" id="selPhases">
+                        <option value="1">1-fase (230 V)</option>
+                        <option value="3">3-fase (400 V / 230 V)</option>
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Lasttype:</label>
+                    <select class="field-select" id="selLoadType">
+                        <option value="allment">Allment / Stikkontakter</option>
+                        <option value="varme">Resistiv varme / VVB</option>
+                        <option value="motor">Motor / Pumpe (Startstrøm)</option>
+                        <option value="elbil">Elbillading (Mode 3)</option>
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Merkeeffekt P (Watt):</label>
+                    <input type="number" class="field-input" id="inpPowerP" placeholder="F.eks. 2300" step="100">
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Effektfaktor (cos φ):</label>
+                    <input type="number" class="field-input" id="inpCosPhi" value="1.00" step="0.01" min="0.5" max="1.0">
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Forlegningsmåte (Tabell 52):</label>
+                    <select class="field-select" id="selInstallMethod">
+                        <option value="A1">A1: Isolerte ledere i rør i isolert vegg (Skjult bolig)</option>
+                        <option value="A2">A2: Flerlederkabel i rør i isolert vegg</option>
+                        <option value="C" selected>C: Kabel åpent klamret på trevegg / mur</option>
+                        <option value="D1">D1: Flerlederkabel i rør i bakken (Jord)</option>
+                        <option value="E">E: Flerlederkabel fritt på kabelbro / hylle</option>
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Kabeltype & Isolasjon:</label>
+                    <select class="field-select" id="selCableType">
+                        <option value="PVC">PR / PFXP / IFXI (PVC 70 °C, Cu)</option>
+                        <option value="PEX">IFXI / TFXP (PEX/XLPE 90 °C, Cu)</option>
+                        <option value="AL">Aluminiumskabel (PVC 70 °C, Al)</option>
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Valgt tverrsnitt A (mm²):</label>
+                    <select class="field-select" id="selCrossA">
+                        <option value="1.5">1,5 mm²</option>
+                        <option value="2.5" selected>2,5 mm²</option>
+                        <option value="4.0">4,0 mm²</option>
+                        <option value="6.0">6,0 mm²</option>
+                        <option value="10.0">10,0 mm²</option>
+                        <option value="16.0">16,0 mm²</option>
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Kurslengde l (meter):</label>
+                    <input type="number" class="field-input" id="inpLengthL" value="20" min="1" max="300">
+                </div>
+            </div>
+
+            <!-- KORREKSJONSFAKTORER -->
+            <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-top: 6px;">
+                <div style="font-size: 12px; font-weight: 800; color: #1e293b; margin-bottom: 8px;">Korreksjonsfaktorer (NEK 400 Tabell 52B-14 & 52B-17):</div>
+                <div class="info-grid">
+                    <div class="field-group">
+                        <label class="field-label">Temperaturfaktor (k₁ / kₜ):</label>
+                        <div class="calc-input-wrap">
+                            <input type="number" class="field-input" id="inpK1" value="1.00" step="0.01" style="width: 80px;">
+                            <span style="font-size: 11px; color: var(--text-muted);">(30 °C = 1,00)</span>
+                            <button type="button" class="quick-table-btn no-print" onclick="openTableModal('temp')">👁️ k₁ tabell</button>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Samføringsfaktor (k₂ / k₉):</label>
+                        <div class="calc-input-wrap">
+                            <input type="number" class="field-input" id="inpK2" value="1.00" step="0.01" style="width: 80px;">
+                            <span style="font-size: 11px; color: var(--text-muted);">(1 kurs = 1,00)</span>
+                            <button type="button" class="quick-table-btn no-print" onclick="openTableModal('bunt')">👁️ k₂ tabell</button>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Total korreksjon (kₜₒₜ = k₁ · k₂):</label>
+                        <div style="font-family: monospace; font-size: 14px; font-weight: 800; color: #1d4ed8; padding-top: 6px;" id="dispKtot">1.00</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. TRINN 1: BELASTNINGSSTRØM (Ib) -->
+        <section class="sheet-section">
+            <div class="section-header">
+                <span class="section-title">Trinn 1: Belastningsstrøm (Ib)</span>
+                <span class="norm-tag">NEK 400-311</span>
+            </div>
+            <div class="ref-box" data-ref="trinn1">
+                <div><span>📘 <strong>Formler:</strong> 1-fase: <code>Ib = P / (U · cosφ)</code> &nbsp;|&nbsp; 3-fase: <code>Ib = P / (√3 · U · cosφ)</code></span></div>
+                <div class="ref-links">
+                    <a href="https://ndla.no/r/energi--og-styresystemer-el-ele-vg1/dokumentasjon-av-kabel-og-vern/00edcccfbb" target="_blank" class="ref-link">NDLA: Ib-beregning</a>
+                </div>
+            </div>
+            <div class="calc-row">
+                <div>
+                    <span class="calc-formula" id="formulaIb">Ib = P / (230 · 1.0)</span>
+                </div>
+                <div class="calc-input-wrap">
+                    <label style="font-size: 12px; font-weight: 700;">Elevens beregnede Ib:</label>
+                    <input type="number" class="calc-input" id="calcIb" placeholder="0.0" step="0.1">
+                    <span style="font-weight: 700;">A</span>
+                    <button type="button" class="btn btn-primary no-print" onclick="checkStep1()">Sjekk Ib</button>
+                    <span class="calc-status status-pending" id="statusIb">Venter på svar</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. TRINN 2: VALG AV VERNSTRØM (In) -->
+        <section class="sheet-section">
+            <div class="section-header">
+                <span class="section-title">Trinn 2: Valg av nominell vernstrøm (In)</span>
+                <span class="norm-tag">Krav 1: Ib ≤ In (NEK 400-533.2.1)</span>
+            </div>
+            <div class="ref-box" data-ref="trinn2">
+                <div><span>📘 <strong>Standard In:</strong> 6A, 10A, 13A, 15A (Bk), 16A, 20A, 25A, 32A, 40A, 50A, 63A. Karakteristikk B/C/D.</span></div>
+                <div class="ref-links">
+                    <button type="button" class="quick-table-btn" onclick="openTableModal('karakteristikk')">👁️ B, C, D Kurver</button>
+                </div>
+            </div>
+            <div class="info-grid">
+                <div class="field-group">
+                    <label class="field-label">Valgt vernstørrelse (In):</label>
+                    <select class="field-select" id="selIn">
+                        <option value="6">6 A</option>
+                        <option value="10">10 A</option>
+                        <option value="13">13 A</option>
+                        <option value="15">15 A (Bk-spesialvern)</option>
+                        <option value="16" selected>16 A</option>
+                        <option value="20">20 A</option>
+                        <option value="25">25 A</option>
+                        <option value="32">32 A</option>
+                        <option value="40">40 A</option>
+                        <option value="50">50 A</option>
+                        <option value="63">63 A</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Utløserkarakteristikk:</label>
+                    <select class="field-select" id="selCurve">
+                        <option value="B">B-karakteristikk (3–5 × In: Resistiv varme, lys)</option>
+                        <option value="C" selected>C-karakteristikk (5–10 × In: Allment, motor)</option>
+                        <option value="D">D-karakteristikk (10–20 × In: Store trafoer, tungstart)</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Kontroll Krav 1a (Ib ≤ In):</label>
+                    <div style="padding-top: 6px;">
+                        <span class="calc-status status-pending" id="statusKrav1a">Venter på Ib</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. TRINN 3: KORRIGERT STRØMFØRINGSEVNE (Iz) -->
+        <section class="sheet-section">
+            <div class="section-header">
+                <span class="section-title">Trinn 3: Kabelens strømføringsevne (Iz)</span>
+                <span class="norm-tag">Krav 1: In ≤ Iz (Tabell 52B)</span>
+            </div>
+            <div class="ref-box" data-ref="trinn3">
+                <div><span>📘 <strong>Tabelloppslag:</strong> Finn <code>Itab</code> i Montørhåndboka Tabell 52B-1. Beregn deretter <code>Iz = Itab · k₁ · k₂</code>.</span></div>
+                <div class="ref-links">
+                    <a href="https://www.nexans.no" target="_blank" class="ref-link">Nexans Kabeltabeller</a>
+                    <button type="button" class="quick-table-btn" onclick="openTableModal('iz')">👁️ Tabell 52B-1 (Iz)</button>
+                </div>
+            </div>
+            <div class="info-grid">
+                <div class="field-group">
+                    <label class="field-label">Tabellverdi fra NEK Tabell 52B (Itab):</label>
+                    <div class="calc-input-wrap">
+                        <input type="number" class="calc-input" id="inpItab" placeholder="F.eks. 27.0" step="0.5">
+                        <span style="font-weight: 700;">A</span>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Korrigert strømføringsevne (Iz = Itab · k₁ · k₂):</label>
+                    <div class="calc-input-wrap">
+                        <input type="number" class="calc-input" id="calcIz" placeholder="0.0" step="0.1">
+                        <span style="font-weight: 700;">A</span>
+                        <button type="button" class="btn btn-primary no-print" onclick="checkStep3()">Sjekk Iz</button>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Kontroll Krav 1b (In ≤ Iz):</label>
+                    <div style="padding-top: 6px;">
+                        <span class="calc-status status-pending" id="statusKrav1b">Venter på Iz</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. TRINN 4: OVERBELASTNINGSVERN (KRAV 2 / BOLIGNORM) -->
+        <section class="sheet-section">
+            <div class="section-header">
+                <span class="section-title">Trinn 4: Overbelastningsvern (Krav 2 & Bolignorm)</span>
+                <span class="norm-tag">NEK 400-533.2 & NEK 400-823</span>
+            </div>
+            <div class="ref-box" data-ref="trinn4">
+                <div><span>📘 <strong>Krav 2:</strong> Generelle anlegg: <code>I₂ ≤ 1,45 · Iz</code> &nbsp;|&nbsp; Bolig (Cu ≤ 4 mm²): <code>I₂ ≤ Iz</code></span></div>
+                <div class="ref-links">
+                    <a href="https://ndla.no/r/energi--og-styresystemer-el-ele-vg1/fem-sikre---for-standard-boligdokumentasjon/1599e629ac" target="_blank" class="ref-link">NDLA: Bolignorm</a>
+                </div>
+            </div>
+            <div class="info-grid">
+                <div class="field-group">
+                    <label class="field-label">Gjeldende regelverk for kursen:</label>
+                    <select class="field-select" id="selStandardRule">
+                        <option value="residential">Boliginstallasjon (NEK 400-823: I₂ ≤ Iz for Cu ≤ 4 mm²)</option>
+                        <option value="general">Generell installasjon / Næring / Industri (I₂ ≤ 1,45 · Iz)</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Vernets øvre prøvestrøm (I₂):</label>
+                    <div class="calc-input-wrap">
+                        <input type="number" class="calc-input" id="calcI2" placeholder="0.0" step="0.1">
+                        <span style="font-weight: 700;">A</span>
+                        <span style="font-size: 11px; color: var(--text-muted);">(1,45·In el. 1,2·In)</span>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Kontroll Krav 2:</label>
+                    <div style="padding-top: 6px;">
+                        <button type="button" class="btn btn-primary no-print" onclick="checkStep4()">Sjekk Krav 2</button>
+                        <span class="calc-status status-pending" id="statusKrav2">Ikke sjekket</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SIDESKIFT PÅ UTSKRIFT MELLOM SIDE 1 OG 2 -->
+        <div class="page-break-print"></div>
+
+        <!-- 6. TRINN 5: SPENNINGSFALL (Δu) -->
+        <section class="sheet-section">
+            <div class="section-header">
+                <span class="section-title">Trinn 5: Spenningsfall (Δu)</span>
+                <span class="norm-tag">NEK 400-525 & Tabell 52A (Maks 4 %)</span>
+            </div>
+            <div class="ref-box" data-ref="trinn5">
+                <div><span>📘 <strong>Formel:</strong> 1-fase: <code>Δu = (2 · l · Ib · ρ · cosφ) / A</code> &nbsp;|&nbsp; 3-fase: <code>Δu = (√3 · l · Ib · ρ · cosφ) / A</code> (ρ=0,0175 Cu)</span></div>
+                <div class="ref-links">
+                    <button type="button" class="quick-table-btn" onclick="openTableModal('spenningsfall')">👁️ Spenningsfall info</button>
+                </div>
+            </div>
+            <div class="info-grid">
+                <div class="field-group">
+                    <label class="field-label">Beregnet spenningsfall i Volt (Δu):</label>
+                    <div class="calc-input-wrap">
+                        <input type="number" class="calc-input" id="calcVoltDrop" placeholder="0.00" step="0.01">
+                        <span style="font-weight: 700;">V</span>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Prosentvis spenningsfall (Δu %):</label>
+                    <div class="calc-input-wrap">
+                        <input type="number" class="calc-input" id="calcVoltDropPct" placeholder="0.00" step="0.01">
+                        <span style="font-weight: 700;">%</span>
+                        <button type="button" class="btn btn-primary no-print" onclick="checkStep5()">Sjekk Δu</button>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Kontroll Spenningsfall (≤ 4,0 %):</label>
+                    <div style="padding-top: 6px;">
+                        <span class="calc-status status-pending" id="statusVoltDrop">Maks 9,2V (4%)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. TRINN 6: MINSTE KORTSLUTNINGSSTRØM (Ik,min) -->
+        <section class="sheet-section">
+            <div class="section-header">
+                <span class="section-title">Trinn 6: Minste kortslutningsstrøm og momentan utkobling</span>
+                <span class="norm-tag">Krav: Ik,min ≥ I₅ (NEK 400-434.5.2)</span>
+            </div>
+            <div class="ref-box" data-ref="trinn6">
+                <div><span>📘 <strong>Krav:</strong> Minste 2-faset kortslutningsstrøm ytterst på kursen (<code>Ik2min</code>) må være større enn eller lik vernets elektromagnetiske grense (<code>I₅</code>).</span></div>
+            </div>
+            <div class="info-grid">
+                <div class="field-group">
+                    <label class="field-label">Oppgitt/målt Ik,min ytterst på kursen:</label>
+                    <div class="calc-input-wrap">
+                        <input type="number" class="calc-input" id="inpIkmin" placeholder="F.eks. 180" step="1">
+                        <span style="font-weight: 700;">A</span>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Vernets I₅-grense (B=5·In, C=10·In, D=20·In):</label>
+                    <div class="calc-input-wrap">
+                        <input type="number" class="calc-input" id="calcI5" placeholder="F.eks. 160" step="1">
+                        <span style="font-weight: 700;">A</span>
+                        <button type="button" class="btn btn-primary no-print" onclick="checkStep6()">Sjekk I₅</button>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Kontroll Momentanutkobling:</label>
+                    <div style="padding-top: 6px;">
+                        <span class="calc-status status-pending" id="statusIkmin">Venter på Ik,min</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. TRINN 7: BRYTEEVNE I TAVLE (Icn) -->
+        <section class="sheet-section">
+            <div class="section-header">
+                <span class="section-title">Trinn 7: Maksimal kortslutningsstrøm og vernets bryteevne</span>
+                <span class="norm-tag">Krav: Icn ≥ Ik,maks (EN 60898)</span>
+            </div>
+            <div class="ref-box" data-ref="trinn7">
+                <div><span>📘 <strong>Krav:</strong> Vernets nominelle bryteevne (tallet i rammen, f.eks. [ 6000 ] eller [ 10000 ]) må tåle største kortslutningsstrøm i tavlen.</span></div>
+            </div>
+            <div class="info-grid">
+                <div class="field-group">
+                    <label class="field-label">Maks forventet Ik,maks i tavle:</label>
+                    <div class="calc-input-wrap">
+                        <input type="number" class="calc-input" id="inpIkmaks" value="4.5" step="0.5">
+                        <span style="font-weight: 700;">kA</span>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Vernets nominelle bryteevne (Icn):</label>
+                    <select class="field-select" id="selIcn">
+                        <option value="6" selected>[ 6000 ] i ramme = 6 kA (EN 60898)</option>
+                        <option value="10">[ 10000 ] i ramme = 10 kA (EN 60898 / Industri)</option>
+                        <option value="15">[ 15000 ] = 15 kA (Industrivern / MCCB)</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Kontroll Bryteevne:</label>
+                    <div style="padding-top: 6px;">
+                        <button type="button" class="btn btn-primary no-print" onclick="checkStep7()">Sjekk Icn</button>
+                        <span class="calc-status status-pending" id="statusIcn">Ikke sjekket</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 9. TRINN 8: TERMISK TÅLEGRENSE (I²t ≤ k²S²) -->
+        <section class="sheet-section">
+            <div class="section-header">
+                <span class="section-title">Trinn 8: Termisk tålegrense ved kortslutning (I²t)</span>
+                <span class="norm-tag">NEK 400-434.5.2 (t &lt; 0,1s)</span>
+            </div>
+            <div class="ref-box" data-ref="trinn8">
+                <div><span>📘 <strong>Formel:</strong> <code>k² · S²</code> (k=115 for Cu/PVC, 143 for Cu/PEX). Vernets gjennomslupne energi må oppfylle <code>I²t ≤ k²S²</code>.</span></div>
+            </div>
+            <div class="info-grid">
+                <div class="field-group">
+                    <label class="field-label">Kabelens termiske tåleevne (k² · S²):</label>
+                    <div class="calc-input-wrap">
+                        <input type="number" class="calc-input" id="calcK2S2" placeholder="F.eks. 82656" step="100">
+                        <span style="font-weight: 700;">A²s</span>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Vernets gjennomslupne energi (I²t):</label>
+                    <div class="calc-input-wrap">
+                        <input type="number" class="calc-input" id="inpI2t" value="45000" step="1000">
+                        <span style="font-weight: 700;">A²s</span>
+                        <button type="button" class="btn btn-primary no-print" onclick="checkStep8()">Sjekk I²t</button>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Kontroll Termisk Tåleevne:</label>
+                    <div style="padding-top: 6px;">
+                        <span class="calc-status status-pending" id="statusI2t">Ikke sjekket</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10. KONKLUSJON OG SIGNATUR -->
+        <section class="sheet-section" style="border: 2px solid var(--primary);">
+            <div class="section-header">
+                <span class="section-title">3. Konklusjon og signatur</span>
+                <span class="norm-tag">FEL § 12 & § 13 (Samsvarserklæring)</span>
+            </div>
+            <div class="info-grid">
+                <div class="field-group">
+                    <label class="field-label">Endelig valgt vern:</label>
+                    <input type="text" class="field-input" id="resVern" placeholder="F.eks. Eaton C15A Bk Jordfeilautomat 30mA 10kA">
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Endelig valgt kabel:</label>
+                    <input type="text" class="field-input" id="resKabel" placeholder="F.eks. PFXP 2x2,5 mm² Cu (Iz = 19,5 A)">
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Jordfeilvern:</label>
+                    <input type="text" class="field-input" id="resRcd" placeholder="F.eks. Type A, 30 mA (Type B ved elbillader)">
+                </div>
+            </div>
+
+            <div style="margin-top: 12px; padding: 10px; background: #f8fafc; border-radius: 8px; font-size: 11.5px; color: #334155; line-height: 1.5;">
+                <strong>Erklæring:</strong> Undertegnede bekrefter at kursen er beregnet, dimensjonert og kontrollert i henhold til forskrift om elektriske lavspenningsanlegg (FEL) og NEK 400:2022. Alle 5 dimensjoneringskrav er oppfylt.
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 16px; padding-top: 8px; border-top: 1px dotted #94a3b8; flex-wrap: wrap; gap: 12px;">
+                <div>
+                    <span style="font-size: 11px; color: var(--text-muted);">Saksbehandlers signatur:</span><br>
+                    <div style="font-family: 'Brush Script MT', cursive, sans-serif; font-size: 22px; color: var(--primary); min-width: 200px; padding-top: 4px;" id="dispSignature">Ola Nordmann</div>
+                </div>
+                <div>
+                    <span style="font-size: 11px; color: var(--text-muted);">Dato & sted:</span><br>
+                    <div style="font-size: 13px; font-weight: 700; color: #1e293b;" id="dispDateCity">Dato: -</div>
+                </div>
+                <div style="text-align: right;">
+                    <div id="overallStamp" style="display: inline-block; border: 2px solid var(--success); color: var(--success); font-size: 13px; font-weight: 900; padding: 4px 12px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                        PROSJEKTERING GODKJENT
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- MODAL: HURTIGTABELLER FOR NEK 400 -->
+<div class="modal-overlay" id="tablesModal">
+    <div class="modal-box">
+        <button type="button" class="modal-close-x" id="tablesModalClose">✕</button>
+        <h2 class="modal-title">📖 NEK 400 Hurtigoppslag for Kursdimensjonering</h2>
+        <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px;">
+            Disse tabellene er tilpasset undervisningsformål etter NEK 400:2022 og Montørhåndboka.
+        </div>
+
+        <!-- FANEVELGERE I MODAL -->
+        <div style="display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+            <button type="button" class="btn active" onclick="switchModalTab('tabIz')">Tabell 52B-1 (Iz)</button>
+            <button type="button" class="btn" onclick="switchModalTab('tabTemp')">Tabell 52B-14 (k₁ Temp)</button>
+            <button type="button" class="btn" onclick="switchModalTab('tabBunt')">Tabell 52B-17 (k₂ Samføring)</button>
+            <button type="button" class="btn" onclick="switchModalTab('tabCurves')">Karakteristikker (B, C, D)</button>
+        </div>
+
+        <!-- FANE 1: TABELL 52B-1 (Iz) -->
+        <div id="tabIz" class="modal-tab-content">
+            <h3 style="font-size: 14px; font-weight: 800; color: var(--primary);">NEK 400 Tabell 52B-1: Strømføringsevne Iz (Cu / PVC 70 °C, 2 ledere, 30 °C)</h3>
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Tverrsnitt</th>
+                        <th>A1 (Skjult isolert)</th>
+                        <th>A2 (Flerleder rør)</th>
+                        <th>C (Åpent trevegg)</th>
+                        <th>D1 (I bakken)</th>
+                        <th>E (Kabelbro)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>1,5 mm²</strong></td><td><strong>14,5 A</strong></td><td>14,0 A</td><td><strong>19,5 A</strong></td><td>22 A</td><td>22 A</td></tr>
+                    <tr><td><strong>2,5 mm²</strong></td><td><strong>19,5 A</strong></td><td>18,5 A</td><td><strong>27,0 A</strong></td><td>29 A</td><td>31 A</td></tr>
+                    <tr><td><strong>4,0 mm²</strong></td><td><strong>26,0 A</strong></td><td>25,0 A</td><td><strong>36,0 A</strong></td><td>38 A</td><td>41 A</td></tr>
+                    <tr><td><strong>6,0 mm²</strong></td><td><strong>34,0 A</strong></td><td>32,0 A</td><td><strong>46,0 A</strong></td><td>47 A</td><td>53 A</td></tr>
+                    <tr><td><strong>10,0 mm²</strong></td><td><strong>46,0 A</strong></td><td>43,0 A</td><td><strong>63,0 A</strong></td><td>63 A</td><td>73 A</td></tr>
+                    <tr><td><strong>16,0 mm²</strong></td><td><strong>61,0 A</strong></td><td>57,0 A</td><td><strong>85,0 A</strong></td><td>81 A</td><td>99 A</td></tr>
+                </tbody>
+            </table>
+            <p style="font-size: 11.5px; color: #475569;">
+                <em>Merk for 3-fase:</em> Ved 3 belastede ledere reduseres verdiene typisk med ca. 10–12 % (f.eks. A1 2,5 mm² = 17,5 A, C 2,5 mm² = 24 A).
+            </p>
+        </div>
+
+        <!-- FANE 2: TEMPERATURFAKTOR k1 -->
+        <div id="tabTemp" class="modal-tab-content" style="display: none;">
+            <h3 style="font-size: 14px; font-weight: 800; color: var(--primary);">NEK 400 Tabell 52B-14: Korreksjonsfaktor k₁ for omgivelsestemperatur</h3>
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Temperatur</th><th>20 °C</th><th>25 °C</th><th>30 °C (Ref)</th><th>35 °C</th><th>40 °C</th><th>45 °C</th><th>50 °C</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>PVC (70 °C)</strong></td><td>1,08</td><td>1,04</td><td><strong>1,00</strong></td><td>0,94</td><td>0,87</td><td>0,79</td><td>0,71</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PEX (90 °C)</strong></td><td>1,07</td><td>1,04</td><td><strong>1,00</strong></td><td>0,96</td><td>0,91</td><td>0,87</td><td>0,82</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- FANE 3: SAMFØRINGSFAKTOR k2 -->
+        <div id="tabBunt" class="modal-tab-content" style="display: none;">
+            <h3 style="font-size: 14px; font-weight: 800; color: var(--primary);">NEK 400 Tabell 52B-17: Korreksjonsfaktor k₂ for samføring / oppsamling</h3>
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Antall kurser</th><th>1 kurs</th><th>2 kurser</th><th>3 kurser</th><th>4 kurser</th><th>5 kurser</th><th>6 kurser</th><th>9 kurser</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Buntet / Bro</strong></td><td><strong>1,00</strong></td><td>0,80</td><td>0,70</td><td>0,65</td><td>0,60</td><td>0,57</td><td>0,50</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- FANE 4: UTKØSERKURVER (B, C, D) -->
+        <div id="tabCurves" class="modal-tab-content" style="display: none;">
+            <h3 style="font-size: 14px; font-weight: 800; color: var(--primary);">Vernets elektromagnetiske utkoblingsgrenser (EN 60898)</h3>
+            <ul style="font-size: 12.5px; line-height: 1.6; padding-left: 20px; margin-top: 8px;">
+                <li><strong>B-karakteristikk (3–5 × In):</strong> Momentanutkobling garantert ved <code>I₅ = 5 · In</code>. Brukes på lys og resistiv varme uten startstrøm.</li>
+                <li><strong>C-karakteristikk (5–10 × In):</strong> Momentanutkobling garantert ved <code>I₅ = 10 · In</code>. Standard allmennvern, tåler moderate startstrømmer fra motorer og kompressorer.</li>
+                <li><strong>D-karakteristikk (10–20 × In):</strong> Momentanutkobling garantert ved <code>I₅ = 20 · In</code>. Brukes på transformatorer og tunge industrimotorer med høy innkoblingsstrøm.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+// DATASTRUKTUR FOR CASER
+const CASES = {
+    custom: {
+        title: "Egendefinert prosjekt (Tomt skjema)",
+        desc: "Fyll inn alle felter manuelt basert på en oppgave gitt av lærer eller fra en fysisk installasjon.",
+        data: {}
+    },
+    case1: {
+        title: "Case 1 (Vg1 Basis): Varmtvannsbereder i bolig",
+        desc: "<strong>Oppdrag:</strong> Kunden skal montere en ny 2000 W varmtvannsbereder (1-fase 230 V, cosφ = 1.0) på vaskerommet. Kabelen føres skjult i isolert vegg (Forlegning A1) over en lengde på 15 meter. Omgivelsestemperatur er normal (30 °C), og kabelen legges alene i røret (k₁=1,0, k₂=1,0). Vurder bolignormen NEK 400-823 (I₂ ≤ Iz for Cu ≤ 4 mm²).",
+        data: {
+            project: "Enebolig Granly - Vaskerom",
+            address: "Furustien 12, 1400 Ski",
+            circuit: "Kurs 3: VVB Vaskerom",
+            grid: "IT_230", phases: "1", loadType: "varme",
+            power: 2000, cosPhi: 1.0, install: "A1",
+            cableType: "PVC", crossA: "2.5", lengthL: 15,
+            k1: 1.0, k2: 1.0,
+            standardRule: "residential",
+            ikmin: 220, ikmaks: 3.5, icn: "6", i2t: 35000
+        }
+    },
+    case2: {
+        title: "Case 2 (Vg1/Vg2): Elbillader i frittstående garasje",
+        desc: "<strong>Oppdrag:</strong> Kunden skal installere en 7,4 kW (32 A) elbillader (1-fase 230 V, cosφ = 1.0) i en frittstående garasje. Kabelen klamres åpent på trevegg og langs bjelkelag (Forlegning C). Lengden fra fordelingen er hele 35 meter. Omgivelsestemperatur er 25 °C (k₁=1,04), og kabelen legges sammen med 1 annen kurs (k₂=0,80). Sjekk nøye at spenningsfallet ikke overstiger 4 %, og at vern og kabel er riktig koordinert.",
+        data: {
+            project: "Villa Solhaug - Garasjelader",
+            address: "Solfaret 8, 3000 Drammen",
+            circuit: "Kurs 8: Elbillading Garasje",
+            grid: "TN_400", phases: "1", loadType: "elbil",
+            power: 7360, cosPhi: 1.0, install: "C",
+            cableType: "PVC", crossA: "6.0", lengthL: 35,
+            k1: 1.04, k2: 0.80,
+            standardRule: "general",
+            ikmin: 290, ikmaks: 5.2, icn: "10", i2t: 55000
+        }
+    },
+    case3: {
+        title: "Case 3 (Vg2 Fordypning): Industripumpe på kabelbro",
+        desc: "<strong>Oppdrag:</strong> En industriell 11 kW hydraulikkpumpe skal forsynes fra en 400 V TN-hovedtavle (3-fase, cosφ = 0.84). Kabelen forlegges på perforert kabelbro i et industribygg (Forlegning E) med 3 andre belastede kabler inntil hverandre (k₂=0,70). Rommet har en forhøyet temperatur på 35 °C (k₁=0,94). Kabellengden er 45 meter. Motoren har direktestart-støt på 7 × In, og krever C- eller D-karakteristikk. Kontroller også at Ik,min ytterst på kabelen klarer å løse ut vernet momentant.",
+        data: {
+            project: "Nordic Hydraulics AS - Fabrikk",
+            address: "Industriveien 100, 4000 Stavanger",
+            circuit: "Kurs 14: Hydraulikkpumpe P-101",
+            grid: "TN_400", phases: "3", loadType: "motor",
+            power: 11000, cosPhi: 0.84, install: "E",
+            cableType: "PEX", crossA: "6.0", lengthL: 45,
+            k1: 0.94, k2: 0.70,
+            standardRule: "general",
+            ikmin: 340, ikmaks: 8.5, icn: "10", i2t: 65000
+        }
+    }
+};
+
+// TABELL-DATA FOR AUTOMATISK SJEKK
+const TABELL_IZ_DATA = {
+    'A1': { '1.5': 14.5, '2.5': 19.5, '4.0': 26.0, '6.0': 34.0, '10.0': 46.0, '16.0': 61.0 },
+    'A2': { '1.5': 14.0, '2.5': 18.5, '4.0': 25.0, '6.0': 32.0, '10.0': 43.0, '16.0': 57.0 },
+    'C':  { '1.5': 19.5, '2.5': 27.0, '4.0': 36.0, '6.0': 46.0, '10.0': 63.0, '16.0': 85.0 },
+    'D1': { '1.5': 22.0, '2.5': 29.0, '4.0': 38.0, '6.0': 47.0, '10.0': 63.0, '16.0': 81.0 },
+    'E':  { '1.5': 22.0, '2.5': 31.0, '4.0': 41.0, '6.0': 53.0, '10.0': 73.0, '16.0': 99.0 }
+};
+
+let currentMode = 'practice'; // 'practice' eller 'exam'
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Sett dagens dato automatisk
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('inpDate').value = today;
+    document.getElementById('dispDateCity').textContent = `Dato: ${today}`;
+
+    // Event listeners
+    document.getElementById('modePracticeBtn').addEventListener('click', () => setMode('practice'));
+    document.getElementById('modeExamBtn').addEventListener('click', () => setMode('exam'));
+
+    document.getElementById('caseSelector').addEventListener('change', (e) => loadCase(e.target.value));
+
+    document.getElementById('btnPrintBlank').addEventListener('click', printBlankForm);
+    document.getElementById('btnPrintFilled').addEventListener('click', printFilledReport);
+    document.getElementById('btnReset').addEventListener('click', resetForm);
+
+    document.getElementById('btnTablesModal').addEventListener('click', () => openTableModal('iz'));
+    document.getElementById('tablesModalClose').addEventListener('click', closeTableModal);
+    document.getElementById('tablesModal').addEventListener('click', (e) => {
+        if (e.target.id === 'tablesModal') closeTableModal();
+    });
+
+    // Inndata-endringer som oppdaterer formeltekster
+    ['inpPowerP', 'inpCosPhi', 'selPhases', 'selGrid'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateFormulaDisplays);
+    });
+
+    // Signaturoppdatering
+    document.getElementById('inpAuthor').addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        document.getElementById('dispSignature').textContent = val || 'Elevens signatur';
+    });
+
+    // Korreksjonsfaktorer
+    ['inpK1', 'inpK2'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateKtotDisplay);
+    });
+
+    updateFormulaDisplays();
+    updateKtotDisplay();
+});
+
+// SETT MODUS (Øving vs Prøve)
+function setMode(mode) {
+    currentMode = mode;
+    const btnP = document.getElementById('modePracticeBtn');
+    const btnE = document.getElementById('modeExamBtn');
+    const docTag = document.getElementById('docModeTag');
+    const btnTables = document.getElementById('btnTablesModal');
+
+    if (mode === 'practice') {
+        btnP.classList.add('active');
+        btnE.classList.remove('active');
+        docTag.textContent = '[ ØVINGSMODUS ]';
+        docTag.style.color = '#059669';
+        btnTables.style.display = 'inline-flex';
+        document.querySelectorAll('.quick-table-btn').forEach(el => el.style.display = 'inline-block');
+        document.querySelectorAll('.ref-links').forEach(el => el.style.display = 'flex');
+    } else {
+        btnE.classList.add('active');
+        btnP.classList.remove('active');
+        docTag.textContent = '[ PRØVEMODUS - UTEN HURTIGOPPSLAG ]';
+        docTag.style.color = '#dc2626';
+        btnTables.style.display = 'none';
+        document.querySelectorAll('.quick-table-btn').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.ref-links').forEach(el => el.style.display = 'none');
+    }
+}
+
+// LAST INN CASE
+function loadCase(caseKey) {
+    const c = CASES[caseKey];
+    const banner = document.getElementById('caseBanner');
+    const bannerText = document.getElementById('caseBannerText');
+
+    if (!c || caseKey === 'custom') {
+        banner.style.display = 'none';
+        return;
+    }
+
+    bannerText.innerHTML = c.desc;
+    banner.style.display = 'flex';
+
+    // Fyll inn inndata
+    const d = c.data;
+    if (d.project) document.getElementById('inpProject').value = d.project;
+    if (d.address) document.getElementById('inpAddress').value = d.address;
+    if (d.circuit) document.getElementById('inpCircuit').value = d.circuit;
+    if (d.grid) document.getElementById('selGrid').value = d.grid;
+    if (d.phases) document.getElementById('selPhases').value = d.phases;
+    if (d.loadType) document.getElementById('selLoadType').value = d.loadType;
+    if (d.power !== undefined) document.getElementById('inpPowerP').value = d.power;
+    if (d.cosPhi !== undefined) document.getElementById('inpCosPhi').value = d.cosPhi;
+    if (d.install) document.getElementById('selInstallMethod').value = d.install;
+    if (d.cableType) document.getElementById('selCableType').value = d.cableType;
+    if (d.crossA) document.getElementById('selCrossA').value = d.crossA;
+    if (d.lengthL) document.getElementById('inpLengthL').value = d.lengthL;
+    if (d.k1 !== undefined) document.getElementById('inpK1').value = d.k1;
+    if (d.k2 !== undefined) document.getElementById('inpK2').value = d.k2;
+    if (d.standardRule) document.getElementById('selStandardRule').value = d.standardRule;
+    if (d.ikmin) document.getElementById('inpIkmin').value = d.ikmin;
+    if (d.ikmaks) document.getElementById('inpIkmaks').value = d.ikmaks;
+    if (d.icn) document.getElementById('selIcn').value = d.icn;
+    if (d.i2t) document.getElementById('inpI2t').value = d.i2t;
+
+    updateFormulaDisplays();
+    updateKtotDisplay();
+}
+
+// OPPDATER FORMLER I GRENSESNITTET
+function updateFormulaDisplays() {
+    const P = parseFloat(document.getElementById('inpPowerP').value) || 0;
+    const cosPhi = parseFloat(document.getElementById('inpCosPhi').value) || 1.0;
+    const phases = document.getElementById('selPhases').value;
+    const grid = document.getElementById('selGrid').value;
+
+    const U = (phases === '3' && grid === 'TN_400') ? 400 : 230;
+
+    const formulaEl = document.getElementById('formulaIb');
+    if (phases === '1') {
+        formulaEl.textContent = `Ib = ${P} W / (${U} V · ${cosPhi})`;
+    } else {
+        formulaEl.textContent = `Ib = ${P} W / (√3 · ${U} V · ${cosPhi})`;
+    }
+}
+
+function updateKtotDisplay() {
+    const k1 = parseFloat(document.getElementById('inpK1').value) || 1.0;
+    const k2 = parseFloat(document.getElementById('inpK2').value) || 1.0;
+    const ktot = +(k1 * k2).toFixed(2);
+    document.getElementById('dispKtot').textContent = ktot;
+}
+
+// BEREGNING OG VALIDERING: TRINN 1 (Ib)
+function checkStep1() {
+    const P = parseFloat(document.getElementById('inpPowerP').value);
+    const cosPhi = parseFloat(document.getElementById('inpCosPhi').value) || 1.0;
+    const phases = document.getElementById('selPhases').value;
+    const grid = document.getElementById('selGrid').value;
+    const userIb = parseFloat(document.getElementById('calcIb').value);
+    const statusEl = document.getElementById('statusIb');
+
+    if (isNaN(P) || P <= 0) {
+        alert('Vennligst oppgi en gyldig merkeeffekt P først.');
+        return;
+    }
+
+    const U = (phases === '3' && grid === 'TN_400') ? 400 : 230;
+    const exactIb = (phases === '1') ? (P / (U * cosPhi)) : (P / (Math.sqrt(3) * U * cosPhi));
+
+    if (isNaN(userIb)) {
+        statusEl.className = 'calc-status status-error';
+        statusEl.textContent = '❌ Skriv inn ditt svar først!';
+        return;
+    }
+
+    const diff = Math.abs(userIb - exactIb);
+    if (diff <= 0.2 || (diff / exactIb) < 0.02) {
+        statusEl.className = 'calc-status status-ok';
+        statusEl.textContent = `✅ Korrekt! Ib = ${exactIb.toFixed(1)} A`;
+        checkStep2Quick();
+    } else {
+        statusEl.className = 'calc-status status-error';
+        statusEl.textContent = `❌ Feil beregnet. Sjekk formel og cosφ! (Fasit ≈ ${exactIb.toFixed(1)} A)`;
+    }
+}
+
+function checkStep2Quick() {
+    const userIb = parseFloat(document.getElementById('calcIb').value);
+    const In = parseFloat(document.getElementById('selIn').value);
+    const statusEl = document.getElementById('statusKrav1a');
+
+    if (isNaN(userIb)) return;
+    if (userIb <= In) {
+        statusEl.className = 'calc-status status-ok';
+        statusEl.textContent = `✅ OK: Ib (${userIb.toFixed(1)}A) ≤ In (${In}A)`;
+    } else {
+        statusEl.className = 'calc-status status-error';
+        statusEl.textContent = `❌ FEIL: In (${In}A) er for liten for Ib (${userIb.toFixed(1)}A)!`;
+    }
+}
+
+// BEREGNING OG VALIDERING: TRINN 3 (Iz)
+function checkStep3() {
+    const Itab = parseFloat(document.getElementById('inpItab').value);
+    const k1 = parseFloat(document.getElementById('inpK1').value) || 1.0;
+    const k2 = parseFloat(document.getElementById('inpK2').value) || 1.0;
+    const userIz = parseFloat(document.getElementById('calcIz').value);
+    const In = parseFloat(document.getElementById('selIn').value);
+    const statusEl = document.getElementById('statusKrav1b');
+
+    if (isNaN(Itab) || isNaN(userIz)) {
+        alert('Oppgi både Itab og beregnet Iz først.');
+        return;
+    }
+
+    const exactIz = +(Itab * k1 * k2).toFixed(1);
+    const diff = Math.abs(userIz - exactIz);
+
+    if (diff <= 0.3) {
+        if (In <= userIz) {
+            statusEl.className = 'calc-status status-ok';
+            statusEl.textContent = `✅ Krav 1 oppfylt! In (${In}A) ≤ Iz (${userIz.toFixed(1)}A)`;
+        } else {
+            statusEl.className = 'calc-status status-error';
+            statusEl.textContent = `❌ Krav 1 feilet: In (${In}A) > Iz (${userIz.toFixed(1)}A). Øk tverrsnitt!`;
+        }
+    } else {
+        statusEl.className = 'calc-status status-error';
+        statusEl.textContent = `❌ Feil utregning av Iz! (Itab · k₁ · k₂ = ${exactIz} A)`;
+    }
+}
+
+// BEREGNING OG VALIDERING: TRINN 4 (Krav 2 / Bolignorm)
+function checkStep4() {
+    const rule = document.getElementById('selStandardRule').value;
+    const In = parseFloat(document.getElementById('selIn').value);
+    const userIz = parseFloat(document.getElementById('calcIz').value);
+    const userI2 = parseFloat(document.getElementById('calcI2').value);
+    const statusEl = document.getElementById('statusKrav2');
+
+    if (isNaN(userIz)) {
+        alert('Beregn Iz i Trinn 3 først.');
+        return;
+    }
+
+    const isBk = (In === 15);
+    const exactI2 = isBk ? +(1.2 * In).toFixed(1) : +(1.45 * In).toFixed(1);
+
+    if (isNaN(userI2)) {
+        document.getElementById('calcI2').value = exactI2;
+    }
+
+    const I2 = isNaN(userI2) ? exactI2 : userI2;
+
+    if (rule === 'residential') {
+        // NEK 400-823: I2 <= Iz
+        if (I2 <= userIz) {
+            statusEl.className = 'calc-status status-ok';
+            statusEl.textContent = `✅ Bolignorm OK: I₂ (${I2}A) ≤ Iz (${userIz}A)`;
+        } else {
+            statusEl.className = 'calc-status status-error';
+            statusEl.textContent = `❌ Avvik bolignorm: I₂ (${I2}A) > Iz (${userIz}A)! Velg 13A eller 15A Bk-vern.`;
+        }
+    } else {
+        // Generelt: I2 <= 1.45 * Iz (dvs In <= Iz for standard vern)
+        const limit = +(1.45 * userIz).toFixed(1);
+        if (I2 <= limit) {
+            statusEl.className = 'calc-status status-ok';
+            statusEl.textContent = `✅ Krav 2 OK: I₂ (${I2}A) ≤ 1,45·Iz (${limit}A)`;
+        } else {
+            statusEl.className = 'calc-status status-error';
+            statusEl.textContent = `❌ Krav 2 feilet: I₂ (${I2}A) > 1,45·Iz (${limit}A)!`;
+        }
+    }
+}
+
+// BEREGNING OG VALIDERING: TRINN 5 (Spenningsfall)
+function checkStep5() {
+    const phases = document.getElementById('selPhases').value;
+    const grid = document.getElementById('selGrid').value;
+    const U = (phases === '3' && grid === 'TN_400') ? 400 : 230;
+    const L = parseFloat(document.getElementById('inpLengthL').value) || 20;
+    const A = parseFloat(document.getElementById('selCrossA').value) || 2.5;
+    const cosPhi = parseFloat(document.getElementById('inpCosPhi').value) || 1.0;
+    const userIb = parseFloat(document.getElementById('calcIb').value);
+    const userDropV = parseFloat(document.getElementById('calcVoltDrop').value);
+    const userDropPct = parseFloat(document.getElementById('calcVoltDropPct').value);
+    const statusEl = document.getElementById('statusVoltDrop');
+
+    if (isNaN(userIb)) {
+        alert('Regn ut Ib i Trinn 1 først.');
+        return;
+    }
+
+    const rho = 0.0175; // Cu 20°C
+    let exactDropV = 0;
+    if (phases === '1') {
+        exactDropV = (2 * L * userIb * rho * cosPhi) / A;
+    } else {
+        exactDropV = (Math.sqrt(3) * L * userIb * rho * cosPhi) / A;
+    }
+    const exactDropPct = (exactDropV / U) * 100;
+
+    if (isNaN(userDropV) || isNaN(userDropPct)) {
+        document.getElementById('calcVoltDrop').value = exactDropV.toFixed(2);
+        document.getElementById('calcVoltDropPct').value = exactDropPct.toFixed(2);
+    }
+
+    const pct = isNaN(userDropPct) ? exactDropPct : userDropPct;
+
+    if (pct <= 4.0) {
+        statusEl.className = 'calc-status status-ok';
+        statusEl.textContent = `✅ Godkjent: ${pct.toFixed(2)} % (≤ 4,0 %)`;
+    } else {
+        statusEl.className = 'calc-status status-error';
+        statusEl.textContent = `❌ For høyt spenningsfall: ${pct.toFixed(2)} % > 4 %! Øk tverrsnitt A.`;
+    }
+}
+
+// BEREGNING OG VALIDERING: TRINN 6 (Ik,min & I5)
+function checkStep6() {
+    const In = parseFloat(document.getElementById('selIn').value);
+    const curve = document.getElementById('selCurve').value;
+    const Ikmin = parseFloat(document.getElementById('inpIkmin').value);
+    const userI5 = parseFloat(document.getElementById('calcI5').value);
+    const statusEl = document.getElementById('statusIkmin');
+
+    let factor = 10;
+    if (curve === 'B') factor = 5;
+    if (curve === 'D') factor = 20;
+
+    const exactI5 = factor * In;
+    if (isNaN(userI5)) {
+        document.getElementById('calcI5').value = exactI5;
+    }
+
+    const I5 = isNaN(userI5) ? exactI5 : userI5;
+
+    if (isNaN(Ikmin)) {
+        statusEl.className = 'calc-status status-error';
+        statusEl.textContent = '❌ Oppgi forventet Ik,min ytterst på kabelen først.';
+        return;
+    }
+
+    if (Ikmin >= I5) {
+        statusEl.className = 'calc-status status-ok';
+        statusEl.textContent = `✅ Momentan utkobling OK: Ik,min (${Ikmin}A) ≥ I₅ (${I5}A)`;
+    } else {
+        statusEl.className = 'calc-status status-error';
+        statusEl.textContent = `❌ Ikke momentan: Ik,min (${Ikmin}A) < I₅ (${I5}A)! Bytt til B-vern eller øk A.`;
+    }
+}
+
+// BEREGNING OG VALIDERING: TRINN 7 (Bryteevne Icn)
+function checkStep7() {
+    const Ikmaks = parseFloat(document.getElementById('inpIkmaks').value);
+    const Icn = parseFloat(document.getElementById('selIcn').value);
+    const statusEl = document.getElementById('statusIcn');
+
+    if (isNaN(Ikmaks)) {
+        statusEl.className = 'calc-status status-error';
+        statusEl.textContent = '❌ Oppgi Ik,maks i tavlen.';
+        return;
+    }
+
+    if (Icn >= Ikmaks) {
+        statusEl.className = 'calc-status status-ok';
+        statusEl.textContent = `✅ Bryteevne OK: Icn (${Icn} kA) ≥ Ik,maks (${Ikmaks} kA)`;
+    } else {
+        statusEl.className = 'calc-status status-error';
+        statusEl.textContent = `❌ FARE: Vernets bryteevne (${Icn} kA) er for lav for Ik,maks (${Ikmaks} kA)!`;
+    }
+}
+
+// BEREGNING OG VALIDERING: TRINN 8 (I²t ≤ k²S²)
+function checkStep8() {
+    const A = parseFloat(document.getElementById('selCrossA').value) || 2.5;
+    const cableType = document.getElementById('selCableType').value;
+    const I2t = parseFloat(document.getElementById('inpI2t').value);
+    const userK2S2 = parseFloat(document.getElementById('calcK2S2').value);
+    const statusEl = document.getElementById('statusI2t');
+
+    const k = (cableType === 'PEX') ? 143 : 115;
+    const exactK2S2 = Math.round(k * k * A * A);
+
+    if (isNaN(userK2S2)) {
+        document.getElementById('calcK2S2').value = exactK2S2;
+    }
+
+    const k2s2 = isNaN(userK2S2) ? exactK2S2 : userK2S2;
+
+    if (I2t <= k2s2) {
+        statusEl.className = 'calc-status status-ok';
+        statusEl.textContent = `✅ Termisk vern OK: I²t (${I2t} A²s) ≤ k²S² (${k2s2} A²s)`;
+    } else {
+        statusEl.className = 'calc-status status-error';
+        statusEl.textContent = `❌ FARE FOR SMELTING: I²t (${I2t} A²s) > k²S² (${k2s2} A²s)!`;
+    }
+}
+
+// PRINT: BLANK SKJEMA FOR PENN OG PAPIR
+function printBlankForm() {
+    document.body.classList.add('print-blank');
+    window.print();
+    setTimeout(() => {
+        document.body.classList.remove('print-blank');
+    }, 1500);
+}
+
+// PRINT: FULL RAPPORT MED DATA
+function printFilledReport() {
+    document.body.classList.remove('print-blank');
+    window.print();
+}
+
+// NULLSTILL
+function resetForm() {
+    if (confirm('Er du sikker på at du vil nullstille hele skjemaet?')) {
+        document.getElementById('caseSelector').value = 'custom';
+        loadCase('custom');
+        document.querySelectorAll('.calc-status').forEach(el => {
+            el.className = 'calc-status status-pending';
+            el.textContent = 'Ikke sjekket';
+        });
+        document.querySelectorAll('.calc-input').forEach(el => el.value = '');
+    }
+}
+
+// TABELL-MODAL
+function openTableModal(tabId) {
+    document.getElementById('tablesModal').classList.add('active');
+    switchModalTab(tabId ? 'tab' + tabId.charAt(0).toUpperCase() + tabId.slice(1) : 'tabIz');
+}
+
+function closeTableModal() {
+    document.getElementById('tablesModal').classList.remove('active');
+}
+
+function switchModalTab(tabId) {
+    document.querySelectorAll('.modal-tab-content').forEach(el => el.style.display = 'none');
+    const target = document.getElementById(tabId);
+    if (target) target.style.display = 'block';
+}
+</script>
+
+</body>
+</html>
