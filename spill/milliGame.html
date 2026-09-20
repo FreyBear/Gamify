@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>milliGame - Enhetskonvertering</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f1f5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 16px;
+            color: #1e293b;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 24px 20px;
+            border-radius: 14px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+            text-align: center;
+            max-width: 540px;
+            width: 100%;
+            position: relative;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .title-group {
+            text-align: left;
+            user-select: none;
+            cursor: default;
+        }
+
+        .brand-title {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+        }
+
+        .brand-title span { color: #2563eb; }
+
+        .brand-subtitle {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .help-btn {
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .help-btn:hover {
+            background-color: #e2e8f0;
+            border-color: #94a3b8;
+        }
+
+        .level-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8fafc;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .level-badge {
+            font-weight: 700;
+            color: #2563eb;
+            background-color: #eff6ff;
+            padding: 3px 8px;
+            border-radius: 6px;
+            border: 1px solid #bfdbfe;
+        }
+
+        .streak-badge {
+            font-weight: 600;
+            color: #059669;
+        }
+
+        .problem-box {
+            margin: 18px 0;
+            text-align: center;
+        }
+
+        .topic-pill {
+            display: inline-block;
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid #bfdbfe;
+        }
+
+        .problem {
+            font-size: 26px;
+            font-weight: 700;
+            padding: 18px;
+            background-color: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            color: #0f172a;
+            letter-spacing: 0.5px;
+            word-break: break-word;
+            margin: 0;
+        }
+
+        .input-section {
+            margin: 18px 0 10px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #answer-input {
+            padding: 12px 16px;
+            font-size: 18px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            outline: none;
+            text-align: center;
+            font-weight: 600;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        #answer-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .shortcut-btn {
+            padding: 8px 12px;
+            font-size: 15px;
+            font-weight: bold;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #334155;
+            min-width: 38px;
+            transition: all 0.15s ease;
+        }
+
+        .shortcut-btn:hover {
+            background-color: #e2e8f0;
+            border-color: #94a3b8;
+        }
+
+        #submit-btn {
+            padding: 10px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            flex-grow: 1;
+            transition: background-color 0.15s, transform 0.05s;
+        }
+
+        #submit-btn:hover { background-color: #1d4ed8; }
+        #submit-btn:active { transform: scale(0.98); }
+        #submit-btn.btn-next { background-color: #0f172a; }
+        #submit-btn.btn-next:hover { background-color: #1e293b; }
+
+        .feedback {
+            margin: 12px 0;
+            font-size: 16px;
+            font-weight: 500;
+            min-height: 24px;
+        }
+
+        .feedback.correct { color: #16a34a; }
+        .feedback.wrong { color: #dc2626; }
+
+        /* Analyse- og sammendragskort ved feil svar */
+        .review-card {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin: 10px 0;
+            text-align: left;
+        }
+
+        .review-title {
+            font-weight: 700;
+            color: #991b1b;
+            margin: 0 0 10px 0;
+            font-size: 15px;
+        }
+
+        .review-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 14px;
+        }
+
+        .review-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 6px;
+            background-color: #ffffff;
+            border: 1px solid #f1f5f9;
+        }
+
+        .review-row.wrong-row {
+            background-color: #fee2e2;
+            border-color: #fca5a5;
+            color: #991b1b;
+            font-weight: 600;
+        }
+
+        .review-row.correct-row {
+            background-color: #dcfce7;
+            border-color: #86efac;
+            color: #166534;
+            font-weight: 600;
+        }
+
+        .review-row .label {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .review-row.wrong-row .label { color: #991b1b; }
+        .review-row.correct-row .label { color: #166534; }
+
+        .review-row .val {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 14px;
+        }
+
+        .review-explanation {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #475569;
+            background-color: #ffffff;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border-left: 3px solid #2563eb;
+            line-height: 1.5;
+        }
+
+        .instructions {
+            font-size: 13px;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 14px;
+            line-height: 1.5;
+            margin-top: 12px;
+        }
+
+        .instructions code {
+            background-color: #f1f5f9;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #1e293b;
+        }
+
+        /* Modal styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(15, 23, 42, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .modal-content {
+            background-color: #ffffff;
+            padding: 24px;
+            border-radius: 14px;
+            max-width: 560px;
+            width: 100%;
+            text-align: left;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+        }
+
+        .modal-title {
+            margin: 0;
+            font-size: 19px;
+            color: #0f172a;
+            font-weight: 800;
+        }
+
+        .modal-body {
+            font-size: 14px;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .lesson-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin: 10px 0;
+        }
+
+        .lesson-card-header {
+            font-size: 12.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #2563eb;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .si-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin: 8px 0;
+        }
+
+        .si-table th, .si-table td {
+            padding: 6px 8px;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+        }
+
+        .si-table th {
+            background-color: #f1f5f9;
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        .si-table tr:nth-child(even) { background-color: #f8fafc; }
+        .si-table .mono { font-family: ui-monospace, monospace; font-weight: 700; }
+        .si-table .highlight-row { background-color: #eff6ff !important; font-weight: 600; }
+
+        .tip-box {
+            background: #fefce8;
+            border: 1px solid #fde047;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #854d0e;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+
+        .modal-close-btn {
+            background-color: #2563eb;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 14px;
+            transition: background-color 0.15s;
+        }
+
+        .modal-close-btn:hover { background-color: #1d4ed8; }
+
+        /* Fyrverkeri Canvas */
+        #fireworks-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            display: none;
+        }
+
+        /* Diplom-overlay */
+        .diploma-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(15, 23, 42, 0.88);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 16px;
+            z-index: 10000;
+            overflow-y: auto;
+        }
+
+        .diploma-overlay.active { display: flex; }
+
+        .diploma-info-banner {
+            color: #f8fafc;
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid #475569;
+            border-radius: 10px;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            text-align: center;
+            max-width: 620px;
+            width: 100%;
+        }
+
+        .diploma-card {
+            background: #fffdfa;
+            border: 8px double #2563eb;
+            border-radius: 16px;
+            max-width: 620px;
+            width: 100%;
+            padding: 32px 24px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Sikkerhetsvannmerke og serienummer på diplom */
+        .diploma-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-24deg);
+            font-size: 58px;
+            font-weight: 900;
+            color: rgba(217, 119, 6, 0.085);
+            border: 5px solid rgba(217, 119, 6, 0.085);
+            padding: 8px 30px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+            z-index: 1;
+            display: none;
+        }
+
+        .diploma-watermark.active {
+            display: block;
+        }
+
+        .diploma-serial {
+            margin-top: 16px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #94a3b8;
+            letter-spacing: 1.2px;
+            font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+            user-select: none;
+        }
+
+        .diploma-locked-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        /* Elevstatus i nivålinje */
+        .player-status-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+            padding: 3px 6px 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .player-logout-btn {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #b91c1c;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            line-height: 1.2;
+        }
+
+        .player-logout-btn:hover {
+            background: #fee2e2;
+            border-color: #f87171;
+            color: #991b1b;
+        }
+
+        .btn-logout-modal {
+            width: 100%;
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            color: #be123c;
+            padding: 9px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-logout-modal:hover {
+            background: #ffe4e6;
+            border-color: #fda4af;
+            color: #9f1239;
+        }
+
+        /* Lagre / Hent modal */
+        .save-tab-bar {
+            display: flex;
+            gap: 8px;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 16px;
+        }
+
+        .save-tab-btn {
+            background: none;
+            border: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #64748b;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.15s;
+        }
+
+        .save-tab-btn.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+
+        .save-input {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 14px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #1e293b;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .save-input:focus { border-color: #2563eb; }
+
+        .save-tab-content {
+            display: block;
+        }
+
+        /* Diplom-styling */
+        .diploma-seal { font-size: 44px; margin-bottom: 6px; }
+        .diploma-title { font-family: Georgia, serif; font-size: 28px; color: #1e3a8a; margin: 0; font-weight: bold; }
+        .diploma-subtitle { font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 4px 0 16px 0; }
+        .diploma-award-to { font-size: 13px; font-weight: 700; color: #475569; }
+        .diploma-name-input {
+            border: none;
+            border-bottom: 2px solid #2563eb;
+            background: transparent;
+            font-family: Georgia, serif;
+            font-size: 24px;
+            font-weight: bold;
+            color: #0f172a;
+            text-align: center;
+            width: 80%;
+            max-width: 380px;
+            margin: 8px auto 14px auto;
+            padding: 4px;
+            outline: none;
+            display: block;
+        }
+        .diploma-praise { font-family: Georgia, serif; font-style: italic; font-size: 18px; color: #2563eb; margin-bottom: 10px; }
+        .diploma-desc { font-size: 14px; line-height: 1.55; color: #334155; max-width: 480px; margin: 0 auto 20px auto; }
+        .diploma-footer { display: flex; justify-content: space-around; margin-top: 20px; }
+        .diploma-signature { display: flex; flex-direction: column; align-items: center; width: 140px; }
+        .signature-line { border-top: 1px solid #94a3b8; width: 100%; padding-top: 4px; font-size: 13px; color: #475569; font-weight: bold; }
+        .diploma-buttons { display: flex; gap: 10px; margin-top: 14px; }
+        .diploma-btn {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .diploma-btn-print { background-color: #2563eb; color: #ffffff; }
+        .diploma-btn-close { background-color: #64748b; color: #ffffff; }
+        .diploma-btn:hover { opacity: 0.9; }
+
+        /* Lærermeny */
+        .cheat-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1e293b;
+            color: #f8fafc;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            padding: 16px;
+            max-width: 320px;
+            width: calc(100% - 40px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            display: none;
+            font-size: 13px;
+            text-align: left;
+        }
+        .cheat-panel.active { display: block; animation: fadeInCheat 0.15s ease-out; }
+        @keyframes fadeInCheat {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .cheat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-weight: 700;
+            color: #38bdf8;
+            font-size: 13px;
+        }
+        .cheat-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 2px 6px;
+            line-height: 1;
+        }
+        .cheat-close:hover { color: #f8fafc; }
+        .cheat-sec-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin: 8px 0 4px 0;
+            letter-spacing: 0.5px;
+        }
+        .cheat-lvl-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+        .cheat-lvl-btn {
+            background: #334155;
+            color: #f8fafc;
+            border: 1px solid #475569;
+            border-radius: 4px;
+            padding: 6px 2px;
+            font-weight: 700;
+            font-size: 11px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s;
+        }
+        .cheat-lvl-btn:hover { background: #475569; }
+        .cheat-lvl-btn.active {
+            background: #2563eb;
+            border-color: #60a5fa;
+            color: #ffffff;
+        }
+        .cheat-ans-box {
+            background: #0f172a;
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-bottom: 10px;
+            border: 1px solid #334155;
+        }
+        .cheat-ans-val {
+            color: #4ade80;
+            font-weight: 700;
+            font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+            font-size: 14px;
+        }
+        .cheat-ans-step {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+        .cheat-btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+        .cheat-action-btn {
+            background: #334155;
+            color: #f8fafc;
+            border: 1px solid #475569;
+            border-radius: 4px;
+            padding: 7px 6px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.15s;
+        }
+        .cheat-action-btn:hover { background: #475569; }
+        .cheat-action-btn.green {
+            background: #166534;
+            border-color: #22c55e;
+            color: #ffffff;
+        }
+        .cheat-action-btn.green:hover { background: #15803d; }
+        .cheat-action-btn.gold {
+            background: #854d0e;
+            border-color: #eab308;
+            color: #ffffff;
+        }
+        .cheat-action-btn.gold:hover { background: #a16207; }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @media print {
+            body { background: white !important; padding: 0 !important; }
+            .container, .modal-overlay, .cheat-panel, #fireworks-canvas, .diploma-buttons, .diploma-info-banner, .no-print { display: none !important; }
+            .diploma-overlay { position: static !important; display: block !important; background: none !important; padding: 0 !important; }
+            .diploma-card { box-shadow: none !important; max-width: 100% !important; border: 8px double #2563eb !important; }
+            .diploma-name-input { border-bottom: none !important; }
+            .diploma-watermark, .diploma-serial {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="fireworks-canvas"></canvas>
+
+    <main class="container">
+        <header>
+            <div class="title-group" id="brand-title-group">
+                <h1 class="brand-title">milli<span>Game</span></h1>
+                <div class="brand-subtitle" id="secret-trigger-area">metrisk enhetskonvertering ⚡</div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <a href="index.html" class="help-btn" style="text-decoration:none;" title="Tilbake til Hovedportalen med alle spill">🏠 Hovedportal</a>
+                <button type="button" class="help-btn" id="help-btn" title="Åpne SI-tabell og hint">
+                    💡 SI-tabell & Hint
+                </button>
+                <button type="button" class="help-btn" id="save-load-btn" title="Lagre eller hent spill">
+                    💾 Lagre / Hent
+                </button>
+            </div>
+        </header>
+        
+        <div class="level-bar">
+            <div>Nivå <span id="level" class="level-badge">1</span>: <strong id="level-name">Kilo & Milli</strong></div>
+            <div class="player-status-tag" id="player-status-tag" style="display: none;">
+                <span>👤 Elev: <strong id="player-status-name">-</strong></span>
+                <button type="button" class="player-logout-btn" id="btn-logout-tag" title="Nullstill lokal fremdrift">🔄 Nullstill</button>
+            </div>
+            <div class="streak-badge">Rette på rad: <span id="streak">0</span> / <span id="target-streak">5</span></div>
+        </div>
+        
+        <div class="problem-box">
+            <div class="topic-pill" id="topic-pill">Kilo & Milli</div>
+            <div class="problem">
+                <p id="problem-text">Laster oppgave...</p>
+            </div>
+        </div>
+
+        <form id="game-form" class="input-section">
+            <label for="answer-input" class="sr-only">Ditt svar</label>
+            <input 
+                type="text" 
+                id="answer-input" 
+                placeholder="F.eks. 1,27 kΩ eller 1.27kΩ" 
+                autocomplete="off" 
+                spellcheck="false"
+                required
+            >
+            <div class="button-group">
+                <button type="button" class="shortcut-btn" data-char="Ω" title="Ohm">Ω</button>
+                <button type="button" class="shortcut-btn" data-char="μ" title="Mikro (u)">μ</button>
+                <button type="button" class="shortcut-btn" data-char="k" title="Kilo (tusen)">k</button>
+                <button type="button" class="shortcut-btn" data-char="m" title="Milli (tusendel)">m</button>
+                <button type="button" class="shortcut-btn" data-char="M" title="Mega (million)">M</button>
+                <button type="button" class="shortcut-btn" data-char="n" title="Nano">n</button>
+                <button type="button" class="shortcut-btn" data-char="p" title="Piko">p</button>
+                <button type="button" class="shortcut-btn" data-char="V" title="Volt">V</button>
+                <button type="button" class="shortcut-btn" data-char="A" title="Ampere">A</button>
+                <button type="button" class="shortcut-btn" data-char="W" title="Watt">W</button>
+                <button type="submit" id="submit-btn">Sjekk svar</button>
+            </div>
+        </form>
+
+        <div class="feedback" id="feedback" aria-live="polite"></div>
+
+        <div class="instructions">
+            <p>Konverter tallet til standard ingeniørform med prefiks (1 &le; tall &lt; 1000) og enhet (V, &Omega;, A, W).</p>
+            <p>Godtar b&aring;de komma og punktum, <code>k</code> og <code>K</code>, samt <code>u</code> for <code>&mu;</code>.</p>
+        </div>
+    </main>
+
+    <!-- Modal for SI-tabell og hint -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Nivå 1: Kilo & Milli</h2>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Fylles dynamisk -->
+            </div>
+            <button type="button" class="modal-close-btn" id="modal-close-btn">Forstått! Tilbake til spillet ➔</button>
+        </div>
+    </div>
+
+    <!-- LAGRE / LAST SPILL MODAL -->
+    <div class="modal-overlay" id="save-load-modal">
+        <div class="modal-content" style="max-width: 500px; text-align: left;">
+            <div class="modal-header" style="margin-bottom: 12px;">
+                <h2 class="modal-title" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <span>💾 Lagre eller hent spill</span>
+                    <button type="button" id="save-load-close-x" style="background: none; border: none; font-size: 18px; color: #94a3b8; cursor: pointer;">✖</button>
+                </h2>
+            </div>
+            
+            <!-- FANER -->
+            <div class="save-tab-bar">
+                <button type="button" class="save-tab-btn active" id="tab-btn-save" data-tab="save">💾 Lagre spill</button>
+                <button type="button" class="save-tab-btn" id="tab-btn-load" data-tab="load">📂 Hent / Fortsett</button>
+            </div>
+            
+            <!-- FANE 1: LAGRE -->
+            <div id="save-tab-content" class="save-tab-content">
+                <div style="font-size: 13px; color: #64748b; margin-bottom: 12px; line-height: 1.5;">
+                    Fremdriften lagres lokalt på denne enheten. Navnet er valgfritt og brukes bare på diplomet.
+                </div>
+                <div style="background: #f8fafc; padding: 10px 12px; border-radius: 8px; margin-bottom: 14px; font-size: 13px; font-weight: 700; color: #1e293b; border: 1px solid #e2e8f0;">
+                    Aktiv fremdrift: <span id="save-current-status" style="color: #2563eb;">-</span>
+                </div>
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 12px; font-weight: 800; color: #334155; margin-bottom: 4px;">Elevens fulle navn:</label>
+                    <input type="text" id="save-player-name-input" class="save-input" placeholder="F.eks. Kari Nordmann" spellcheck="false" autocomplete="name">
+                </div>
+                <button type="button" class="modal-close-btn" id="btn-save-progress" style="width: 100%; margin-top: 4px; margin-bottom: 12px;">💾 Lagre fremdrift</button>
+            </div>
+
+            <!-- FANE 2: LAST INN -->
+            <div id="load-tab-content" class="save-tab-content" style="display: none;">
+                <div style="font-size: 13px; color: #64748b; margin-bottom: 12px; line-height: 1.5;">
+                    Fortsett med fremdriften som er lagret på denne enheten:
+                </div>
+                <div id="load-status" style="font-size: 13px; color: #475569; margin-bottom: 14px;"></div>
+                <button type="button" class="modal-close-btn" id="btn-load-progress" style="width: 100%; margin-top: 4px;">🚀 Fortsett lagret spill</button>
+            </div>
+            
+            <button type="button" class="modal-close-btn" id="save-load-close-btn" style="margin-top: 14px; background: #e2e8f0; color: #1e293b;">Lukk</button>
+        </div>
+    </div>
+
+    <!-- Diplom for fullført milliGame -->
+    <div class="diploma-overlay" id="diploma-overlay">
+        <div class="diploma-info-banner no-print">
+            📄 <strong>SI-Mester!</strong> Skriv navnet ditt under og klikk <strong>«Skriv ut / Lagre som PDF»</strong> for å vise at du mestrer prefikser og enhetskonvertering!
+        </div>
+        <div class="diploma-card">
+            <div class="diploma-seal">⚡ 🎓 ⚡</div>
+            <h2 class="diploma-title">MILLIGAME DIPLOM</h2>
+            <div class="diploma-subtitle">Mester i SI-prefikser og Enhetskonvertering</div>
+            <div class="diploma-award-to">TILDELT TIL:</div>
+            <input type="text" class="diploma-name-input" id="student-name-input" placeholder="Skriv ditt navn her..." value="" autocomplete="name" spellcheck="false">
+            <div class="diploma-praise">«Perfekt Presisjon!»</div>
+            <p class="diploma-desc">
+                Har demonstrert full mestring av metrisk enhetskonvertering og ingeniørnotasjon innen elektroteknikk:
+                kilo, milli, mega, mikro, nano og piko, samt vitenskapelig tierpotensnotasjon og korrekt avrunding.
+            </p>
+            <div class="diploma-footer">
+                <div class="diploma-signature">
+                    <div class="signature-line" id="diploma-date"></div>
+                    <span>Dato</span>
+                </div>
+                <div class="diploma-signature">
+                    <div class="signature-line" id="diploma-sign-name">Ingve Bjørnå</div>
+                    <span>Lærer / Elektro-Ingeniør</span>
+                </div>
+            </div>
+            <div class="diploma-serial" id="diploma-serial"></div>
+        </div>
+        <div class="diploma-buttons no-print">
+            <button type="button" class="diploma-btn diploma-btn-print" onclick="window.print()">🖨️ Skriv ut / Lagre som PDF</button>
+            <button type="button" class="diploma-btn diploma-btn-close" id="diploma-close-btn">Tilbake til spillet</button>
+        </div>
+    </div>
+
+    <!-- Hemmelig Lærermeny -->
+    <div class="cheat-panel" id="cheat-panel">
+        <div class="cheat-header">
+            <span>🕵️ Lærermeny milliGame</span>
+            <button type="button" class="cheat-close" id="cheat-close" title="Lukk">✖</button>
+        </div>
+        <div class="cheat-sec-title">Hopp direkte til nivå:</div>
+        <div class="cheat-lvl-grid" id="cheat-lvl-grid">
+            <button type="button" class="cheat-lvl-btn" data-lvl="1">Nivå 1</button>
+            <button type="button" class="cheat-lvl-btn" data-lvl="2">Nivå 2</button>
+            <button type="button" class="cheat-lvl-btn" data-lvl="3">Nivå 3</button>
+            <button type="button" class="cheat-lvl-btn" data-lvl="4">Nivå 4</button>
+        </div>
+        <div class="cheat-sec-title">Fasit for aktiv oppgave:</div>
+        <div class="cheat-ans-box">
+            <div>Fasit: <span class="cheat-ans-val" id="cheat-ans-val">-</span></div>
+            <div class="cheat-ans-step" id="cheat-ans-step"></div>
+        </div>
+        <div class="cheat-btn-row">
+            <button type="button" class="cheat-action-btn green" id="cheat-fill-btn">🪄 Fyll inn fasit</button>
+            <button type="button" class="cheat-action-btn" id="cheat-skip-btn">⏩ Ny oppgave</button>
+            <button type="button" class="cheat-action-btn" id="cheat-streak-btn">⭐ +1 Streak</button>
+            <button type="button" class="cheat-action-btn gold" id="cheat-diploma-btn">🎓 Vis diplom</button>
+        </div>
+    </div>
+
+    <script>
+        // Standard SI-prefikser med 3-er potenser (ingeniørnotasjon)
+        const PREFIXES = [
+            { symbol: 'G', name: 'Giga',  exp: 9,   factor: '1 000 000 000', example: '10⁹' },
+            { symbol: 'M', name: 'Mega',  exp: 6,   factor: '1 000 000',     example: '10⁶' },
+            { symbol: 'k', name: 'kilo',  exp: 3,   factor: '1 000',         example: '10³' },
+            { symbol: '',  name: '(grunn)', exp: 0, factor: '1',             example: '10⁰' },
+            { symbol: 'm', name: 'milli', exp: -3,  factor: '0,001',         example: '10⁻³' },
+            { symbol: 'μ', name: 'mikro', exp: -6,  factor: '0,000 001',     example: '10⁻⁶' },
+            { symbol: 'n', name: 'nano',  exp: -9,  factor: '0,000 000 001', example: '10⁻⁹' },
+            { symbol: 'p', name: 'piko',  exp: -12, factor: '0,000 000 000 001', example: '10⁻¹²' }
+        ];
+
+        const UNITS = ['V', 'Ω', 'A', 'W'];
+
+        const LEVEL_META = [
+            {
+                level: 1,
+                name: "Kilo & Milli",
+                targetStreak: 5,
+                topic: "Kilo & Milli (10³ og 10⁻³)",
+                concept: "I elektro møter du oftest <strong>kilo (k = 1000)</strong> og <strong>milli (m = 0,001)</strong>.<br><br>• Store tall (&ge; 1000) gjøres om til <strong>k</strong> ved å dele på 1000 (flytt komma 3 plasser mot venstre).<br>• Små tall (&lt; 1) gjøres om til <strong>m</strong> ved å gange med 1000 (flytt komma 3 plasser mot høyre).",
+                example: "• 2500 V = <strong>2,5 kV</strong><br>• 0,045 A = <strong>45 mA</strong>"
+            },
+            {
+                level: 2,
+                name: "Alle prefikser (piko til giga)",
+                targetStreak: 5,
+                topic: "Hele SI-skalaen (p til G)",
+                concept: "Nå utvider vi til hele spekteret fra de minste elektronikk-verdiene (piko, nano, mikro) til de største (kilo, Mega, Giga).<br><br>Målet er alltid standard ingeniørform: tallet foran prefikset skal være mellom <strong>1 og 1000</strong>.",
+                example: "• 0,0000047 A = <strong>4,7 μA</strong><br>• 15 000 000 Ω = <strong>15 MΩ</strong><br>• 0,00000000082 F = <strong>820 pF</strong>"
+            },
+            {
+                level: 3,
+                name: "Tierpotenser (10ˣ)",
+                targetStreak: 5,
+                topic: "Vitenskapelig notasjon (10ˣ)",
+                concept: "Oppgavene er oppgitt på tierpotensform (f.eks. 45 · 10⁻⁵). Din jobb er å omforme tallet til standard ingeniørprefiks der potensen er et multiplum av 3 (10³, 10⁶, 10⁻³, 10⁻⁶ osv.) og tallet er mellom 1 og 1000.",
+                example: "• 45 · 10⁻⁵ A = 0,45 · 10⁻³ A = 450 · 10⁻⁶ A = <strong>450 μA</strong><br>• 1,2 · 10⁴ Ω = 12 · 10³ Ω = <strong>12 kΩ</strong>"
+            },
+            {
+                level: 4,
+                name: "Mester & Avrunding",
+                targetStreak: 5,
+                topic: "Avrunding og Presisjon",
+                concept: "I praktisk ingeniørarbeid runder man ofte av til f.eks. 1 eller 2 desimaler.<br><br>Følg vanlige avrundingsregler: 5 og oppover rundes opp, 4 og nedover rundes ned. Sørg for å svare med <strong>nøyaktig det antall desimaler oppgaven ber om</strong>.",
+                example: "• 0,04567 A (avrund til 1 desimal) ➔ <strong>45,7 mA</strong><br>• 1278 Ω (avrund til 0 desimaler) ➔ <strong>1 kΩ</strong> (eller 1,3 kΩ avhengig av oppgitt instruks)"
+            }
+        ];
+
+        const gameState = {
+            level: 1,
+            streak: 0,
+            consecutiveWrong: 0,
+            currentValue: 0,
+            currentUnit: '',
+            expectedAnswer: '',
+            currentProblemText: '',
+            decimalPlaces: 0,
+            isReviewing: false,
+            explanation: '',
+            playerName: '',
+            isNameLocked: false
+        };
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function toSuperscript(num) {
+            const map = {
+                '-': '⁻', '+': '⁺',
+                '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+                '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹'
+            };
+            return String(num).split('').map(c => map[c] || c).join('');
+        }
+
+        function getBestPrefix(val) {
+            const abs = Math.abs(val);
+            if (abs === 0) return PREFIXES.find(p => p.exp === 0);
+            for (const p of PREFIXES) {
+                const scaled = abs / Math.pow(10, p.exp);
+                if (scaled >= 0.99999999 && scaled < 999.99999999) {
+                    return p;
+                }
+            }
+            return PREFIXES.find(p => p.exp === 0);
+        }
+
+        function formatDisplayNumber(num) {
+            if (num === 0) return '0';
+            const abs = Math.abs(num);
+            if (abs >= 1e-12 && abs < 1) {
+                const str = num.toFixed(15).replace(/\.?0+$/, '');
+                return str.replace('.', ',');
+            }
+            const str = num.toLocaleString('no-NO', {
+                useGrouping: false,
+                maximumFractionDigits: 14
+            });
+            return str.replace('.', ',');
+        }
+
+        function normalizePrefix(rawPrefix) {
+            if (!rawPrefix) return '';
+            if (rawPrefix === 'u' || rawPrefix === 'U' || rawPrefix === 'μ' || rawPrefix === 'µ') return 'μ';
+            if (rawPrefix === 'K') return 'k';
+            if (rawPrefix === 'g') return 'G';
+            return rawPrefix;
+        }
+
+        function normalizeUnit(rawUnit) {
+            const trimmed = rawUnit.trim();
+            if (trimmed.toLowerCase() === 'ohm' || trimmed === 'Ω' || trimmed === 'Ω') return 'Ω';
+            return trimmed.toUpperCase();
+        }
+
+        function generateProblem() {
+            let number, exponent, targetPrefix;
+
+            do {
+                number = getRandomInt(100, 999);
+
+                if (gameState.level === 1) {
+                    const availableExps = [-3, -2, -1, 1, 2, 3];
+                    exponent = availableExps[getRandomInt(0, availableExps.length - 1)];
+                } else if (gameState.level === 2 || gameState.level === 4) {
+                    const availableExps = [-12, -10, -9, -8, -6, -5, -3, -2, 1, 3, 4, 6, 7, 9];
+                    exponent = availableExps[getRandomInt(0, availableExps.length - 1)];
+                } else if (gameState.level === 3) {
+                    exponent = getRandomInt(-9, 9);
+                }
+
+                gameState.currentValue = number * Math.pow(10, exponent);
+                gameState.currentUnit = UNITS[getRandomInt(0, UNITS.length - 1)];
+                targetPrefix = getBestPrefix(gameState.currentValue);
+
+            } while (gameState.level === 1 && targetPrefix.symbol === '');
+
+            const scaledValue = gameState.currentValue / Math.pow(10, targetPrefix.exp);
+            let problemText = '';
+            let explanation = '';
+
+            const lvlMeta = LEVEL_META[gameState.level - 1];
+
+            if (gameState.level === 4) {
+                gameState.decimalPlaces = getRandomInt(0, 2);
+                const roundedScaled = Number(scaledValue.toFixed(gameState.decimalPlaces));
+                const formattedNum = roundedScaled.toFixed(gameState.decimalPlaces).replace('.', ',');
+                
+                gameState.expectedAnswer = `${formattedNum} ${targetPrefix.symbol}${gameState.currentUnit}`;
+                const displayVal = formatDisplayNumber(gameState.currentValue);
+                problemText = `${displayVal} ${gameState.currentUnit} (avrund til ${gameState.decimalPlaces} desimal${gameState.decimalPlaces === 1 ? '' : 'er'} med prefiks)`;
+                explanation = `${displayVal} ${gameState.currentUnit} = ${formatDisplayNumber(scaledValue)} ${targetPrefix.symbol}${gameState.currentUnit} ➔ Avrundet til ${gameState.decimalPlaces} desimal${gameState.decimalPlaces === 1 ? '' : 'er'}: ${formattedNum} ${targetPrefix.symbol}${gameState.currentUnit}`;
+            } else if (gameState.level === 3) {
+                const formattedScaled = formatDisplayNumber(scaledValue);
+                gameState.expectedAnswer = `${formattedScaled} ${targetPrefix.symbol}${gameState.currentUnit}`;
+                problemText = `${number} · 10${toSuperscript(exponent)} ${gameState.currentUnit}`;
+                explanation = `${number} · 10${toSuperscript(exponent)} = ${formatDisplayNumber(gameState.currentValue)} ➔ flytt komma til 10${toSuperscript(targetPrefix.exp)} (${targetPrefix.name || 'grunnenhet'}) ➔ ${formattedScaled} ${targetPrefix.symbol}${gameState.currentUnit}`;
+            } else {
+                const formattedScaled = formatDisplayNumber(scaledValue);
+                gameState.expectedAnswer = `${formattedScaled} ${targetPrefix.symbol}${gameState.currentUnit}`;
+                const displayVal = formatDisplayNumber(gameState.currentValue);
+                problemText = `${displayVal} ${gameState.currentUnit}`;
+                const steps = Math.abs(targetPrefix.exp);
+                const dir = targetPrefix.exp > 0 ? 'venstre (del på 10' + toSuperscript(steps) + ')' : (targetPrefix.exp < 0 ? 'høyre (gang med 10' + toSuperscript(steps) + ')' : 'ingen flytting');
+                explanation = `${displayVal} ${gameState.currentUnit}: Flytt komma ${steps} plasser mot ${dir} ➔ ${formattedScaled} ${targetPrefix.symbol}${gameState.currentUnit}`;
+            }
+
+            gameState.currentProblemText = problemText;
+            gameState.explanation = explanation;
+
+            // Oppdater grensesnitt
+            document.getElementById('problem-text').textContent = problemText;
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('level-name').textContent = lvlMeta.name;
+            document.getElementById('topic-pill').textContent = lvlMeta.topic;
+            document.getElementById('streak').textContent = gameState.streak;
+            document.getElementById('target-streak').textContent = lvlMeta.targetStreak;
+            updateCheatPanel();
+        }
+
+        function checkAnswer(rawInput) {
+            if (!rawInput || typeof rawInput !== 'string') {
+                return { correct: false, message: 'Vennligst skriv inn et svar.' };
+            }
+
+            const trimmed = rawInput.trim();
+            const match = trimmed.match(/^(\d+(?:[.,]\d+)?)\s*([pnμµuUmkMKGg]?)\s*(V|Ω|Ω|A|W|ohm|OHM|Ohm|v|a|w)$/);
+
+            if (!match) {
+                return { correct: false, message: 'Ugyldig format. Eksempel: 1,27 kΩ eller 1.27kΩ' };
+            }
+
+            let numStr = match[1].replace(',', '.');
+            const userPrefix = normalizePrefix(match[2]);
+            const userUnit = normalizeUnit(match[3]);
+
+            if (userUnit !== gameState.currentUnit) {
+                return { correct: false, message: `Feil enhet! Forventet ${gameState.currentUnit}, men du skrev ${userUnit}.` };
+            }
+
+            const prefixObj = PREFIXES.find(p => p.symbol === userPrefix);
+            if (!prefixObj) {
+                return { correct: false, message: 'Ukjent prefiks.' };
+            }
+
+            const targetPrefix = getBestPrefix(gameState.currentValue);
+            const parsedNum = parseFloat(numStr);
+
+            if (isNaN(parsedNum)) {
+                return { correct: false, message: 'Ugyldig tallverdi.' };
+            }
+
+            if (gameState.level === 4) {
+                const decimals = numStr.includes('.') ? (numStr.split('.')[1] || '').length : 0;
+                if (decimals !== gameState.decimalPlaces) {
+                    return { 
+                        correct: false, 
+                        message: `Feil antall desimaler! Oppgaven ba om ${gameState.decimalPlaces} desimal${gameState.decimalPlaces === 1 ? '' : 'er'}.` 
+                    };
+                }
+
+                if (userPrefix !== targetPrefix.symbol) {
+                    return { 
+                        correct: false, 
+                        message: 'Feil prefiks. Tallet må være mellom 1 og 1000.' 
+                    };
+                }
+
+                const scaledTarget = gameState.currentValue / Math.pow(10, targetPrefix.exp);
+                const expectedRounded = Number(scaledTarget.toFixed(gameState.decimalPlaces));
+
+                if (Math.abs(parsedNum - expectedRounded) > 1e-6) {
+                    return { 
+                        correct: false, 
+                        message: 'Feil verdi etter avrunding.' 
+                    };
+                }
+            } else {
+                const userValue = parsedNum * Math.pow(10, prefixObj.exp);
+                
+                if (parsedNum < 0.999999 || parsedNum >= 1000) {
+                    return { 
+                        correct: false, 
+                        message: 'Prefikset må velges slik at tallet er mellom 1 og 1000.' 
+                    };
+                }
+
+                const tolerance = Math.max(1e-12, Math.abs(gameState.currentValue) * 1e-7);
+                if (Math.abs(userValue - gameState.currentValue) > tolerance) {
+                    return { 
+                        correct: false, 
+                        message: 'Feil tallverdi.' 
+                    };
+                }
+            }
+
+            return { correct: true, message: 'Riktig! Fantastisk konvertering! 🎉' };
+        }
+
+        function handleSubmission(e) {
+            if (e) e.preventDefault();
+
+            const inputElement = document.getElementById('answer-input');
+            const submitBtn = document.getElementById('submit-btn');
+            const feedbackElement = document.getElementById('feedback');
+
+            if (gameState.isReviewing) {
+                gameState.isReviewing = false;
+                submitBtn.textContent = 'Sjekk svar';
+                submitBtn.classList.remove('btn-next');
+                feedbackElement.innerHTML = '';
+                inputElement.value = '';
+                generateProblem();
+                inputElement.focus();
+                return;
+            }
+
+            const rawAnswer = inputElement.value;
+            const result = checkAnswer(rawAnswer);
+
+            if (result.correct) {
+                gameState.consecutiveWrong = 0;
+                gameState.streak++;
+
+                const lvlMeta = LEVEL_META[gameState.level - 1];
+
+                // Sjekk om hele spillet er fullført (Nivå 4)
+                if (gameState.level === 4 && gameState.streak >= lvlMeta.targetStreak) {
+                    document.getElementById('streak').textContent = gameState.streak;
+                    feedbackElement.className = 'feedback correct';
+                    feedbackElement.textContent = '🏆 GRATULERER! Du er en ekte SI-Mester! 🎆';
+                    saveToLocalStorage();
+                    launchFireworks(3000, () => {
+                        showDiploma();
+                    });
+                    return;
+                }
+
+                // Nivåopprykk
+                if (gameState.streak >= lvlMeta.targetStreak && gameState.level < LEVEL_META.length) {
+                    gameState.level++;
+                    gameState.streak = 0;
+                    saveToLocalStorage();
+                    showHelpModal(gameState.level);
+                }
+
+                feedbackElement.className = 'feedback correct';
+                feedbackElement.textContent = result.message;
+
+                generateProblem();
+                inputElement.value = '';
+                inputElement.focus();
+            } else {
+                gameState.consecutiveWrong++;
+                gameState.streak = 0;
+
+                // Nivånedrykk ved 3 feil på rad
+                if (gameState.consecutiveWrong >= 3 && gameState.level > 1) {
+                    gameState.level--;
+                    gameState.consecutiveWrong = 0;
+                    showHelpModal(gameState.level);
+                }
+
+                document.getElementById('level').textContent = gameState.level;
+                document.getElementById('streak').textContent = gameState.streak;
+
+                gameState.isReviewing = true;
+                submitBtn.textContent = 'Neste oppgave ➔';
+                submitBtn.classList.add('btn-next');
+
+                const safeAnswer = rawAnswer ? escapeHtml(rawAnswer) : '(ingenting skrevet)';
+
+                feedbackElement.className = 'feedback';
+                feedbackElement.innerHTML = `
+                    <div class="review-card">
+                        <div class="review-title">❌ ${escapeHtml(result.message)}</div>
+                        <div class="review-grid">
+                            <div class="review-row">
+                                <span class="label">Oppgave:</span>
+                                <span class="val">${escapeHtml(gameState.currentProblemText)}</span>
+                            </div>
+                            <div class="review-row wrong-row">
+                                <span class="label">Ditt svar:</span>
+                                <span class="val">${safeAnswer}</span>
+                            </div>
+                            <div class="review-row correct-row">
+                                <span class="label">Riktig svar:</span>
+                                <span class="val">${escapeHtml(gameState.expectedAnswer)}</span>
+                            </div>
+                        </div>
+                        <div class="review-explanation">
+                            <strong>Utregning:</strong> ${escapeHtml(gameState.explanation)}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // ==========================================
+        // HJELPEMODAL & SI-TABELL
+        // ==========================================
+        function showHelpModal(lvl = gameState.level) {
+            const data = LEVEL_META[lvl - 1];
+            document.getElementById('modal-title').textContent = `Nivå ${lvl}: ${data.name}`;
+
+            let rowsHtml = PREFIXES.map(p => {
+                const isBase = p.symbol === '';
+                const rowClass = isBase ? 'highlight-row' : '';
+                return `
+                    <tr class="${rowClass}">
+                        <td class="mono">${p.symbol || '—'}</td>
+                        <td>${p.name}</td>
+                        <td class="mono">${p.example}</td>
+                        <td>${p.factor}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('modal-body').innerHTML = `
+                <div class="lesson-card">
+                    <div class="lesson-card-header">🎯 Nivåfokus & Teori</div>
+                    <div style="font-size: 13.5px; line-height: 1.5; color: #334155;">${data.concept}</div>
+                </div>
+
+                <div class="lesson-card">
+                    <div class="lesson-card-header">📐 Komplett SI-Prefikstabell</div>
+                    <table class="si-table">
+                        <thead>
+                            <tr>
+                                <th>Prefiks</th>
+                                <th>Navn</th>
+                                <th>Tierpotens</th>
+                                <th>Faktor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="lesson-card">
+                    <div class="lesson-card-header" style="color: #059669;">🧠 3-er-regelen (Flytting av komma)</div>
+                    <div style="font-size: 13px; line-height: 1.55; color: #334155;">
+                        • <strong>Hvert prefiks-hopp er 3 plasser (faktor 1000):</strong><br>
+                        • For store tall (&ge; 1000): Del på 1000 (flytt komma 3 plasser <em>til venstre</em>).<br>
+                        • For små tall (&lt; 1): Gang med 1000 (flytt komma 3 plasser <em>til høyre</em>).<br>
+                        • <strong>Eksempler:</strong><br>${data.example}
+                    </div>
+                </div>
+
+                <div class="tip-box">
+                    💡 <strong>Tips:</strong> Tallet foran prefikset skal alltid være mellom 1 og 1000 (f.eks. 4,7 kΩ, ikke 0,0047 MΩ eller 4700 Ω).
+                </div>
+            `;
+
+            document.getElementById('modal-close-btn').textContent = gameState.streak === 0 ? 'Start oppgavene ➔' : 'Forstått! Tilbake til oppgaven ➔';
+            document.getElementById('modal-overlay').classList.add('active');
+            const modalContent = document.querySelector('#modal-overlay .modal-content');
+            if (modalContent) modalContent.scrollTop = 0;
+            document.getElementById('modal-close-btn').focus({ preventScroll: true });
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+            document.getElementById('answer-input').focus();
+        }
+
+        // ==========================================
+        // FYRVERKERI & DIPLOMMOTOR
+        // ==========================================
+        function launchFireworks(durationMs = 3000, callback) {
+            const canvas = document.getElementById('fireworks-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.style.display = 'block';
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#ffffff', '#eab308'];
+
+            function createExplosion(x, y) {
+                const count = 50;
+                for (let i = 0; i < count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 6 + 2;
+                    particles.push({
+                        x: x, y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        alpha: 1,
+                        decay: Math.random() * 0.02 + 0.015,
+                        radius: Math.random() * 3 + 2
+                    });
+                }
+            }
+
+            let animationFrameId;
+            let intervalId = setInterval(() => {
+                const x = Math.random() * canvas.width * 0.8 + canvas.width * 0.1;
+                const y = Math.random() * canvas.height * 0.5 + canvas.height * 0.1;
+                createExplosion(x, y);
+            }, 300);
+
+            function loop() {
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.2)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.08;
+                    p.alpha -= p.decay;
+
+                    if (p.alpha <= 0) {
+                        particles.splice(i, 1);
+                        continue;
+                    }
+
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                animationFrameId = requestAnimationFrame(loop);
+            }
+
+            createExplosion(canvas.width * 0.5, canvas.height * 0.3);
+            loop();
+
+            setTimeout(() => {
+                clearInterval(intervalId);
+                cancelAnimationFrame(animationFrameId);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                canvas.style.display = 'none';
+                if (callback) callback();
+            }, durationMs);
+        }
+
+        function updatePlayerStatusUI() {
+            const tag = document.getElementById('player-status-tag');
+            const nameSpan = document.getElementById('player-status-name');
+            if (tag && nameSpan) {
+                if (gameState.playerName) {
+                    tag.style.display = 'inline-flex';
+                    nameSpan.textContent = gameState.playerName;
+                } else {
+                    tag.style.display = 'none';
+                }
+            }
+        }
+
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('milliGame_progress', JSON.stringify({
+                    level: gameState.level,
+                    streak: gameState.streak,
+                    playerName: gameState.playerName
+                }));
+            } catch (e) {}
+        }
+
+        function showDiploma() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('no-NO', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('diploma-date').textContent = dateStr;
+
+            const nameInput = document.getElementById('student-name-input');
+            nameInput.value = gameState.playerName || '';
+            nameInput.readOnly = false;
+            nameInput.style.backgroundColor = 'transparent';
+            nameInput.style.color = '';
+            nameInput.style.cursor = 'text';
+            nameInput.focus();
+            document.getElementById('diploma-overlay').classList.add('active');
+        }
+
+        function closeDiploma() {
+            document.getElementById('diploma-overlay').classList.remove('active');
+            document.getElementById('answer-input').focus();
+        }
+
+        function openSaveLoadModal(defaultTab = 'save') {
+            const modal = document.getElementById('save-load-modal');
+            const statusSpan = document.getElementById('save-current-status');
+            const nameInput = document.getElementById('save-player-name-input');
+
+            statusSpan.textContent = `Nivå ${gameState.level}: ${LEVEL_META[gameState.level - 1].name}`;
+            nameInput.value = gameState.playerName;
+            nameInput.readOnly = false;
+            document.getElementById('load-status').textContent = localStorage.getItem('milliGame_progress') ? 'Det finnes lagret fremdrift på denne enheten.' : 'Ingen lagret fremdrift funnet.';
+
+            switchSaveTab(defaultTab);
+            modal.classList.add('active');
+        }
+
+        function switchSaveTab(tab) {
+            const tabSave = document.getElementById('tab-btn-save');
+            const tabLoad = document.getElementById('tab-btn-load');
+            const contentSave = document.getElementById('save-tab-content');
+            const contentLoad = document.getElementById('load-tab-content');
+
+            if (tab === 'save') {
+                tabSave.classList.add('active');
+                tabLoad.classList.remove('active');
+                contentSave.style.display = 'block';
+                contentLoad.style.display = 'none';
+            } else {
+                tabLoad.classList.add('active');
+                tabSave.classList.remove('active');
+                contentLoad.style.display = 'block';
+                contentSave.style.display = 'none';
+
+                document.getElementById('load-status').textContent = localStorage.getItem('milliGame_progress') ? 'Det finnes lagret fremdrift på denne enheten.' : 'Ingen lagret fremdrift funnet.';
+            }
+        }
+
+        function logoutPlayer() {
+            const confirmLogout = confirm(
+                "Er du sikker på at du vil nullstille lokal fremdrift?\n\n" +
+                "• Nivå, streak og navn på denne enheten blir slettet.\n" +
+                "• Neste elev kan starte med blanke ark."
+            );
+            if (!confirmLogout) return;
+
+            try {
+                localStorage.removeItem('milliGame_progress');
+            } catch(e) {}
+
+            gameState.playerName = "";
+            gameState.isNameLocked = false;
+            gameState.streak = 0;
+            gameState.consecutiveWrong = 0;
+            gameState.isReviewing = false;
+            gameState.level = 1;
+
+            const saveNameInput = document.getElementById('save-player-name-input');
+            if (saveNameInput) {
+                saveNameInput.value = "";
+                saveNameInput.readOnly = false;
+                saveNameInput.style.backgroundColor = "#ffffff";
+            }
+            const dipNameInput = document.getElementById('student-name-input');
+            if (dipNameInput) {
+                dipNameInput.value = "";
+                dipNameInput.readOnly = false;
+                dipNameInput.style.backgroundColor = "transparent";
+                dipNameInput.style.color = "";
+                dipNameInput.style.cursor = "text";
+            }
+
+            const modal = document.getElementById('save-load-modal');
+            if (modal) modal.classList.remove('active');
+
+            updatePlayerStatusUI();
+            generateProblem();
+            showHelpModal(1);
+        }
+
+        // ==========================================
+        // LÆRERMENY
+        // ==========================================
+        function toggleCheatMenu() {
+            const panel = document.getElementById('cheat-panel');
+            panel.classList.toggle('active');
+            if (panel.classList.contains('active')) {
+                updateCheatPanel();
+            }
+        }
+
+        function updateCheatPanel() {
+            document.getElementById('cheat-ans-val').textContent = gameState.expectedAnswer || '-';
+            const stepEl = document.getElementById('cheat-ans-step');
+            if (stepEl) stepEl.textContent = gameState.explanation || '';
+            document.querySelectorAll('.cheat-lvl-btn[data-lvl]').forEach(btn => {
+                const lvl = parseInt(btn.getAttribute('data-lvl'));
+                if (lvl === gameState.level) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
+        // ==========================================
+        // EVENT LISTENERS
+        // ==========================================
+        document.getElementById('game-form').addEventListener('submit', handleSubmission);
+
+        document.getElementById('help-btn').addEventListener('click', () => showHelpModal(gameState.level));
+        document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+        document.getElementById('modal-overlay').addEventListener('click', (e) => {
+            if (e.target.id === 'modal-overlay') closeModal();
+        });
+
+        document.getElementById('diploma-close-btn').addEventListener('click', closeDiploma);
+
+        // Snarveiknapper
+        document.querySelectorAll('.shortcut-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const char = btn.getAttribute('data-char');
+                const input = document.getElementById('answer-input');
+                const start = input.selectionStart || input.value.length;
+                const end = input.selectionEnd || input.value.length;
+                input.value = input.value.substring(0, start) + char + input.value.substring(end);
+                input.focus();
+                input.selectionStart = input.selectionEnd = start + char.length;
+            });
+        });
+
+        // Lagre / Hent modal hendelser
+        document.getElementById('save-load-btn').addEventListener('click', () => openSaveLoadModal('save'));
+        document.getElementById('save-load-close-btn').addEventListener('click', () => document.getElementById('save-load-modal').classList.remove('active'));
+        document.getElementById('save-load-close-x').addEventListener('click', () => document.getElementById('save-load-modal').classList.remove('active'));
+        document.getElementById('save-load-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'save-load-modal') document.getElementById('save-load-modal').classList.remove('active');
+        });
+        document.getElementById('tab-btn-save').addEventListener('click', () => switchSaveTab('save'));
+        document.getElementById('tab-btn-load').addEventListener('click', () => switchSaveTab('load'));
+
+        document.getElementById('btn-save-progress').addEventListener('click', () => {
+            const input = document.getElementById('save-player-name-input');
+            gameState.playerName = input.value.trim();
+            updatePlayerStatusUI();
+            saveToLocalStorage();
+            document.getElementById('save-current-status').textContent = `Lagret: Nivå ${gameState.level} (${gameState.streak}/5)`;
+        });
+
+        document.getElementById('btn-load-progress').addEventListener('click', () => {
+            try {
+                const saved = JSON.parse(localStorage.getItem('milliGame_progress'));
+                if (!saved) return;
+                gameState.level = Math.min(Math.max(saved.level || 1, 1), LEVEL_META.length);
+                gameState.streak = Math.min(Math.max(saved.streak || 0, 0), LEVEL_META[gameState.level - 1].targetStreak);
+                gameState.playerName = saved.playerName || '';
+                gameState.isReviewing = false;
+                updatePlayerStatusUI();
+                generateProblem();
+                document.getElementById('save-load-modal').classList.remove('active');
+            } catch (e) {
+                document.getElementById('load-status').textContent = 'Den lagrede fremdriften kunne ikke leses.';
+            }
+        });
+
+        const btnLogoutTag = document.getElementById('btn-logout-tag');
+        if (btnLogoutTag) btnLogoutTag.addEventListener('click', (e) => { e.stopPropagation(); logoutPlayer(); });
+        const btnLogoutModal = document.getElementById('btn-logout-modal');
+        if (btnLogoutModal) btnLogoutModal.addEventListener('click', () => logoutPlayer());
+
+        const studentNameInput = document.getElementById('student-name-input');
+        if (studentNameInput) studentNameInput.addEventListener('input', () => {
+            gameState.playerName = studentNameInput.value.trim();
+        });
+
+        // Hemmelig lærermeny: 7 klikk eller Ctrl+Alt+K / Ctrl+Shift+K
+        let triggerClicks = 0;
+        let triggerTimer = null;
+        document.getElementById('secret-trigger-area').addEventListener('click', () => {
+            triggerClicks++;
+            clearTimeout(triggerTimer);
+            triggerTimer = setTimeout(() => { triggerClicks = 0; }, 3000);
+            if (triggerClicks >= 7) {
+                triggerClicks = 0;
+                toggleCheatMenu();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (((e.ctrlKey && e.altKey) || (e.ctrlKey && e.shiftKey)) && (e.key === 'k' || e.key === 'K')) {
+                e.preventDefault();
+                toggleCheatMenu();
+            }
+            if (e.key === 'Escape') {
+                if (document.getElementById('save-load-modal') && document.getElementById('save-load-modal').classList.contains('active')) {
+                    document.getElementById('save-load-modal').classList.remove('active');
+                } else if (document.getElementById('modal-overlay').classList.contains('active')) {
+                    closeModal();
+                } else if (document.getElementById('diploma-overlay').classList.contains('active')) {
+                    closeDiploma();
+                } else if (document.getElementById('cheat-panel').classList.contains('active')) {
+                    toggleCheatMenu();
+                }
+            }
+        });
+
+        document.getElementById('cheat-close').addEventListener('click', toggleCheatMenu);
+
+        document.querySelectorAll('.cheat-lvl-btn[data-lvl]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const lvl = parseInt(btn.getAttribute('data-lvl'));
+                gameState.level = lvl;
+                gameState.streak = 0;
+                gameState.isReviewing = false;
+                document.getElementById('feedback').innerHTML = '';
+                document.getElementById('submit-btn').textContent = 'Sjekk svar';
+                document.getElementById('submit-btn').classList.remove('btn-next');
+                document.getElementById('answer-input').value = '';
+                generateProblem();
+                document.getElementById('answer-input').focus();
+            });
+        });
+
+        document.getElementById('cheat-fill-btn').addEventListener('click', () => {
+            document.getElementById('answer-input').value = gameState.expectedAnswer;
+            document.getElementById('answer-input').focus();
+        });
+
+        document.getElementById('cheat-skip-btn').addEventListener('click', () => {
+            gameState.isReviewing = false;
+            document.getElementById('feedback').innerHTML = '';
+            document.getElementById('submit-btn').textContent = 'Sjekk svar';
+            document.getElementById('submit-btn').classList.remove('btn-next');
+            document.getElementById('answer-input').value = '';
+            generateProblem();
+            document.getElementById('answer-input').focus();
+        });
+
+        document.getElementById('cheat-streak-btn').addEventListener('click', () => {
+            gameState.streak++;
+            document.getElementById('streak').textContent = gameState.streak;
+            const lvlMeta = LEVEL_META[gameState.level - 1];
+            if (gameState.level === 4 && gameState.streak >= lvlMeta.targetStreak) {
+                launchFireworks(3000, () => showDiploma());
+            } else if (gameState.streak >= lvlMeta.targetStreak && gameState.level < LEVEL_META.length) {
+                gameState.level++;
+                gameState.streak = 0;
+                showHelpModal(gameState.level);
+                generateProblem();
+            }
+            updateCheatPanel();
+        });
+
+        document.getElementById('cheat-diploma-btn').addEventListener('click', () => {
+            showDiploma();
+        });
+
+        // Sjekk om det finnes en aktiv lagret økt i localStorage ved oppstart
+        try {
+            const saved = JSON.parse(localStorage.getItem('milliGame_progress'));
+            if (saved) {
+                gameState.level = Math.min(Math.max(saved.level || 1, 1), LEVEL_META.length);
+                gameState.streak = Math.min(Math.max(saved.streak || 0, 0), LEVEL_META[gameState.level - 1].targetStreak);
+                gameState.playerName = saved.playerName || '';
+                updatePlayerStatusUI();
+            }
+        } catch(e) {}
+
+        // Start spillet ved innlasting
+        generateProblem();
+    </script>
+</body>
+</html>

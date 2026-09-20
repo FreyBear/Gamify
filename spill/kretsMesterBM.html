@@ -1,0 +1,2119 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KretsMester BEAST MODE</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #070a12;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.08) 0%, transparent 45%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 16px;
+            color: #f1f5f9;
+        }
+        .container {
+            background-color: #0f172a;
+            padding: 24px 20px;
+            border-radius: 16px;
+            border: 1px solid #1e293b;
+            box-shadow: 0 0 35px rgba(56, 189, 248, 0.12), 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 660px;
+            width: 100%;
+            position: relative;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .title-group {
+            text-align: left;
+            user-select: none;
+            cursor: default;
+        }
+        .brand-title {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 900;
+            color: #f8fafc;
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .brand-title span.blue { color: #38bdf8; }
+        .beast-badge {
+            background: linear-gradient(135deg, #ef4444, #f59e0b);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 3px 8px;
+            border-radius: 6px;
+            letter-spacing: 1px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+            animation: pulse-glow 2s infinite alternate;
+        }
+        @keyframes pulse-glow {
+            from { box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
+            to { box-shadow: 0 0 18px rgba(245, 158, 11, 0.8); }
+        }
+        .brand-subtitle {
+            font-size: 13px;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-top: 3px;
+        }
+        .help-btn {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 7px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #38bdf8;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+        .help-btn:hover { background-color: #334155; border-color: #38bdf8; color: #ffffff; box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
+        .level-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1e293b;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        .level-badge {
+            font-weight: 800;
+            color: #fbbf24;
+            background-color: rgba(251, 191, 36, 0.1);
+            padding: 3px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+        .streak-badge { font-weight: 700; color: #34d399; }
+        .circuit-container {
+            background-color: #0b0f19;
+            border: 2px solid #1e293b;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 260px;
+            overflow-x: auto;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+        .circuit-svg { max-width: 100%; height: auto; display: block; }
+        .wire { stroke: #64748b; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        .bridge-wire { stroke: #a855f7; stroke-width: 3.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        .junction-dot { fill: #38bdf8; }
+        .node-letter { font-family: system-ui, sans-serif; font-size: 14px; font-weight: 800; fill: #c084fc; }
+        .source-line-pos { stroke: #38bdf8; stroke-width: 2.5; stroke-linecap: round; }
+        .source-line-neg { stroke: #38bdf8; stroke-width: 5.5; stroke-linecap: round; }
+        .source-label { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 13px; font-weight: bold; fill: #f8fafc; }
+        .resistor-box { fill: #1e293b; stroke: #38bdf8; stroke-width: 2.5; rx: 3; }
+        .resistor-box.target { stroke: #f43f5e; stroke-width: 3; fill: #31121d; }
+        .component-label { font-family: system-ui, sans-serif; font-size: 13px; font-weight: 700; fill: #94a3b8; }
+        .value-label { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; font-weight: 700; fill: #f8fafc; }
+        .target-badge { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 14px; font-weight: 900; fill: #fb7185; }
+        .arrow-head { fill: #34d399; }
+        .arrow-head-bridge { fill: #c084fc; }
+        .arrow-label { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; font-weight: 700; fill: #34d399; }
+        .bridge-label { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 13px; font-weight: 800; fill: #c084fc; }
+        .problem-box { margin: 14px 0; text-align: center; }
+        .topic-pill {
+            display: inline-block;
+            background-color: rgba(168, 85, 247, 0.15);
+            color: #c084fc;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            font-size: 12px;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .problem-question { font-size: 18px; font-weight: 700; color: #f8fafc; margin: 0; line-height: 1.4; }
+        .direction-section {
+            display: none;
+            margin: 12px 0;
+            background-color: #172554;
+            border: 1px solid #1e40af;
+            border-radius: 10px;
+            padding: 12px;
+        }
+        .direction-section.active { display: block; }
+        .direction-label { font-size: 13px; font-weight: 700; color: #93c5fd; margin-bottom: 8px; }
+        .direction-buttons { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+        .dir-btn {
+            background-color: #1e293b;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #93c5fd;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .dir-btn:hover { background-color: #1d4ed8; color: #ffffff; border-color: #60a5fa; }
+        .dir-btn.selected { background-color: #2563eb; color: #ffffff; border-color: #93c5fd; box-shadow: 0 0 12px rgba(37, 99, 235, 0.6); }
+        .input-section { margin: 18px 0 10px 0; display: flex; flex-direction: column; gap: 10px; }
+        #answer-input {
+            padding: 12px 16px;
+            font-size: 18px;
+            background-color: #1e293b;
+            color: #ffffff;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            outline: none;
+            text-align: center;
+            font-weight: 700;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        #answer-input:focus { border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25); }
+        .button-group { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+        .shortcut-btn {
+            padding: 8px 12px;
+            font-size: 15px;
+            font-weight: bold;
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #cbd5e1;
+            min-width: 42px;
+            transition: all 0.15s ease;
+        }
+        .shortcut-btn:hover { background-color: #334155; color: #38bdf8; border-color: #38bdf8; }
+        #submit-btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            flex-grow: 1;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+        }
+        #submit-btn:hover { background: linear-gradient(135deg, #1d4ed8, #6d28d9); box-shadow: 0 6px 18px rgba(124, 58, 237, 0.5); }
+        #submit-btn:active { transform: scale(0.98); }
+        #submit-btn.btn-next { background: linear-gradient(135deg, #334155, #1e293b); }
+        #submit-btn.btn-next:hover { background: #475569; }
+        .feedback { margin: 12px 0; font-size: 16px; font-weight: 600; min-height: 24px; }
+        .feedback.correct { color: #4ade80; text-shadow: 0 0 8px rgba(74, 222, 128, 0.3); }
+        .feedback.wrong { color: #f87171; }
+        .review-card {
+            background-color: #271216;
+            border: 1px solid #7f1d1d;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin: 10px 0;
+            text-align: left;
+        }
+        .review-title { font-weight: 800; color: #fca5a5; margin: 0 0 10px 0; font-size: 15px; }
+        .review-grid { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+        .review-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 6px;
+            background-color: #1e293b;
+            border: 1px solid #334155;
+        }
+        .review-row.wrong-row { background-color: #451a20; border-color: #991b1b; color: #fca5a5; font-weight: 700; }
+        .review-row.correct-row { background-color: #143523; border-color: #166534; color: #86efac; font-weight: 700; }
+        .review-row .label { color: #94a3b8; font-size: 13px; font-weight: 600; }
+        .review-row.wrong-row .label { color: #fca5a5; }
+        .review-row.correct-row .label { color: #86efac; }
+        .review-row .val { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 14px; }
+        .review-explanation {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #cbd5e1;
+            background-color: #0f172a;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border-left: 3px solid #38bdf8;
+            line-height: 1.5;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            padding: 24px 28px;
+            border-radius: 16px;
+            max-width: 620px;
+            width: 100%;
+            text-align: left;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(56, 189, 248, 0.15);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1e293b;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        .modal-title { margin: 0; font-size: 20px; color: #fbbf24; font-weight: 800; }
+        .modal-body { font-size: 14px; color: #cbd5e1; line-height: 1.6; }
+        .lesson-card {
+            background-color: #162032;
+            border: 1px solid #1e293b;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin: 12px 0;
+        }
+        .lesson-card-header {
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #38bdf8;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .lesson-card-header.gold { color: #fbbf24; }
+        .lesson-card-header.purple { color: #c084fc; }
+        .lesson-card-header.green { color: #34d399; }
+        .lesson-step-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 10px 0 0 0;
+            padding-left: 0;
+            list-style: none;
+        }
+        .lesson-step-item {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            font-size: 13.5px;
+            line-height: 1.5;
+            background: #0f172a;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #1e293b;
+        }
+        .step-num {
+            background: #2563eb;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 11px;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .formula-box {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 12px 0;
+            font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+            font-size: 13.5px;
+            color: #38bdf8;
+        }
+        .formula-item { margin: 5px 0; }
+        .frac {
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: middle;
+            text-align: center;
+            padding: 0 4px;
+            font-size: 0.92em;
+            line-height: 1.1;
+        }
+        .frac .num {
+            border-bottom: 1.5px solid currentColor;
+            padding-bottom: 2px;
+            margin-bottom: 1px;
+            display: block;
+        }
+        .frac .den {
+            padding-top: 1px;
+            display: block;
+        }
+        .modal-close-btn {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #ffffff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 16px;
+            transition: all 0.2s ease;
+        }
+        .modal-close-btn:hover { background: linear-gradient(135deg, #1d4ed8, #6d28d9); }
+
+        /* Canvas Fyrverkeri */
+        #fireworks-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            display: none;
+        }
+
+        /* Diplom-overlay og styling (BEAST DIPLOM) */
+        .diploma-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(3, 7, 18, 0.94);
+            backdrop-filter: blur(6px);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 16px;
+            z-index: 10000;
+            overflow-y: auto;
+        }
+        .diploma-overlay.active { display: flex; }
+        .diploma-info-banner {
+            color: #f8fafc;
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid #3b82f6;
+            border-radius: 10px;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            text-align: center;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+        }
+        .diploma-card {
+            background: #090d16;
+            border: 10px double #fbbf24;
+            border-radius: 16px;
+            max-width: 700px;
+            width: 100%;
+            padding: 36px 28px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(251, 191, 36, 0.25), 0 20px 40px rgba(0, 0, 0, 0.8);
+            color: #f8fafc;
+        }
+        .diploma-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-24deg);
+            font-size: 50px;
+            font-weight: 900;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            letter-spacing: 10px;
+            color: rgba(245, 158, 11, 0.12);
+            border: 5px solid rgba(245, 158, 11, 0.12);
+            padding: 8px 30px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+            z-index: 1;
+            display: none;
+        }
+        .diploma-watermark.active {
+            display: block;
+        }
+        .diploma-seal { font-size: 48px; margin-bottom: 8px; text-shadow: 0 0 15px rgba(251, 191, 36, 0.6); }
+        .diploma-title {
+            font-family: Georgia, serif;
+            font-size: 32px;
+            color: #fbbf24;
+            margin: 0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+        }
+        .diploma-subtitle {
+            font-size: 16px;
+            color: #38bdf8;
+            margin: 6px 0 16px 0;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .diploma-award-to {
+            font-size: 13px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 4px;
+        }
+        .diploma-name-input {
+            font-family: "Brush Script MT", cursive, Georgia, serif;
+            font-size: 36px;
+            color: #60a5fa;
+            border: none;
+            border-bottom: 2px dashed #fbbf24;
+            background: transparent;
+            text-align: center;
+            width: 85%;
+            outline: none;
+            margin: 4px 0 16px 0;
+            padding: 6px 8px;
+            font-weight: bold;
+            transition: border-color 0.2s;
+        }
+        .diploma-name-input:focus { border-bottom: 2px solid #38bdf8; background: rgba(30, 41, 59, 0.5); }
+        .diploma-locked-badge {
+            font-size: 12px;
+            font-weight: 700;
+            color: #38bdf8;
+            background: rgba(14, 165, 233, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 6px;
+            padding: 4px 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin: -8px auto 14px auto;
+        }
+        .diploma-praise {
+            font-family: Georgia, serif;
+            font-size: 22px;
+            font-weight: bold;
+            color: #f43f5e;
+            margin: 12px 0;
+            text-shadow: 0 0 8px rgba(244, 63, 94, 0.3);
+        }
+        .diploma-desc {
+            font-size: 14px;
+            color: #cbd5e1;
+            line-height: 1.6;
+            max-width: 560px;
+            margin: 0 auto 20px auto;
+        }
+        .diploma-footer {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            margin-top: 24px;
+            border-top: 1px solid #1e293b;
+            padding-top: 16px;
+        }
+        .diploma-signature { text-align: center; font-size: 12px; color: #94a3b8; }
+        .signature-line {
+            font-family: "Brush Script MT", cursive, Georgia, serif;
+            font-size: 22px;
+            color: #38bdf8;
+            border-bottom: 1px solid #475569;
+            padding-bottom: 2px;
+            margin-bottom: 4px;
+        }
+        .diploma-serial {
+            margin-top: 14px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            letter-spacing: 1.2px;
+            font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+            user-select: none;
+        }
+        .diploma-buttons {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            max-width: 700px;
+            width: 100%;
+        }
+        .diploma-btn {
+            padding: 12px 20px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s ease;
+        }
+        .diploma-btn-print { background-color: #d97706; color: white; }
+        .diploma-btn-print:hover { background-color: #b45309; }
+        .diploma-btn-close { background-color: #1e293b; color: white; border: 1px solid #334155; }
+        .diploma-btn-close:hover { background-color: #334155; }
+
+        /* LOCAL PROGRESS STATUS & MODAL (BEAST THEME) */
+        .player-status-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #334155;
+            color: #38bdf8;
+            padding: 3px 6px 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .player-logout-btn {
+            background: #0f172a;
+            border: 1px solid #475569;
+            color: #f87171;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            line-height: 1.2;
+        }
+        .player-logout-btn:hover {
+            background: #7f1d1d;
+            border-color: #ef4444;
+            color: #ffffff;
+        }
+        .btn-logout-modal {
+            width: 100%;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            padding: 9px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-logout-modal:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+            color: #ffffff;
+        }
+        .save-tab-bar {
+            display: flex;
+            gap: 8px;
+            border-bottom: 2px solid #334155;
+            margin-bottom: 16px;
+            padding-bottom: 4px;
+        }
+        .save-tab-btn {
+            background: none;
+            border: none;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 800;
+            color: #94a3b8;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -6px;
+            transition: all 0.15s;
+        }
+        .save-tab-btn:hover { color: #f8fafc; }
+        .save-tab-btn.active {
+            color: #38bdf8;
+            border-bottom-color: #38bdf8;
+        }
+        .save-input {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 14px;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            background: #0f172a;
+            color: #f8fafc;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .save-input:focus { border-color: #38bdf8; }
+
+        @media print {
+            body { background: white !important; color: black !important; padding: 0 !important; }
+            .container, .modal-overlay, .cheat-panel, #fireworks-canvas, .diploma-buttons, .diploma-info-banner { display: none !important; }
+            .diploma-overlay { position: static !important; display: block !important; background: none !important; padding: 0 !important; }
+            .diploma-card { box-shadow: none !important; max-width: 100% !important; border: 8px double #d97706 !important; background: white !important; color: black !important; }
+            .diploma-name-input { border-bottom: none !important; color: #1e3a8a !important; }
+            .diploma-title { color: #92400e !important; }
+            .diploma-subtitle { color: #1e40af !important; }
+            .diploma-desc { color: #334155 !important; }
+            .diploma-watermark, .diploma-serial {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .diploma-watermark {
+                color: rgba(180, 83, 9, 0.085) !important;
+                border-color: rgba(180, 83, 9, 0.085) !important;
+            }
+        }
+
+        /* Teacher and testing panel */
+        .cheat-panel {
+            display: none;
+            position: fixed;
+            bottom: 20px; right: 20px;
+            background-color: #0f172a;
+            color: #f8fafc;
+            border: 2px solid #ef4444;
+            border-radius: 12px;
+            padding: 16px;
+            max-width: 400px;
+            width: calc(100% - 40px);
+            box-shadow: 0 12px 35px rgba(239, 68, 68, 0.3);
+            z-index: 1000;
+            text-align: left;
+            font-size: 13px;
+        }
+        .cheat-panel.active { display: block; }
+        .cheat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: #f87171;
+        }
+        .cheat-close { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 16px; padding: 0 4px; }
+        .cheat-close:hover { color: #ffffff; }
+        .cheat-sec-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; margin: 8px 0 4px 0; font-weight: 600; }
+        .cheat-lvl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 8px; }
+        .cheat-lvl-btn {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            color: #f8fafc;
+            padding: 6px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+            text-align: center;
+            transition: all 0.1s;
+        }
+        .cheat-lvl-btn:hover { background-color: #ef4444; border-color: #fca5a5; }
+        .cheat-lvl-btn.active { background-color: #ef4444; border-color: #fca5a5; }
+        .cheat-ans-box {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin: 6px 0;
+            font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        }
+        .cheat-ans-val { color: #4ade80; font-weight: bold; font-size: 14px; }
+        .cheat-ans-step { color: #94a3b8; font-size: 11px; margin-top: 4px; line-height: 1.4; }
+        .cheat-btn-row { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+        .cheat-action-btn {
+            flex: 1;
+            background-color: #334155;
+            border: none;
+            color: #ffffff;
+            padding: 6px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+        .cheat-action-btn:hover { background-color: #475569; }
+        .cheat-action-btn.green { background-color: #166534; }
+        .cheat-action-btn.green:hover { background-color: #15803d; }
+        .cheat-action-btn.gold { background-color: #b45309; }
+        .cheat-action-btn.gold:hover { background-color: #d97706; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    </style>
+</head>
+<body>
+    <canvas id="fireworks-canvas"></canvas>
+    <main class="container">
+        <header>
+            <div class="title-group" id="brand-title-group">
+                <h1 class="brand-title">Krets<span class="blue">Mester</span> <span class="beast-badge">BEAST MODE</span></h1>
+                <div class="brand-subtitle" id="secret-trigger-area">avansert elektroanalyse ⚡</div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <button type="button" class="help-btn" id="help-btn" title="Åpne formelguide">
+                    💡 Formler & Hint
+                </button>
+                <button type="button" class="help-btn" id="save-load-btn" title="Lagre eller hent spill">
+                    💾 Lagre / Hent
+                </button>
+            </div>
+        </header>
+        <div class="level-bar">
+            <div>Beast Nivå <span id="level-num" class="level-badge">1</span>: <strong id="level-name">Baklengs-analyse</strong></div>
+            <div class="player-status-tag" id="player-status-tag" style="display: none;">
+                <span>👤 Spiller: <strong id="player-status-name">-</strong></span>
+                <button type="button" class="player-logout-btn" id="btn-logout-tag" title="Nullstill lokal progresjon">↺ Nullstill</button>
+            </div>
+            <div class="streak-badge">Rette på rad: <span id="streak-num">0</span> / 3</div>
+        </div>
+        <div class="circuit-container" id="circuit-container"></div>
+        <div class="problem-box">
+            <div class="topic-pill" id="topic-pill">Beast Mode</div>
+            <p class="problem-question" id="problem-question">Laster Beast oppgave...</p>
+        </div>
+        <!-- Retningsseksjon for retningsavhengige oppgaver -->
+        <div class="direction-section" id="direction-section">
+            <div class="direction-label" id="direction-label">Velg strømretning:</div>
+            <div class="direction-buttons" id="direction-buttons"></div>
+        </div>
+        <form id="game-form" class="input-section">
+            <label for="answer-input" class="sr-only">Ditt svar</label>
+            <input type="text" id="answer-input" placeholder="F.eks. 54 V, 1.5 A, 30 Ω, 18 W eller 2.5kΩ" autocomplete="off" spellcheck="false" required>
+            <div class="button-group">
+                <button type="button" class="shortcut-btn" data-char="Ω" title="Ohm">Ω</button>
+                <button type="button" class="shortcut-btn" data-char="k" title="Kilo">k</button>
+                <button type="button" class="shortcut-btn" data-char="m" title="Milli">m</button>
+                <button type="button" class="shortcut-btn" data-char="μ" title="Mikro">μ</button>
+                <button type="button" class="shortcut-btn" data-char="V" title="Volt">V</button>
+                <button type="button" class="shortcut-btn" data-char="A" title="Ampere">A</button>
+                <button type="button" class="shortcut-btn" data-char="W" title="Watt">W</button>
+                <button type="submit" id="submit-btn">Sjekk svar</button>
+            </div>
+        </form>
+        <div class="feedback" id="feedback" aria-live="polite"></div>
+    </main>
+
+    <!-- Modal for nivå-intro og formeloversikt -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Beast Nivå 1: Tre-grens Parallellkobling & Effekt</h2>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+            <button type="button" class="modal-close-btn" id="modal-close-btn">Start Beast-utfordring ➔</button>
+        </div>
+    </div>
+
+    <!-- LOCAL PROGRESSION MODAL -->
+    <div class="modal-overlay" id="save-load-modal">
+        <div class="modal-content" style="max-width: 500px; text-align: left;">
+            <div class="modal-header" style="margin-bottom: 12px;">
+                <h2 class="modal-title" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <span>💾 Progresjon</span>
+                    <button type="button" id="save-load-close-x" style="background: none; border: none; font-size: 18px; color: #94a3b8; cursor: pointer;">✖</button>
+                </h2>
+            </div>
+            
+            <div class="save-tab-bar">
+                <button type="button" class="save-tab-btn active" id="tab-btn-save" data-tab="save">💾 Lagre progresjon</button>
+                <button type="button" class="save-tab-btn" id="tab-btn-load" data-tab="load">📂 Fortsett lagret spill</button>
+            </div>
+            
+            <div id="save-tab-content" class="save-tab-content">
+                <div style="font-size: 13px; color: #94a3b8; margin-bottom: 12px; line-height: 1.5;">
+                    Lagre nivå, streak og valgfritt navn lokalt på denne enheten.
+                </div>
+                <div style="background: #1e293b; padding: 10px 12px; border-radius: 8px; margin-bottom: 14px; font-size: 13px; font-weight: 700; color: #f8fafc; border: 1px solid #334155;">
+                    Aktiv fremdrift: <span id="save-current-status" style="color: #38bdf8;">-</span>
+                </div>
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 12px; font-weight: 800; color: #cbd5e1; margin-bottom: 4px;">Navn (valgfritt):</label>
+                    <input type="text" id="save-player-name-input" class="save-input" placeholder="F.eks. Kari Nordmann" spellcheck="false" autocomplete="name">
+                </div>
+                <button type="button" class="modal-close-btn" id="btn-save-progress" style="width: 100%; margin-top: 4px;">💾 Lagre progresjon</button>
+            </div>
+            <div id="load-tab-content" class="save-tab-content" style="display: none;">
+                <div style="font-size: 13px; color: #94a3b8; margin-bottom: 12px; line-height: 1.5;">
+                    Fortsett med fremdriften som er lagret på denne enheten.
+                </div>
+                <div id="load-status" style="font-size: 13px; font-weight: 700; margin-bottom: 12px;">Ingen lagret fremdrift funnet.</div>
+                <button type="button" class="modal-close-btn" id="btn-load-progress" style="width: 100%; margin-top: 4px;">🚀 Continue Saved Game</button>
+            </div>
+            <button type="button" class="btn-logout-modal" id="btn-logout-modal" style="margin-top: 14px;">↺ Nullstill lokal progresjon</button>
+            <button type="button" class="modal-close-btn" id="save-load-close-btn" style="margin-top: 14px; background: #1e293b; color: #f8fafc; border: 1px solid #334155;">Lukk</button>
+        </div>
+    </div>
+
+    <!-- Diplom for fullført Beast Challenge -->
+    <div class="diploma-overlay" id="diploma-overlay">
+        <div class="diploma-info-banner no-print">
+            📄 <strong>Beast Mester!</strong> Skriv navnet ditt under og klikk <strong>«Skriv ut / Lagre som PDF»</strong> for å vise Ingve at du har stålroen!
+        </div>
+        <div class="diploma-card">
+            <div class="diploma-seal">⚡ 🐉 ⚡</div>
+            <h2 class="diploma-title">BEAST MODE DIPLOM</h2>
+            <div class="diploma-subtitle">Ingves Ekstreme Elektro-Challenge</div>
+            <div class="diploma-award-to">TILDELT TIL:</div>
+            <input type="text" class="diploma-name-input" id="student-name-input" placeholder="Skriv ditt navn her..." value="" autocomplete="name" spellcheck="false">
+            <div class="diploma-praise">«Legendary Circuit Beast!»</div>
+            <p class="diploma-desc">
+                Har demonstrert et helt ekstraordinært nivå i elektroteknisk kretsanalyse: 
+                Tre-grens parallellkoblinger med effekt, baklengs effektberegninger, reell spenningskilde med indre resistans (R_i), 
+                superposisjon med doble spenningskilder, samt tverrstrøm i ubalansert Wheatstone-bro.
+            </p>
+            <div class="diploma-footer">
+                <div class="diploma-signature">
+                    <div class="signature-line" id="diploma-date"></div>
+                    <span>Dato</span>
+                </div>
+                <div class="diploma-signature">
+                    <div class="signature-line" id="diploma-sign-name">Ingve Bjørnå</div>
+                    <span>Chief Beast Engineer</span>
+                </div>
+            </div>
+        </div>
+        <div class="diploma-buttons no-print">
+            <button type="button" class="diploma-btn diploma-btn-print" onclick="window.print()">🖨️ Skriv ut / Lagre som PDF</button>
+            <button type="button" class="diploma-btn diploma-btn-close" id="diploma-close-btn">Tilbake til spillet</button>
+        </div>
+    </div>
+
+    <!-- Teacher and testing panel -->
+    <div class="cheat-panel" id="cheat-panel">
+        <div class="cheat-header">
+            <span>🕵️ Beast Lærermeny</span>
+            <button type="button" class="cheat-close" id="cheat-close" title="Lukk">✖</button>
+        </div>
+        <div class="cheat-sec-title">Hopp direkte til nivå:</div>
+        <div class="cheat-lvl-grid" id="cheat-lvl-grid">
+            <button type="button" class="cheat-lvl-btn" data-lvl="1">Nivå 1</button>
+            <button type="button" class="cheat-lvl-btn" data-lvl="2">Nivå 2</button>
+            <button type="button" class="cheat-lvl-btn" data-lvl="3">Nivå 3</button>
+            <button type="button" class="cheat-lvl-btn" data-lvl="4">Nivå 4</button>
+            <button type="button" class="cheat-lvl-btn" data-lvl="5">Nivå 5</button>
+            <button type="button" class="cheat-lvl-btn" id="cheat-intro-btn">📖 Intro</button>
+        </div>
+        <div class="cheat-sec-title">Fasit for aktiv oppgave:</div>
+        <div class="cheat-ans-box">
+            <div>Fasit: <span class="cheat-ans-val" id="cheat-ans-val">-</span></div>
+            <div class="cheat-ans-step" id="cheat-ans-step">-</div>
+        </div>
+        <div class="cheat-btn-row">
+            <button type="button" class="cheat-action-btn green" id="cheat-fill-btn">🪄 Fyll inn fasit</button>
+            <button type="button" class="cheat-action-btn" id="cheat-skip-btn">⏩ Ny oppgave</button>
+            <button type="button" class="cheat-action-btn" id="cheat-streak-btn">⭐ +1 Streak</button>
+            <button type="button" class="cheat-action-btn gold" id="cheat-diploma-btn">🎓 Vis diplom</button>
+        </div>
+    </div>
+
+    <script>
+        const LEVELS = [
+            {
+                level: 1,
+                name: "Tre-grens Parallellkobling & Effekt",
+                topic: "Parallellkretser & Total Effekt",
+                description: "Mestre tre parallelle grener, beregn total ekvivalent motstand, kildespenning og samlet avgitt effekt.",
+                bridgeConcept: "Fra <strong>KretsMester</strong> kan du allerede Ohms lov og vet at spenningen U er lik over alle parallelle grener. Her tar vi steget videre til <strong>3 parallelle grener</strong> og introduserer <strong>elektrisk effekt (P)</strong>.",
+                lessonConcept: "<strong>1. Tre parallelle motstander:</strong><br>I stedet for 'produkt over sum' (som kun fungerer for 2 motstander), må vi bruke den generelle formelen for parallellkobling:<br><span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R<sub>par</sub></span></span> = <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R₁</span></span> + <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R₂</span></span> + <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R₃</span></span>.<br><br><strong>2. Elektrisk effekt (P) måles i Watt (W):</strong><br>Effekt er hvor mye energi kilden leverer (eller motstandene avgir som varme) per sekund: <strong>P = U · I</strong>.<br>Kombinerer vi dette med Ohms lov får vi tre nyttige varianter: P = U · I = R · I² = <span class=\"frac\"><span class=\"num\">U²</span><span class=\"den\">R</span></span>.",
+                lessonSteps: [
+                    "<strong>Finn parallellmotstanden R<sub>par</sub>:</strong> Regn ut summen av brøkene <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R₁</span></span> + <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R₂</span></span> + <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R₃</span></span>, og inverter svaret (trykk 1/x eller x⁻¹ på kalkulatoren).",
+                    "<strong>Finn kildespenningen:</strong> U = I<sub>tot</sub> · R<sub>par</sub>. (Siden grenene er i parallell, har alle motstandene denne spenningen U over seg).",
+                    "<strong>Finn total avgitt effekt P<sub>tot</sub>:</strong> P<sub>tot</sub> = U · I<sub>tot</sub> (eller direkte: P<sub>tot</sub> = I<sub>tot</sub>² · R<sub>par</sub>).",
+                    "<strong>Finn greinstrømmer (f.eks. I₃):</strong> I₃ = <span class=\"frac\"><span class=\"num\">U</span><span class=\"den\">R₃</span></span>."
+                ],
+                example: "<strong>Gitt:</strong> R₁ = 30 Ω, R₂ = 60 Ω, R₃ = 20 Ω, og kilden leverer I<sub>tot</sub> = 3 A.<br>• <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R<sub>par</sub></span></span> = <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">30</span></span> + <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">60</span></span> + <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">20</span></span> = <span class=\"frac\"><span class=\"num\">2 + 1 + 3</span><span class=\"den\">60</span></span> = <span class=\"frac\"><span class=\"num\">6</span><span class=\"den\">60</span></span> ➔ <strong>R<sub>par</sub> = 10 Ω</strong>.<br>• Kildespenning: <strong>U = 3 A · 10 Ω = 30 V</strong>.<br>• Total effekt fra kilde: <strong>P<sub>tot</sub> = 30 V · 3 A = 90 W</strong>.<br>• Strøm gjennom R₃: <strong>I₃ = 30 V / 20 Ω = 1.5 A</strong>.",
+                formulas: [
+                    "3 parallelle motstander: <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R<sub>par</sub></span></span> = <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R₁</span></span> + <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R₂</span></span> + <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R₃</span></span>  ➔  R<sub>par</sub> = (R₁⁻¹ + R₂⁻¹ + R₃⁻¹)⁻¹",
+                    "Elektrisk effekt: P = U · I = R · I² = <span class=\"frac\"><span class=\"num\">U²</span><span class=\"den\">R</span></span>  (Enhet: Watt / W)",
+                    "Total effekt fra kilden: P<sub>tot</sub> = U · I<sub>tot</sub> = I<sub>tot</sub>² · R<sub>par</sub>",
+                    "Kirchhoffs strømlov (KCL): I<sub>tot</sub> = I₁ + I₂ + I₃"
+                ],
+                tips: "På kalkulatoren: Tast (30⁻¹ + 60⁻¹ + 20⁻¹)⁻¹ for å finne R_par på ett sekund!"
+            },
+            {
+                level: 2,
+                name: "Baklengs-analyse (Effekt & KVL)",
+                topic: "Effekt & Baklengs-KVL",
+                description: "Nøst deg fra oppgitte effekt- eller spenningsverdier i grenene helt tilbake til hovedkilden.",
+                bridgeConcept: "I KretsMester startet du alltid med en oppgitt kilde U og regnet utover. I <strong>Baklengs-analyse</strong> er kilden ukjent! Du må starte ute ved en motstand der du kjenner to verdier (f.eks. effekt P₂ og resistans R₂) og nøste deg baklengs mot kilden.",
+                lessonConcept: "<strong>Nøkkelen inn i kretsen:</strong><br>Når du kjenner effekten P₂ og motstanden R₂ i en gren, kan du snu effektformelen P = <span class=\"frac\"><span class=\"num\">U²</span><span class=\"den\">R</span></span> for å finne spenningen: <strong>U<sub>par</sub> = √(P₂ · R₂)</strong>.<br><br>Siden R₁ og R₂ står i parallell, har begge denne spenningen over seg. Deretter summerer du greinstrømmene (KCL) for å finne strømmen gjennom seriemotstanden R<sub>s</sub>, og bruker Kirchhoffs spenningslov (KVL) til å finne kildespenningen!",
+                lessonSteps: [
+                    "<strong>Lås opp parallellspenningen:</strong> U<sub>par</sub> = √(P₂ · R₂). (Begge parallellgrenene har denne spenningen).",
+                    "<strong>Finn greinstrømmene:</strong> I₂ = <span class=\"frac\"><span class=\"num\">U<sub>par</sub></span><span class=\"den\">R₂</span></span>  og  I₁ = <span class=\"frac\"><span class=\"num\">U<sub>par</sub></span><span class=\"den\">R₁</span></span>.",
+                    "<strong>Finn totalstrømmen (KCL):</strong> I<sub>tot</sub> = I₁ + I₂. (Hele denne strømmen må passere gjennom seriemotstanden R<sub>s</sub>).",
+                    "<strong>Finn kildespenningen (KVL):</strong> Kildespenningen må dekke både spenningsfallet over R<sub>s</sub> og spenningen over parallellblokken: <strong>U<sub>kilde</sub> = U<sub>par</sub> + (I<sub>tot</sub> · R<sub>s</sub>)</strong>."
+                ],
+                example: "<strong>Gitt:</strong> R₂ = 40 Ω med P₂ = 40 W, R₁ = 20 Ω og seriemotstand R<sub>s</sub> = 10 Ω.<br>1. Parallellspenning: <strong>U<sub>par</sub> = √(40 W · 40 Ω) = √1600 = 40 V</strong>.<br>2. Greinstrømmer: <strong>I₂ = 40 V / 40 Ω = 1 A</strong> og <strong>I₁ = 40 V / 20 Ω = 2 A</strong>.<br>3. Totalstrøm: <strong>I<sub>tot</sub> = 1 A + 2 A = 3 A</strong>.<br>4. Spenningsfall over R<sub>s</sub>: U<sub>Rs</sub> = 3 A · 10 Ω = 30 V.<br>5. Kildespenning: <strong>U<sub>kilde</sub> = 40 V + 30 V = 70 V</strong>.",
+                formulas: [
+                    "Grenspenning fra effekt: U<sub>par</sub> = √(P · R)",
+                    "Greinstrøm fra effekt: I = <span class=\"frac\"><span class=\"num\">U<sub>par</sub></span><span class=\"den\">R</span></span>  eller  I = √(P / R)",
+                    "Kirchhoffs spenningslov (KVL): U<sub>kilde</sub> = U<sub>Rs</sub> + U<sub>par</sub> = (I<sub>tot</sub> · R<sub>s</sub>) + U<sub>par</sub>"
+                ],
+                tips: "Let alltid etter komponenten som har 2 kjente verdier (som P og R). Det er alltid der du må begynne for å løse opp floken!"
+            },
+            {
+                level: 3,
+                name: "Reell Spenningskilde (R_i & Polspenning)",
+                topic: "Indre Resistans R_i",
+                description: "Forstå hvordan et ekte batteri mister spenning under belastning på grunn av sin indre motstand.",
+                bridgeConcept: "I KretsMester var alle spenningskilder 'ideelle' – de leverte alltid 24 V uansett hvor mye strøm du trakk. I virkeligheten har alle batterier og strømforsyninger en <strong>indre resistans (R<sub>i</sub>)</strong>.",
+                lessonConcept: "En <strong>reell spenningskilde</strong> modelleres som en perfekt tomgangsspenning U<sub>kilde</sub> i serie med en indre motstand R<sub>i</sub>:<br><br>• <strong>Tomgangsspenning (U<sub>kilde</sub>):</strong> Spenningen du måler når batteriet er helt ubelastet (I = 0 A).<br>• <strong>Internt spenningsfall (U<sub>i</sub>):</strong> Når strømmen I flyter, forsvinner litt spenning inni selve batteriet: U<sub>i</sub> = I · R<sub>i</sub>.<br>• <strong>Polspenning (U<sub>p</sub>):</strong> Den spenningen som faktisk er tilgjengelig på batteriets ytre poler under belastning: <strong>U<sub>p</sub> = U<sub>kilde</sub> - (I · R<sub>i</sub>) = I · R<sub>L</sub></strong>.<br>• <strong>Internt effekttap (P<sub>i</sub>):</strong> Effekten som blir til uønsket varme inni batteriet: <strong>P<sub>i</sub> = I² · R<sub>i</sub></strong>.",
+                lessonSteps: [
+                    "<strong>Finn total motstand i kretsen:</strong> Summer kildens indre motstand og belastningsmotstanden: R<sub>tot</sub> = R<sub>i</sub> + R<sub>L</sub>.",
+                    "<strong>Beregn kretsstrømmen:</strong> I = <span class=\"frac\"><span class=\"num\">U<sub>kilde</sub></span><span class=\"den\">R<sub>i</sub> + R<sub>L</sub></span></span>.",
+                    "<strong>Finn polspenningen U<sub>p</sub> på klemmene:</strong> U<sub>p</sub> = U<sub>kilde</sub> - (I · R<sub>i</sub>)  (eller direkte: U<sub>p</sub> = I · R<sub>L</sub>).",
+                    "<strong>Finn internt varmetap P<sub>i</sub>:</strong> P<sub>i</sub> = I² · R<sub>i</sub>."
+                ],
+                example: "<strong>Gitt:</strong> Bilbatteri med tomgangsspenning U<sub>kilde</sub> = 24 V, indre motstand R<sub>i</sub> = 2 Ω, og belastning R<sub>L</sub> = 10 Ω.<br>1. Total motstand: <strong>R<sub>tot</sub> = 2 Ω + 10 Ω = 12 Ω</strong>.<br>2. Strøm: <strong>I = 24 V / 12 Ω = 2 A</strong>.<br>3. Internt spenningsfall: U<sub>i</sub> = 2 A · 2 Ω = 4 V.<br>4. Polspenning på klemmene: <strong>U<sub>p</sub> = 24 V - 4 V = 20 V</strong> (eller U<sub>p</sub> = 2 A · 10 Ω = 20 V).<br>5. Internt effekttap (varme i batteri): <strong>P<sub>i</sub> = (2 A)² · 2 Ω = 8 W</strong>.",
+                formulas: [
+                    "Kretsstrøm: I = <span class=\"frac\"><span class=\"num\">U<sub>kilde</sub></span><span class=\"den\">R<sub>i</sub> + R<sub>L</sub></span></span>",
+                    "Polspenning på klemmer: U<sub>p</sub> = U<sub>kilde</sub> - (I · R<sub>i</sub>) = I · R<sub>L</sub>",
+                    "Internt effekttap (varme): P<sub>i</sub> = I² · R<sub>i</sub> = <span class=\"frac\"><span class=\"num\">U<sub>i</sub>²</span><span class=\"den\">R<sub>i</sub></span></span>"
+                ],
+                tips: "Husk at polspenningen U_p alltid er lavere enn tomgangsspenningen U_kilde så lenge det trekkes strøm!"
+            },
+            {
+                level: 4,
+                name: "Doble Spenningskilder (Superposisjon)",
+                topic: "To-Kilde Nettverk",
+                description: "Lær hvordan to kilder samarbeider eller motarbeider hverandre i et sammensatt nettverk.",
+                bridgeConcept: "I KretsMester hadde kretsen kun én spenningskilde. Her møter du et nettverk med <strong>to uavhengige spenningskilder</strong> (U₁ og U₂) koblet til samme toppknutepunkt (node A).",
+                lessonConcept: "Fordi to kilder trykker strøm inn mot samme knutepunkt A, kan vi ikke løse kretsen med enkel seriekobling. Vi har to kraftige metoder:<br><br>⚡ <strong>Metode 1: Nodal-analyse (Knutepunktmetoden - Raskest!):</strong><br>Tenk på spenningen U<sub>A</sub> i knutepunkt A som et ukjent potensial (vanntrykk).<br>Strøm inn fra venstre (<span class=\"frac\"><span class=\"num\">U₁ - U<sub>A</sub></span><span class=\"den\">R₁</span></span>) + Strøm inn fra høyre (<span class=\"frac\"><span class=\"num\">U₂ - U<sub>A</sub></span><span class=\"den\">R₂</span></span>) må være lik strøm ned gjennom midten (<span class=\"frac\"><span class=\"num\">U<sub>A</sub></span><span class=\"den\">R<sub>m</sub></span></span>).<br>Omformer vi dette til standardform, får vi:<br><strong>U<sub>A</sub> · (<span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R₁</span></span> + <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R<sub>m</sub></span></span> + <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R₂</span></span>) = <span class=\"frac\"><span class=\"num\">U₁</span><span class=\"den\">R₁</span></span> + <span class=\"frac\"><span class=\"num\">U₂</span><span class=\"den\">R₂</span></span></strong>.<br><br>💡 <strong>Metode 2: Superposisjonsprinsippet:</strong><br>Regn ut midtstrømmen fra kilde 1 alene (kortslutt kilde 2 til 0 V), regn ut midtstrømmen fra kilde 2 alene (kortslutt kilde 1), og summer bidragene: I<sub>m</sub> = I<sub>m(kun U₁)</sub> + I<sub>m(kun U₂)</sub>.",
+                lessonSteps: [
+                    "<strong>Beregn kildestrømmene inn (høyre side i formelen):</strong> Regn ut <span class=\"frac\"><span class=\"num\">U₁</span><span class=\"den\">R₁</span></span> + <span class=\"frac\"><span class=\"num\">U₂</span><span class=\"den\">R₂</span></span>.",
+                    "<strong>Beregn summen av ledningsevnene (konduktansene):</strong> G<sub>tot</sub> = <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R₁</span></span> + <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R<sub>m</sub></span></span> + <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R₂</span></span>.",
+                    "<strong>Løs for potensialet i node A:</strong> U<sub>A</sub> = <span class=\"frac\"><span class=\"num\">(U₁/R₁) + (U₂/R₂)</span><span class=\"den\">G<sub>tot</sub></span></span>.",
+                    "<strong>Finn midtstrømmen I<sub>m</sub>:</strong> I<sub>m</sub> = <span class=\"frac\"><span class=\"num\">U<sub>A</sub></span><span class=\"den\">R<sub>m</sub></span></span>.",
+                    "<strong>Strømretning:</strong> Siden toppknutepunkt A har positiv spenning (U<sub>A</sub> > 0 V) i forhold til 0 V-bunnen, flyter strømmen <strong>Nedover (Fra A)</strong>."
+                ],
+                example: "<strong>Gitt:</strong> U₁ = 30 V, R₁ = 10 Ω, U₂ = 20 V, R₂ = 20 Ω, R<sub>m</sub> = 20 Ω.<br>1. Kildestrømmer inn: <span class=\"frac\"><span class=\"num\">30</span><span class=\"den\">10</span></span> + <span class=\"frac\"><span class=\"num\">20</span><span class=\"den\">20</span></span> = 3 A + 1 A = <strong>4 A</strong>.<br>2. Konduktans: <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">10</span></span> + <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">20</span></span> + <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">20</span></span> = 0.1 + 0.05 + 0.05 = <strong>0.2 Ω⁻¹</strong>.<br>3. Spenning i node A: <strong>U<sub>A</sub> = 4 A / 0.2 Ω⁻¹ = 20 V</strong>.<br>4. Midtstrøm: <strong>I<sub>m</sub> = 20 V / 20 Ω = 1.0 A</strong>.<br>5. Retning: <strong>Nedover (Fra A)</strong>.",
+                formulas: [
+                    "Nodal-likning: U<sub>A</sub> · (<span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R₁</span></span> + <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R<sub>m</sub></span></span> + <span class=\"frac\"><span class=\"num\">1</span><span class=\"den\">R₂</span></span>) = <span class=\"frac\"><span class=\"num\">U₁</span><span class=\"den\">R₁</span></span> + <span class=\"frac\"><span class=\"num\">U₂</span><span class=\"den\">R₂</span></span>",
+                    "Midtstrøm: I<sub>m</sub> = <span class=\"frac\"><span class=\"num\">U<sub>A</sub></span><span class=\"den\">R<sub>m</sub></span></span>",
+                    "Superposisjon: I<sub>m</sub> = I<sub>m1</sub> + I<sub>m2</sub>"
+                ],
+                tips: "Tenk på spenningen U_A som et vanntrykk i topp-noden. Strømmen triller naturlig ned mot 0 V-bunnledningen!"
+            },
+            {
+                level: 5,
+                name: "Wheatstone-bro (Ubalansert H-krets)",
+                topic: "Tverrstrøm med R_h",
+                description: "Løs den ubalanserte H-kretsen med tverrmotstand R<sub>h</sub> ved hjelp av Thévenins teorem.",
+                bridgeConcept: "I KretsMester lærte du å finne spenningen mellom A og B når tverrstreken var åpen (et voltmeter). I <strong>Beast Mode</strong> setter vi inn en faktisk motstand R<sub>h</sub> i tverrstreken slik at det går en <strong>tverrstrøm I<sub>h</sub></strong>!",
+                lessonConcept: "Fordi motstanden R<sub>h</sub> knytter venstre og høyre gren sammen, er kretsen hverken en ren seriekobling eller parallellkobling.<br><br>🛠️ <strong>Løsningsverktøy: Thévenins teorem!</strong><br>Thévenin sier at uansett hvor kompleks kretsen er, kan hele nettverket sett fra klemmene A og B forenkles til én ekvivalent spenningskilde <strong>U<sub>th</sub></strong> i serie med én ekvivalent motstand <strong>R<sub>th</sub></strong>!",
+                lessonSteps: [
+                    "<strong>Steg 1: Finn Thévenin tomgangsspenning U<sub>th</sub> (koble ut R<sub>h</sub> i tankene):</strong><br>Regn ut spenningen i node A og B med vanlig spenningsdeling (som i KretsMester):<br>U<sub>A</sub> = U · <span class=\"frac\"><span class=\"num\">R₃</span><span class=\"den\">R₁ + R₃</span></span>  og  U<sub>B</sub> = U · <span class=\"frac\"><span class=\"num\">R₄</span><span class=\"den\">R₂ + R₄</span></span> ➔ <strong>U<sub>th</sub> = |U<sub>A</sub> - U<sub>B</sub>|</strong>.",
+                    "<strong>Steg 2: Finn Thévenin-resistansen R<sub>th</sub>:</strong><br>Kortslutt hovedkilden U i tankene (0 V). Sett fra klemmene A og B står R₁ i parallell med R₃, og R₂ i parallell med R₄:<br><strong>R<sub>th</sub> = (R₁ ∥ R₃) + (R₂ ∥ R₄) = <span class=\"frac\"><span class=\"num\">R₁ · R₃</span><span class=\"den\">R₁ + R₃</span></span> + <span class=\"frac\"><span class=\"num\">R₂ · R₄</span><span class=\"den\">R₂ + R₄</span></span></strong>.",
+                    "<strong>Steg 3: Beregn tverrstrømmen I<sub>h</sub>:</strong><br>Koble inn tverrmotstanden R<sub>h</sub> i den enkle Thévenin-seriekretsen:<br><strong>I<sub>h</sub> = <span class=\"frac\"><span class=\"num\">U<sub>th</sub></span><span class=\"den\">R<sub>th</sub> + R<sub>h</sub></span></span></strong>.",
+                    "<strong>Steg 4: Bestem strømretning:</strong><br>• Hvis U<sub>A</sub> > U<sub>B</sub>: Strømmen går fra høyt til lavt potensial ➔ <strong>Fra A til B (Høyre)</strong>.<br>• Hvis U<sub>B</sub> > U<sub>A</sub>: Strømmen går ➔ <strong>Fra B til A (Venstre)</strong>.<br>• Hvis U<sub>A</sub> = U<sub>B</sub> (balansert bro R₁/R₃ = R₂/R₄) ➔ <strong>0 A (Ingen strøm)</strong>."
+                ],
+                example: "<strong>Gitt:</strong> U = 60 V, R₁ = 20 Ω, R₂ = 30 Ω, R₃ = 60 Ω, R₄ = 30 Ω og R<sub>h</sub> = 20 Ω.<br>1. Spenninger: U<sub>A</sub> = 60 · <span class=\"frac\"><span class=\"num\">60</span><span class=\"den\">80</span></span> = <strong>45 V</strong>, U<sub>B</sub> = 60 · <span class=\"frac\"><span class=\"num\">30</span><span class=\"den\">60</span></span> = <strong>30 V</strong>.<br>2. Tomgangsspenning: <strong>U<sub>th</sub> = |45 V - 30 V| = 15 V</strong> (Siden U<sub>A</sub> > U<sub>B</sub>, flyter strømmen mot Høyre).<br>3. Thévenin-resistans: R<sub>th</sub> = (20 ∥ 60) + (30 ∥ 30) = 15 Ω + 15 Ω = <strong>30 Ω</strong>.<br>4. Tverrstrøm: <strong>I<sub>h</sub> = <span class=\"frac\"><span class=\"num\">15 V</span><span class=\"den\">30 Ω + 20 Ω</span></span> = <span class=\"frac\"><span class=\"num\">15</span><span class=\"den\">50</span></span> = 0.3 A</strong>.<br>5. Retning: <strong>Fra A til B (Høyre)</strong>.",
+                formulas: [
+                    "Thévenin tomgangsspenning: U<sub>th</sub> = |U<sub>A</sub> - U<sub>B</sub>|  (hvor U<sub>A</sub> = U · <span class=\"frac\"><span class=\"num\">R₃</span><span class=\"den\">R₁+R₃</span></span>, U<sub>B</sub> = U · <span class=\"frac\"><span class=\"num\">R₄</span><span class=\"den\">R₂+R₄</span></span>)",
+                    "Thévenin indre motstand: R<sub>th</sub> = <span class=\"frac\"><span class=\"num\">R₁ · R₃</span><span class=\"den\">R₁ + R₃</span></span> + <span class=\"frac\"><span class=\"num\">R₂ · R₄</span><span class=\"den\">R₂ + R₄</span></span>",
+                    "Tverrstrøm gjennom R<sub>h</sub>: I<sub>h</sub> = <span class=\"frac\"><span class=\"num\">U<sub>th</sub></span><span class=\"den\">R<sub>th</sub> + R<sub>h</sub></span></span>",
+                    "Balansebetingelse (I<sub>h</sub> = 0 A): <span class=\"frac\"><span class=\"num\">R₁</span><span class=\"den\">R₃</span></span> = <span class=\"frac\"><span class=\"num\">R₂</span><span class=\"den\">R₄</span></span>"
+                ],
+                tips: "Sjekk alltid balansebetingelsen (R1/R3 = R2/R4) først! Hvis forholdene er like, er U_A = U_B, U_th = 0 V og tverrstrømmen er garantert 0 A uten at du trenger å regne ut R_th."
+            }
+        ];
+
+        const gameState = {
+            currentLevel: 1,
+            streak: 0,
+            consecutiveWrong: 0,
+            isReviewing: false,
+            currentProblem: null,
+            selectedDirection: null,
+            lastProblemSignature: null,
+            playerName: ""
+        };
+        function getRandomChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        function roundNum(num, decimals = 2) { const factor = Math.pow(10, decimals); return Math.round(num * factor) / factor; }
+        // Identifiserer en oppgave unikt slik at vi kan unngå at samme oppgave dukker opp to ganger på rad
+        function getProblemSignature(problem) {
+            return JSON.stringify([problem.circuitType, problem.circuitParams, problem.questionText, problem.expectedAnswer, problem.expectedDir]);
+        }
+        function escapeHtml(str) { if (!str) return ""; return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+
+        function createVerticalSourceSvg(x, y, label, val, isTarget = false, reversed = false) {
+            const valClass = isTarget ? "target-badge" : "source-label";
+            let textStr = "";
+            if (isTarget) {
+                textStr = `${label} = ?`;
+            } else if (!val || val === label) {
+                textStr = label;
+            } else if (String(val).startsWith(`${label} =`)) {
+                textStr = val;
+            } else {
+                textStr = `${label} = ${val}`;
+            }
+            const posY = reversed ? y + 4 : y - 4;
+            const negY = reversed ? y - 4 : y + 4;
+            const posSignY = reversed ? y + 14 : y - 4;
+            const negSignY = reversed ? y - 4 : y + 14;
+            return `<g class="source-group">
+                <line x1="${x}" y1="${y - 10}" x2="${x}" y2="${y - 4}" class="wire"></line>
+                <line x1="${x}" y1="${y + 4}" x2="${x}" y2="${y + 10}" class="wire"></line>
+                <line x1="${x - 18}" y1="${posY}" x2="${x + 18}" y2="${posY}" class="source-line-pos"></line>
+                <line x1="${x - 9}" y1="${negY}" x2="${x + 9}" y2="${negY}" class="source-line-neg"></line>
+                <text x="${x - 30}" y="${posSignY}" font-size="13" font-weight="800" fill="#38bdf8" text-anchor="middle">+</text>
+                <text x="${x - 30}" y="${negSignY}" font-size="13" font-weight="800" fill="#38bdf8" text-anchor="middle">-</text>
+                <text x="${x - 44}" y="${y + 4}" class="${valClass}" text-anchor="end">${textStr}</text>
+            </g>`;
+        }
+
+        function createVerticalResistorSvg(x, y, label, val, isTarget = false, textSide = "right", h = 50) {
+            const w = 24;
+            const rx = x - w / 2;
+            const ry = y - h / 2;
+            const textVal = isTarget ? "?" : val;
+            const valClass = isTarget ? "target-badge" : "value-label";
+            const textX = textSide === "right" ? x + 24 : x - 24;
+            const textAnchor = textSide === "right" ? "start" : "end";
+            return `<g class="resistor-group">
+                <rect x="${rx}" y="${ry}" width="${w}" height="${h}" class="resistor-box ${isTarget ? "target" : ""}"></rect>
+                <text x="${textX}" y="${y - 4}" class="component-label" text-anchor="${textAnchor}">${label}</text>
+                <text x="${textX}" y="${y + 14}" class="${valClass}" text-anchor="${textAnchor}">${textVal}</text>
+            </g>`;
+        }
+
+        function createHorizontalResistorSvg(x, y, label, val, isTarget = false, textSide = "above", w = 48, h = 22) {
+            const rx = x - w / 2;
+            const ry = y - h / 2;
+            const textVal = isTarget ? "?" : val;
+            const valClass = isTarget ? "target-badge" : "value-label";
+            const labelY = textSide === "above" ? y - 18 : y + 26;
+            const valY = textSide === "above" ? y + 26 : y - 18;
+            return `<g class="resistor-group">
+                <rect x="${rx}" y="${ry}" width="${w}" height="${h}" class="resistor-box ${isTarget ? "target" : ""}"></rect>
+                <text x="${x}" y="${labelY}" class="component-label" text-anchor="middle">${label}</text>
+                <text x="${x}" y="${valY}" class="${valClass}" text-anchor="middle">${textVal}</text>
+            </g>`;
+        }
+
+        function createArrowSvg(x, y, dir, label, val, isTarget = false, textSide = "auto") {
+            const textVal = isTarget ? "?" : val;
+            const labelClass = isTarget ? "target-badge" : "arrow-label";
+            let points = "";
+            let textX = x, textY = y;
+            let anchor = "middle";
+            if (dir === "down") {
+                points = `${x},${y + 7} ${x - 5},${y - 5} ${x + 5},${y - 5}`;
+                textX = textSide === "left" ? x - 12 : x + 12;
+                textY = y + 4;
+                anchor = textSide === "left" ? "end" : "start";
+            } else if (dir === "up") {
+                points = `${x},${y - 7} ${x - 5},${y + 5} ${x + 5},${y + 5}`;
+                textX = textSide === "right" ? x + 12 : x - 12;
+                textY = y + 4;
+                anchor = textSide === "right" ? "start" : "end";
+            } else if (dir === "right") {
+                points = `${x + 7},${y} ${x - 5},${y - 5} ${x - 5},${y + 5}`;
+                textX = x; textY = y - 9; anchor = "middle";
+            } else if (dir === "left") {
+                points = `${x - 7},${y} ${x + 5},${y - 5} ${x + 5},${y + 5}`;
+                textX = x; textY = y - 9; anchor = "middle";
+            }
+            return `<g class="current-arrow">
+                <polygon points="${points}" class="arrow-head"></polygon>
+                <text x="${textX}" y="${textY}" class="${labelClass}" text-anchor="${anchor}">${label}${textVal ? " = " + textVal : ""}</text>
+            </g>`;
+        }
+
+        const CIRCUIT_RENDERERS = {
+            // Beast Level 1: Tre-grens Parallellkrets
+            circuitBeast5(p) {
+                return `<svg class="circuit-svg" viewBox="0 0 580 300" width="580" height="300">
+                    <path d="M 90 145 L 90 35 L 490 35 L 490 110 M 490 160 L 490 265 L 90 265 L 90 165" class="wire"></path>
+                    <path d="M 230 35 L 230 110 M 230 160 L 230 265" class="wire"></path>
+                    <path d="M 360 35 L 360 110 M 360 160 L 360 265" class="wire"></path>
+                    <circle cx="230" cy="35" r="3.5" class="junction-dot"></circle>
+                    <circle cx="360" cy="35" r="3.5" class="junction-dot"></circle>
+                    <circle cx="230" cy="265" r="3.5" class="junction-dot"></circle>
+                    <circle cx="360" cy="265" r="3.5" class="junction-dot"></circle>
+                    ${createVerticalSourceSvg(90, 155, "U", p.U, p.target === "U")}
+                    ${createVerticalResistorSvg(230, 135, "R₁", p.R1, p.target === "R1", "left", 48)}
+                    ${createVerticalResistorSvg(360, 135, "R₂", p.R2, p.target === "R2", "right", 48)}
+                    ${createVerticalResistorSvg(490, 135, "R₃", p.R3, p.target === "R3", "right", 48)}
+                    ${createArrowSvg(160, 35, "right", "I_tot", p.Itot, p.target === "Itot")}
+                    ${p.I1 ? createArrowSvg(230, 70, "down", "I₁", p.I1, p.target === "I1", "left") : createArrowSvg(230, 70, "down", "", "")}
+                    ${p.I2 ? createArrowSvg(360, 70, "down", "I₂", p.I2, p.target === "I2", "right") : createArrowSvg(360, 70, "down", "", "")}
+                    ${p.I3 ? createArrowSvg(490, 70, "down", "I₃", p.I3, p.target === "I3", "right") : createArrowSvg(490, 70, "down", "", "")}
+                    ${createArrowSvg(90, 85, "up", "", "", false, "right")}
+                </svg>`;
+            },
+            // Beast Level 2: Baklengs-analyse (Rs i serie med R1 || R2)
+            circuitBeast1(p) {
+                return `<svg class="circuit-svg" viewBox="0 0 580 280" width="580" height="280">
+                    <path d="M 80 130 L 80 40 L 176 40 M 224 40 L 480 40 L 480 110 M 480 160 L 480 240 L 80 240 L 80 150" class="wire"></path>
+                    <path d="M 360 40 L 360 110 M 360 160 L 360 240" class="wire"></path>
+                    <circle cx="360" cy="40" r="3.5" class="junction-dot"></circle>
+                    <circle cx="360" cy="240" r="3.5" class="junction-dot"></circle>
+                    ${createVerticalSourceSvg(80, 140, "U_kilde", p.U, p.target === "U")}
+                    ${createHorizontalResistorSvg(200, 40, "R_s", p.Rs, p.target === "Rs", "above", 48, 22)}
+                    ${createVerticalResistorSvg(360, 135, "R₁", p.R1, p.target === "R1", "left", 48)}
+                    ${createVerticalResistorSvg(480, 135, "R₂", p.R2, p.target === "R2", "right", 48)}
+                    ${createArrowSvg(130, 40, "right", "I_tot", p.Itot, p.target === "Itot")}
+                    ${createArrowSvg(360, 75, "down", "", "")}
+                    ${createArrowSvg(480, 75, "down", "", "")}
+                    ${createArrowSvg(80, 85, "up", "", "", false, "right")}
+                    <text x="480" y="195" font-family="ui-monospace, monospace" font-size="12" font-weight="bold" fill="#f43f5e" text-anchor="middle">P₂ = ${p.P2}</text>
+                </svg>`;
+            },
+            // Beast Level 3: Reell spenningskilde med indre motstand R_i
+            circuitBeast2(p) {
+                return `<svg class="circuit-svg" viewBox="0 0 580 280" width="580" height="280">
+                    <!-- Stiplet ramme rundt reell kilde -->
+                    <rect x="45" y="20" width="195" height="222" fill="none" stroke="#f43f5e" stroke-width="1.5" stroke-dasharray="5,4" rx="8"></rect>
+                    <text x="142" y="258" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#f43f5e" text-anchor="middle">Reell spenningskilde (U_kilde, R_i)</text>
+                    
+                    <!-- Hovedledninger -->
+                    <path d="M 90 130 L 90 50 L 156 50 M 204 50 L 480 50 L 480 115 M 480 165 L 480 230 L 90 230 L 90 150" class="wire"></path>
+                    
+                    <!-- Klemmer (U_p) -->
+                    <circle cx="260" cy="50" r="4.5" class="junction-dot" fill="#fbbf24"></circle>
+                    <circle cx="260" cy="230" r="4.5" class="junction-dot" fill="#fbbf24"></circle>
+                    <text x="260" y="32" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#fbbf24" text-anchor="middle">Klemmer (U_p)</text>
+                    
+                    <!-- Komponenter -->
+                    ${createVerticalSourceSvg(90, 140, "U_kilde", p.E, p.target === "E")}
+                    ${createHorizontalResistorSvg(180, 50, "R_i", p.Ri, p.target === "Ri", "above", 48, 22)}
+                    ${createVerticalResistorSvg(480, 140, "R_L", p.RL, p.target === "RL", "right", 48)}
+                    ${createArrowSvg(370, 50, "right", "I", p.I, p.target === "I")}
+                    ${createArrowSvg(480, 80, "down", "", "")}
+                    ${createArrowSvg(90, 85, "up", "", "", false, "right")}
+                </svg>`;
+            },
+            // Beast Level 4: Doble spenningskilder (Superposisjon)
+            circuitBeast3(p) {
+                let midArrowSvg = "";
+                const dir = gameState.selectedDirection;
+                if (dir === "down") {
+                    midArrowSvg = `<polygon points="290,82 285,70 295,70" class="arrow-head-bridge"></polygon><text x="304" y="79" class="bridge-label" text-anchor="start">I_m (Nedover)</text>`;
+                } else if (dir === "up") {
+                    midArrowSvg = `<polygon points="290,68 285,80 295,80" class="arrow-head-bridge"></polygon><text x="304" y="79" class="bridge-label" text-anchor="start">I_m (Oppover)</text>`;
+                } else if (dir === "zero") {
+                    midArrowSvg = `<text x="304" y="79" class="bridge-label" text-anchor="start">I_m = 0 A</text>`;
+                } else {
+                    midArrowSvg = `<text x="304" y="79" class="target-badge" text-anchor="start">I_m = ?</text>`;
+                }
+                return `<svg class="circuit-svg" viewBox="0 0 580 290" width="580" height="290">
+                    <path d="M 100 135 L 100 40 L 166 40 M 214 40 L 290 40 M 290 40 L 366 40 M 414 40 L 480 40 L 480 135 M 480 155 L 480 245 L 290 245 L 100 245 L 100 155" class="wire"></path>
+                    <path d="M 290 40 L 290 110 M 290 160 L 290 245" class="wire"></path>
+                    <circle cx="290" cy="40" r="4" class="junction-dot"></circle>
+                    <circle cx="290" cy="245" r="4" class="junction-dot"></circle>
+                    <text x="290" y="26" class="node-letter" text-anchor="middle">Knutepunkt A</text>
+                    ${createVerticalSourceSvg(100, 145, "U₁", p.U1, false, p.U1Reversed || false)}
+                    ${createVerticalSourceSvg(480, 145, "U₂", p.U2, false, p.U2Reversed || false)}
+                    ${createHorizontalResistorSvg(190, 40, "R₁", p.R1, false, "above", 48, 22)}
+                    ${createHorizontalResistorSvg(390, 40, "R₂", p.R2, false, "above", 48, 22)}
+                    ${createVerticalResistorSvg(290, 135, "R_m", p.Rm, false, "left", 48)}
+                    ${midArrowSvg}
+                </svg>`;
+            },
+            // Beast Level 5: Wheatstone-bro med R_h i tverrstreken
+            circuitWheatstone(p) {
+                let bridgeArrowSvg = "";
+                const dir = gameState.selectedDirection;
+                if (dir === "right") {
+                    bridgeArrowSvg = `<polygon points="410,145 398,140 398,150" class="arrow-head-bridge"></polygon><text x="390" y="132" class="bridge-label" text-anchor="middle">I_h (A ➔ B)</text>`;
+                } else if (dir === "left") {
+                    bridgeArrowSvg = `<polygon points="370,145 382,140 382,150" class="arrow-head-bridge"></polygon><text x="390" y="132" class="bridge-label" text-anchor="middle">I_h (B ➔ A)</text>`;
+                } else if (dir === "zero") {
+                    bridgeArrowSvg = `<text x="390" y="132" class="bridge-label" text-anchor="middle">I_h = 0 A</text>`;
+                } else {
+                    bridgeArrowSvg = `<text x="390" y="132" class="target-badge" text-anchor="middle">I_h = ?</text>`;
+                }
+                return `<svg class="circuit-svg" viewBox="0 0 580 320" width="580" height="320">
+                    <path d="M 110 150 L 110 30 L 470 30 L 470 58 M 470 102 L 470 145" class="wire"></path>
+                    <path d="M 310 30 L 310 58 M 310 102 L 310 145" class="wire"></path>
+                    <circle cx="310" cy="30" r="3.5" class="junction-dot"></circle>
+                    <circle cx="470" cy="30" r="3.5" class="junction-dot"></circle>
+                    
+                    <!-- Tverrstrek med motstand R_h -->
+                    <line x1="310" y1="145" x2="365" y2="145" class="bridge-wire"></line>
+                    <rect x="365" y="135" width="50" height="20" fill="#1e293b" stroke="#a855f7" stroke-width="2.5" rx="3"></rect>
+                    <text x="390" y="149" font-family="ui-monospace, monospace" font-size="11" font-weight="bold" fill="#f8fafc" text-anchor="middle">R_h = ${p.Rh}</text>
+                    <line x1="415" y1="145" x2="470" y2="145" class="bridge-wire"></line>
+
+                    <circle cx="310" cy="145" r="4.5" class="junction-dot"></circle>
+                    <circle cx="470" cy="145" r="4.5" class="junction-dot"></circle>
+                    <text x="294" y="150" class="node-letter" text-anchor="end">A</text>
+                    <text x="486" y="150" class="node-letter" text-anchor="start">B</text>
+                    ${bridgeArrowSvg}
+
+                    <path d="M 310 145 L 310 188 M 310 232 L 310 280 L 110 280 L 110 170" class="wire"></path>
+                    <path d="M 470 145 L 470 188 M 470 232 L 470 280 L 310 280" class="wire"></path>
+                    <circle cx="310" cy="280" r="3.5" class="junction-dot"></circle>
+                    <circle cx="470" cy="280" r="3.5" class="junction-dot"></circle>
+                    ${createVerticalSourceSvg(110, 160, "U", p.U, false)}
+                    ${createVerticalResistorSvg(310, 80, "R₁", p.R1, false, "left", 44)}
+                    ${createVerticalResistorSvg(470, 80, "R₂", p.R2, false, "right", 44)}
+                    ${createVerticalResistorSvg(310, 210, "R₃", p.R3, false, "left", 44)}
+                    ${createVerticalResistorSvg(470, 210, "R₄", p.R4, false, "right", 44)}
+                    ${createArrowSvg(310, 44, "down", "", "")}
+                    ${createArrowSvg(470, 44, "down", "", "")}
+                    ${createArrowSvg(110, 85, "up", "", "", false, "right")}
+                </svg>`;
+            }
+        };
+
+        function generateProblemForLevel(lvl) {
+            let problem = { level: lvl, circuitType: "circuitBeast5", circuitParams: {}, questionText: "", expectedAnswer: "", expectedValue: 0, expectedUnit: "", expectedDir: null, explanation: "" };
+            
+            if (lvl === 1) {
+                // Tre-grens Parallellkobling & Effekt
+                problem.circuitType = "circuitBeast5";
+                const R1 = 30; const R2 = 60; const R3 = 20;
+                const Rpar = 10; // 1/(1/30 + 1/60 + 1/20) = 10 ohm
+                const Itot = getRandomChoice([2, 3, 4, 5]);
+                const U = roundNum(Rpar * Itot, 1);
+                const I1 = roundNum(U / R1, 2);
+                const I2 = roundNum(U / R2, 2);
+                const I3 = roundNum(U / R3, 2);
+                const Ptot = roundNum(U * Itot, 1);
+
+                const targetType = getRandomChoice(["Ptot", "Rpar", "I3"]);
+
+                if (targetType === "Ptot") {
+                    problem.circuitParams = { U: "?", R1: `${R1} Ω`, R2: `${R2} Ω`, R3: `${R3} Ω`, I1: "", I2: "", I3: "", Itot: `${Itot} A`, target: "none" };
+                    problem.questionText = `Kilden leverer totalt ${Itot} A til de tre parallelle motstandene (30 Ω, 60 Ω, 20 Ω). Hva er den totale avgitte effekten P<sub>tot</sub> fra kilden?`;
+                    problem.expectedAnswer = `${Ptot} W`;
+                    problem.expectedValue = Ptot;
+                    problem.expectedUnit = "W";
+                    problem.explanation = `1. R<sub>par</sub> = <span class="frac"><span class="num">1</span><span class="den"><span class="frac"><span class="num">1</span><span class="den">30</span></span> + <span class="frac"><span class="num">1</span><span class="den">60</span></span> + <span class="frac"><span class="num">1</span><span class="den">20</span></span></span></span> = 10 Ω ➔ 2. U = I<sub>tot</sub> · R<sub>par</sub> = ${Itot} · 10 = ${U} V ➔ 3. P<sub>tot</sub> = U · I<sub>tot</sub> = ${U} · ${Itot} = ${Ptot} W`;
+                } else if (targetType === "Rpar") {
+                    problem.circuitParams = { U: "", R1: `${R1} Ω`, R2: `${R2} Ω`, R3: `${R3} Ω`, I1: "", I2: "", I3: "", Itot: `${Itot} A`, target: "none" };
+                    problem.questionText = "Hva er den ekvivalente totalresistansen R<sub>par</sub> for de tre parallelle grenene (30 Ω, 60 Ω, 20 Ω)?";
+                    problem.expectedAnswer = `${Rpar} Ω`;
+                    problem.expectedValue = Rpar;
+                    problem.expectedUnit = "Ω";
+                    problem.explanation = `<span class="frac"><span class="num">1</span><span class="den">R<sub>par</sub></span></span> = <span class="frac"><span class="num">1</span><span class="den">30</span></span> + <span class="frac"><span class="num">1</span><span class="den">60</span></span> + <span class="frac"><span class="num">1</span><span class="den">20</span></span> = <span class="frac"><span class="num">2+1+3</span><span class="den">60</span></span> = <span class="frac"><span class="num">6</span><span class="den">60</span></span> ➔ R<sub>par</sub> = <span class="frac"><span class="num">60</span><span class="den">6</span></span> = 10 Ω`;
+                } else {
+                    problem.circuitParams = { U: "?", R1: `${R1} Ω`, R2: `${R2} Ω`, R3: `${R3} Ω`, I1: "", I2: "", I3: "?", Itot: `${Itot} A`, target: "I3" };
+                    problem.questionText = `Hva er greinstrømmen I₃ gjennom den minste motstanden R₃ (20 Ω)?`;
+                    problem.expectedAnswer = `${I3} A`;
+                    problem.expectedValue = I3;
+                    problem.expectedUnit = "A";
+                    problem.explanation = `1. R<sub>par</sub> = 10 Ω ➔ 2. U = ${Itot} · 10 = ${U} V ➔ 3. I₃ = <span class="frac"><span class="num">U</span><span class="den">R₃</span></span> = <span class="frac"><span class="num">${U}</span><span class="den">20</span></span> = ${I3} A`;
+                }
+
+            } else if (lvl === 2) {
+                // Baklengs-analyse (Effekt P2 over R2 er oppgitt)
+                problem.circuitType = "circuitBeast1";
+                const R2 = getRandomChoice([20, 30, 40, 50, 60]);
+                const I2 = getRandomChoice([0.5, 0.6, 0.8, 1, 1.2, 1.5]);
+                const Upar = roundNum(R2 * I2, 2);
+                const P2 = roundNum(Upar * I2, 1);
+                const R1 = getRandomChoice([20, 30, 40, 50]);
+                const I1 = roundNum(Upar / R1, 2);
+                const Itot = roundNum(I1 + I2, 2);
+                const Rserie = getRandomChoice([10, 15, 20, 25]);
+                const Userie = roundNum(Rserie * Itot, 2);
+                const Ukilde = roundNum(Userie + Upar, 2);
+
+                const targetType = getRandomChoice(["Ukilde", "Itot", "R1"]);
+
+                if (targetType === "Ukilde") {
+                    problem.circuitParams = { U: "?", Rs: `${Rserie} Ω`, R1: `${R1} Ω`, R2: `${R2} Ω`, P2: `${P2} W`, Itot: "", target: "U" };
+                    problem.questionText = `Gitt at motstanden R₂ (${R2} Ω) avgir effekten P₂ = ${P2} W og seriemotstanden er R<sub>s</sub> = ${Rserie} Ω. Hva må den totale kildespenningen U<sub>kilde</sub> være?`;
+                    problem.expectedAnswer = `${Ukilde} V`;
+                    problem.expectedValue = Ukilde;
+                    problem.expectedUnit = "V";
+                    problem.explanation = `1. U<sub>par</sub> = √(P₂ · R₂) = √(${P2} · ${R2}) = ${Upar} V ➔ 2. I₂ = <span class="frac"><span class="num">${Upar}</span><span class="den">${R2}</span></span> = ${I2} A, I₁ = <span class="frac"><span class="num">${Upar}</span><span class="den">${R1}</span></span> = ${I1} A ➔ 3. I<sub>tot</sub> = ${I1} + ${I2} = ${Itot} A ➔ 4. U<sub>kilde</sub> = U<sub>par</sub> + (I<sub>tot</sub> · R<sub>s</sub>) = ${Upar} + (${Itot} · ${Rserie}) = ${Ukilde} V`;
+                } else if (targetType === "Itot") {
+                    problem.circuitParams = { U: "?", Rs: `${Rserie} Ω`, R1: `${R1} Ω`, R2: `${R2} Ω`, P2: `${P2} W`, Itot: "?", target: "Itot" };
+                    problem.questionText = `Gitt at motstanden R₂ (${R2} Ω) avgir effekten P₂ = ${P2} W. Hva er totalstrømmen I<sub>tot</sub> i kretsen?`;
+                    problem.expectedAnswer = `${Itot} A`;
+                    problem.expectedValue = Itot;
+                    problem.expectedUnit = "A";
+                    problem.explanation = `1. U<sub>par</sub> = √(P₂ · R₂) = √(${P2} · ${R2}) = ${Upar} V ➔ 2. I₂ = <span class="frac"><span class="num">${Upar}</span><span class="den">${R2}</span></span> = ${I2} A, I₁ = <span class="frac"><span class="num">${Upar}</span><span class="den">${R1}</span></span> = ${I1} A ➔ 3. I<sub>tot</sub> = I₁ + I₂ = ${I1} + ${I2} = ${Itot} A`;
+                } else {
+                    problem.circuitParams = { U: "?", Rs: `${Rserie} Ω`, R1: "?", R2: `${R2} Ω`, P2: `${P2} W`, Itot: `${Itot} A`, target: "R1" };
+                    problem.questionText = `Totalstrømmen er I<sub>tot</sub> = ${Itot} A og P₂ = ${P2} W over R₂ (${R2} Ω). Hva er verdien til motstanden R₁?`;
+                    problem.expectedAnswer = `${R1} Ω`;
+                    problem.expectedValue = R1;
+                    problem.expectedUnit = "Ω";
+                    problem.explanation = `1. U<sub>par</sub> = √(P₂ · R₂) = ${Upar} V ➔ 2. I₂ = <span class="frac"><span class="num">${Upar}</span><span class="den">${R2}</span></span> = ${I2} A ➔ 3. I₁ = I<sub>tot</sub> - I₂ = ${Itot} - ${I2} = ${I1} A ➔ 4. R₁ = <span class="frac"><span class="num">U<sub>par</sub></span><span class="den">I₁</span></span> = <span class="frac"><span class="num">${Upar}</span><span class="den">${I1}</span></span> = ${R1} Ω`;
+                }
+
+            } else if (lvl === 3) {
+                // Reell spenningskilde med indre motstand R_i
+                problem.circuitType = "circuitBeast2";
+                const Ukilde = getRandomChoice([12, 24, 36, 48, 60]);
+                const Ri = getRandomChoice([1, 2, 3, 4, 5]);
+                const RL = getRandomChoice([10, 15, 20, 25, 30, 40]);
+                const Rtot = Ri + RL;
+                const I = roundNum(Ukilde / Rtot, 2);
+                const Up = roundNum(Ukilde - (I * Ri), 2);
+                const Pi = roundNum(I * I * Ri, 2);
+
+                const targetType = getRandomChoice(["Up", "Pi", "I"]);
+
+                if (targetType === "Up") {
+                    problem.circuitParams = { E: `${Ukilde} V`, Ri: `${Ri} Ω`, RL: `${RL} Ω`, I: "", target: "none" };
+                    problem.questionText = `Spenningskilden har tomgangsspenning U<sub>kilde</sub> = ${Ukilde} V og indre motstand R<sub>i</sub> = ${Ri} Ω. Hva er polspenningen U<sub>p</sub> over belastningen R<sub>L</sub> (${RL} Ω)?`;
+                    problem.expectedAnswer = `${Up} V`;
+                    problem.expectedValue = Up;
+                    problem.expectedUnit = "V";
+                    problem.explanation = `1. R<sub>tot</sub> = R<sub>i</sub> + R<sub>L</sub> = ${Ri} + ${RL} = ${Rtot} Ω ➔ 2. I = <span class="frac"><span class="num">U<sub>kilde</sub></span><span class="den">R<sub>tot</sub></span></span> = <span class="frac"><span class="num">${Ukilde}</span><span class="den">${Rtot}</span></span> = ${I} A ➔ 3. U<sub>p</sub> = U<sub>kilde</sub> - (I · R<sub>i</sub>) = ${Ukilde} - (${I} · ${Ri}) = ${Up} V`;
+                } else if (targetType === "Pi") {
+                    problem.circuitParams = { E: `${Ukilde} V`, Ri: `${Ri} Ω`, RL: `${RL} Ω`, I: "", target: "none" };
+                    problem.questionText = `Hva er det interne effekttapet P<sub>i</sub> (varmeutviklingen i spenningskildens indre motstand R<sub>i</sub> = ${Ri} Ω)? (R<sub>L</sub> = ${RL} Ω)`;
+                    problem.expectedAnswer = `${Pi} W`;
+                    problem.expectedValue = Pi;
+                    problem.expectedUnit = "W";
+                    problem.explanation = `1. I = <span class="frac"><span class="num">U<sub>kilde</sub></span><span class="den">R<sub>i</sub> + R<sub>L</sub></span></span> = <span class="frac"><span class="num">${Ukilde}</span><span class="den">${Ri} + ${RL}</span></span> = ${I} A ➔ 2. P<sub>i</sub> = I² · R<sub>i</sub> = (${I})² · ${Ri} = ${Pi} W`;
+                } else {
+                    problem.circuitParams = { E: `${Ukilde} V`, Ri: `${Ri} Ω`, RL: `${RL} Ω`, I: "?", target: "I" };
+                    problem.questionText = `Hva er strømmen I som kilden leverer til belastningen R<sub>L</sub> = ${RL} Ω?`;
+                    problem.expectedAnswer = `${I} A`;
+                    problem.expectedValue = I;
+                    problem.expectedUnit = "A";
+                    problem.explanation = `I = <span class="frac"><span class="num">U<sub>kilde</sub></span><span class="den">R<sub>i</sub> + R<sub>L</sub></span></span> = <span class="frac"><span class="num">${Ukilde} V</span><span class="den">(${Ri} + ${RL}) Ω</span></span> = ${I} A`;
+                }
+
+            } else if (lvl === 4) {
+                // Doble spenningskilder (Superposisjon / Nodal-analyse)
+                problem.circuitType = "circuitBeast3";
+                const combos = [
+                    // 1. NEDOVER (Normal polaritet på U2)
+                    { U1: 30, R1: 10, U2: 20, R2: 20, Rm: 20, U2Rev: false, Im: 1.0, UA: 20, dir: "down", dirText: "Nedover (Fra A)" },
+                    { U1: 60, R1: 30, U2: 30, R2: 30, Rm: 30, U2Rev: false, Im: 1.0, UA: 30, dir: "down", dirText: "Nedover (Fra A)" },
+                    { U1: 72, R1: 24, U2: 36, R2: 24, Rm: 24, U2Rev: false, Im: 1.5, UA: 36, dir: "down", dirText: "Nedover (Fra A)" },
+                    { U1: 36, R1: 12, U2: 36, R2: 12, Rm: 12, U2Rev: false, Im: 2.0, UA: 24, dir: "down", dirText: "Nedover (Fra A)" },
+
+                    // 2. NEDOVER (Reversert U2, men U1 dominerer og holder UA positiv)
+                    { U1: 40, R1: 10, U2: 30, R2: 20, Rm: 10, U2Rev: true, Im: 1.0, UA: 10, dir: "down", dirText: "Nedover (Fra A)" },
+                    { U1: 36, R1: 12, U2: 30, R2: 60, Rm: 15, U2Rev: true, Im: 1.0, UA: 15, dir: "down", dirText: "Nedover (Fra A)" },
+                    { U1: 24, R1: 12, U2: 60, R2: 60, Rm: 10, U2Rev: true, Im: 0.5, UA: 5, dir: "down", dirText: "Nedover (Fra A)" },
+
+                    // 3. OPPOVER (Reversert U2 dominerer og trekker UA negativ)
+                    { U1: 24, R1: 24, U2: 60, R2: 12, Rm: 24, U2Rev: true, Im: 1.0, UA: -24, dir: "up", dirText: "Oppover (Til A)" },
+                    { U1: 12, R1: 24, U2: 36, R2: 12, Rm: 12, U2Rev: true, Im: 1.0, UA: -12, dir: "up", dirText: "Oppover (Til A)" },
+                    { U1: 30, R1: 20, U2: 40, R2: 10, Rm: 10, U2Rev: true, Im: 1.0, UA: -10, dir: "up", dirText: "Oppover (Til A)" },
+                    { U1: 24, R1: 12, U2: 90, R2: 15, Rm: 20, U2Rev: true, Im: 1.0, UA: -20, dir: "up", dirText: "Oppover (Til A)" },
+                    { U1: 12, R1: 60, U2: 18, R2: 15, Rm: 12, U2Rev: true, Im: 0.5, UA: -6, dir: "up", dirText: "Oppover (Til A)" },
+                    { U1: 12, R1: 24, U2: 60, R2: 12, Rm: 10, U2Rev: true, Im: 2.0, UA: -20, dir: "up", dirText: "Oppover (Til A)" },
+
+                    // 4. INGEN STRØM (Reversert U2 balanserer U1 nøyaktig slik at UA = 0 V)
+                    { U1: 30, R1: 15, U2: 20, R2: 10, Rm: 20, U2Rev: true, Im: 0.0, UA: 0, dir: "zero", dirText: "Ingen strøm (0 A)" },
+                    { U1: 40, R1: 20, U2: 40, R2: 20, Rm: 15, U2Rev: true, Im: 0.0, UA: 0, dir: "zero", dirText: "Ingen strøm (0 A)" },
+                    { U1: 36, R1: 12, U2: 60, R2: 20, Rm: 25, U2Rev: true, Im: 0.0, UA: 0, dir: "zero", dirText: "Ingen strøm (0 A)" },
+                    { U1: 24, R1: 12, U2: 30, R2: 15, Rm: 10, U2Rev: true, Im: 0.0, UA: 0, dir: "zero", dirText: "Ingen strøm (0 A)" }
+                ];
+                const c = getRandomChoice(combos);
+                problem.circuitParams = { 
+                    U1: `${c.U1} V`, 
+                    U2: `${c.U2} V`, 
+                    R1: `${c.R1} Ω`, 
+                    R2: `${c.R2} Ω`, 
+                    Rm: `${c.Rm} Ω`, 
+                    Im: `${c.Im} A`, 
+                    target: "Im",
+                    U1Reversed: false,
+                    U2Reversed: c.U2Rev 
+                };
+                problem.questionText = "Bruk superposisjon eller nodal-analyse: Beregn strømmen I<sub>m</sub> gjennom midtmotstanden R<sub>m</sub>, og velg retning med knappene under.";
+                problem.expectedAnswer = `${c.Im} A (${c.dirText})`;
+                problem.expectedValue = c.Im;
+                problem.expectedUnit = "A";
+                problem.expectedDir = c.dir;
+
+                const polInfo = c.U2Rev
+                    ? `Merk at kilde U₂ er motkoblet med minuspolen opp mot Knutepunkt A (V₂ = -${c.U2} V).`
+                    : `Begge kilder har plusspolen vendt opp mot Knutepunkt A (V₁ = +${c.U1} V, V₂ = +${c.U2} V).`;
+
+                const nodeEq = c.U2Rev
+                    ? `U<sub>A</sub> · (<span class="frac"><span class="num">1</span><span class="den">${c.R1}</span></span> + <span class="frac"><span class="num">1</span><span class="den">${c.Rm}</span></span> + <span class="frac"><span class="num">1</span><span class="den">${c.R2}</span></span>) = <span class="frac"><span class="num">${c.U1}</span><span class="den">${c.R1}</span></span> - <span class="frac"><span class="num">${c.U2}</span><span class="den">${c.R2}</span></span>`
+                    : `U<sub>A</sub> · (<span class="frac"><span class="num">1</span><span class="den">${c.R1}</span></span> + <span class="frac"><span class="num">1</span><span class="den">${c.Rm}</span></span> + <span class="frac"><span class="num">1</span><span class="den">${c.R2}</span></span>) = <span class="frac"><span class="num">${c.U1}</span><span class="den">${c.R1}</span></span> + <span class="frac"><span class="num">${c.U2}</span><span class="den">${c.R2}</span></span>`;
+
+                let dirExplain = "";
+                if (c.dir === "down") {
+                    dirExplain = `Siden U<sub>A</sub> = +${c.UA} V > 0 V, flyter strømmen fra node A ned til 0 V-skinnen: I<sub>m</sub> = <span class="frac"><span class="num">U<sub>A</sub></span><span class="den">R<sub>m</sub></span></span> = <span class="frac"><span class="num">${c.UA}</span><span class="den">${c.Rm}</span></span> = ${c.Im} A (Nedover).`;
+                } else if (c.dir === "up") {
+                    dirExplain = `Siden U<sub>A</sub> = ${c.UA} V < 0 V, flyter strømmen fra 0 V-skinnen opp til det negative knutepunktet A: I<sub>m</sub> = <span class="frac"><span class="num">|U<sub>A</sub>|</span><span class="den">R<sub>m</sub></span></span> = <span class="frac"><span class="num">${Math.abs(c.UA)}</span><span class="den">${c.Rm}</span></span> = ${c.Im} A (Oppover).`;
+                } else {
+                    dirExplain = `Kildene balanserer hverandre nøyaktig i node A: U<sub>A</sub> = 0 V ➔ Det går ingen strøm gjennom R<sub>m</sub>: I<sub>m</sub> = 0 A (Ingen strøm).`;
+                }
+
+                problem.explanation = `1. ${polInfo} ➔ 2. Nodal-likning: ${nodeEq} ➔ U<sub>A</sub> = ${c.UA} V ➔ 3. ${dirExplain}`;
+
+            } else if (lvl === 5) {
+                // Wheatstone-bro med motstand R_h i tverrstreken
+                problem.circuitType = "circuitWheatstone";
+                const combos = [
+                    { U: 60, R1: 20, R2: 30, R3: 60, R4: 30, Rh: 20, ih: 0.3, dir: "right", dirText: "Fra A til B (Høyre)", Uth: 15, Rth: 30 },
+                    { U: 120, R1: 30, R2: 60, R3: 60, R4: 30, Rh: 40, ih: 0.5, dir: "right", dirText: "Fra A til B (Høyre)", Uth: 40, Rth: 40 },
+                    { U: 48, R1: 60, R2: 20, R3: 20, R4: 60, Rh: 18, ih: 0.5, dir: "left", dirText: "Fra B til A (Venstre)", Uth: 24, Rth: 30 },
+                    { U: 90, R1: 30, R2: 60, R3: 60, R4: 30, Rh: 20, ih: 0.5, dir: "right", dirText: "Fra A til B (Høyre)", Uth: 30, Rth: 40 },
+                    { U: 80, R1: 40, R2: 40, R3: 40, R4: 40, Rh: 25, ih: 0.0, dir: "zero", dirText: "Ingen strøm (0 A)", Uth: 0, Rth: 40 }
+                ];
+                const c = getRandomChoice(combos);
+                problem.circuitParams = { U: `${c.U} V`, R1: `${c.R1} Ω`, R2: `${c.R2} Ω`, R3: `${c.R3} Ω`, R4: `${c.R4} Ω`, Rh: `${c.Rh} Ω` };
+                problem.questionText = "Beregn tverrstrømmen I<sub>h</sub> gjennom tverrmotstanden R<sub>h</sub>, og velg retning med knappene under.";
+                problem.expectedAnswer = `${c.ih} A (${c.dirText})`;
+                problem.expectedValue = c.ih;
+                problem.expectedUnit = "A";
+                problem.expectedDir = c.dir;
+                problem.explanation = `1. Open-circuit spenning U<sub>th</sub> = |U<sub>A</sub> - U<sub>B</sub>| = ${c.Uth} V ➔ 2. Thévenin-resistans R<sub>th</sub> = (R₁∥R₃) + (R₂∥R₄) = ${c.Rth} Ω ➔ 3. I<sub>h</sub> = <span class="frac"><span class="num">U<sub>th</sub></span><span class="den">R<sub>th</sub> + R<sub>h</sub></span></span> = <span class="frac"><span class="num">${c.Uth}</span><span class="den">${c.Rth} + ${c.Rh}</span></span> = ${c.ih} A, Retning: ${c.dirText}`;
+            }
+            return problem;
+        }
+
+        function checkAnswer(rawInput) {
+            if (!rawInput || typeof rawInput !== "string") return { correct: false, message: "Vennligst skriv inn et svar." };
+            const trimmed = rawInput.trim();
+            const match = trimmed.match(/^(\d+(?:[.,]\d+)?)\s*([pnμµuUmkMKGg]?)\s*(V|Ω|Ω|A|W|ohm|OHM|Ohm|v|a|w)?$/);
+            if (!match) return { correct: false, message: "Ugyldig format. Eksempel på svar: 54 V, 1.5 A, 30 Ω eller 18 W" };
+            let numStr = match[1].replace(",", ".");
+            let prefix = match[2] || "";
+            let unit = match[3] || "";
+            if (prefix === "u" || prefix === "U" || prefix === "µ") prefix = "μ";
+            if (prefix === "K") prefix = "k";
+            if (unit.toLowerCase() === "ohm" || unit === "Ω") unit = "Ω";
+            else if (unit) unit = unit.toUpperCase();
+
+            const expectedUnit = gameState.currentProblem.expectedUnit;
+            if (unit && unit !== expectedUnit) return { correct: false, message: `Feil enhet! Forventet ${expectedUnit}, men du skrev ${unit}.` };
+
+            let factor = 1;
+            if (prefix === "k") factor = 1e3;
+            else if (prefix === "m") factor = 1e-3;
+            else if (prefix === "μ") factor = 1e-6;
+            else if (prefix === "M") factor = 1e6;
+
+            const userVal = parseFloat(numStr) * factor;
+            const expectedVal = gameState.currentProblem.expectedValue;
+            if (isNaN(userVal)) return { correct: false, message: "Ugyldig tallverdi." };
+
+            const tolerance = Math.max(0.05, Math.abs(expectedVal) * 0.04);
+            if (Math.abs(userVal - expectedVal) > tolerance) return { correct: false, message: "Feil tallverdi." };
+
+            if (gameState.currentLevel === 4 || gameState.currentLevel === 5) {
+                const userDir = gameState.selectedDirection;
+                const expectedDir = gameState.currentProblem.expectedDir;
+                if (!userDir) return { correct: false, message: "Husk å velge strømretning med retningsknappene under oppgaven!" };
+                if (userDir !== expectedDir) return { correct: false, message: "Tallverdien er riktig, men du har valgt feil strømretning!" };
+            }
+            return { correct: true, message: "🔥 LEGENDARISK! Du løste Beast-oppgaven helt perfekt! ⚡" };
+        }
+
+        // Fyrverkeri
+        function launchFireworks(durationMs = 3500, callback) {
+            const canvas = document.getElementById("fireworks-canvas");
+            const ctx = canvas.getContext("2d");
+            canvas.style.display = "block";
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#a855f7", "#38bdf8", "#ffffff", "#fbbf24"];
+
+            function createExplosion(x, y) {
+                const count = 75;
+                for (let i = 0; i < count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 8 + 2;
+                    particles.push({
+                        x: x, y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        color: getRandomChoice(colors),
+                        alpha: 1,
+                        decay: Math.random() * 0.02 + 0.015,
+                        radius: Math.random() * 3.5 + 2
+                    });
+                }
+            }
+
+            let animationFrameId;
+            let intervalId = setInterval(() => {
+                const x = Math.random() * canvas.width * 0.8 + canvas.width * 0.1;
+                const y = Math.random() * canvas.height * 0.5 + canvas.height * 0.1;
+                createExplosion(x, y);
+            }, 250);
+
+            function loop() {
+                ctx.fillStyle = "rgba(7, 10, 18, 0.25)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.08;
+                    p.alpha -= p.decay;
+
+                    if (p.alpha <= 0) {
+                        particles.splice(i, 1);
+                        continue;
+                    }
+
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+                animationFrameId = requestAnimationFrame(loop);
+            }
+
+            createExplosion(canvas.width * 0.5, canvas.height * 0.3);
+            loop();
+
+            setTimeout(() => {
+                clearInterval(intervalId);
+                cancelAnimationFrame(animationFrameId);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                canvas.style.display = "none";
+                if (callback) callback();
+            }, durationMs);
+        }
+
+        function updatePlayerStatusUI() {
+            const tag = document.getElementById('player-status-tag');
+            const nameSpan = document.getElementById('player-status-name');
+            if (gameState.playerName) {
+                tag.style.display = 'inline-flex';
+                nameSpan.textContent = gameState.playerName;
+            } else {
+                tag.style.display = 'none';
+            }
+        }
+
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('kretsMesterBM_progress', JSON.stringify({
+                    level: gameState.currentLevel,
+                    streak: gameState.streak,
+                    playerName: gameState.playerName
+                }));
+            } catch (e) {}
+        }
+
+        function showDiploma() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString("no-NO", { year: "numeric", month: "long", day: "numeric" });
+            document.getElementById("diploma-date").textContent = dateStr;
+
+            const nameInput = document.getElementById("student-name-input");
+            nameInput.value = gameState.playerName || "";
+            nameInput.readOnly = false;
+            nameInput.style.backgroundColor = "transparent";
+            nameInput.focus();
+            document.getElementById("diploma-overlay").classList.add("active");
+        }
+
+        function closeDiploma() {
+            document.getElementById("diploma-overlay").classList.remove("active");
+            document.getElementById("answer-input").focus();
+        }
+
+        function openSaveLoadModal(defaultTab = 'save') {
+            const modal = document.getElementById('save-load-modal');
+            const statusSpan = document.getElementById('save-current-status');
+            const nameInput = document.getElementById('save-player-name-input');
+            statusSpan.textContent = `Nivå ${gameState.currentLevel}: ${LEVELS[gameState.currentLevel - 1].name}`;
+            nameInput.value = gameState.playerName;
+            nameInput.readOnly = false;
+            document.getElementById('load-status').textContent = localStorage.getItem('kretsMesterBM_progress') ? 'Det finnes lagret fremdrift på denne enheten.' : 'Ingen lagret fremdrift funnet.';
+            switchSaveTab(defaultTab);
+            modal.classList.add('active');
+        }
+
+        function switchSaveTab(tab) {
+            const tabSave = document.getElementById('tab-btn-save');
+            const tabLoad = document.getElementById('tab-btn-load');
+            const contentSave = document.getElementById('save-tab-content');
+            const contentLoad = document.getElementById('load-tab-content');
+
+            if (tab === 'save') {
+                tabSave.classList.add('active');
+                tabLoad.classList.remove('active');
+                contentSave.style.display = 'block';
+                contentLoad.style.display = 'none';
+            } else {
+                tabLoad.classList.add('active');
+                tabSave.classList.remove('active');
+                contentLoad.style.display = 'block';
+                contentSave.style.display = 'none';
+
+                document.getElementById('load-status').textContent = localStorage.getItem('kretsMesterBM_progress') ? 'Det finnes lagret fremdrift på denne enheten.' : 'Ingen lagret fremdrift funnet.';
+            }
+        }
+
+        function logoutPlayer() {
+            const confirmLogout = confirm(
+                "Er du sikker på at du vil nullstille lokal progresjon?\n\n" +
+                "Nivå, streak og navn på denne enheten blir slettet."
+            );
+            if (!confirmLogout) return;
+
+            try {
+                localStorage.removeItem('kretsMesterBM_progress');
+            } catch(e) {}
+
+            gameState.playerName = "";
+            gameState.streak = 0;
+            gameState.consecutiveWrong = 0;
+            gameState.isReviewing = false;
+            gameState.currentLevel = 1;
+
+            const saveNameInput = document.getElementById('save-player-name-input');
+            if (saveNameInput) {
+                saveNameInput.value = "";
+                saveNameInput.readOnly = false;
+                saveNameInput.style.backgroundColor = "#0f172a";
+            }
+            const dipNameInput = document.getElementById('student-name-input');
+            if (dipNameInput) {
+                dipNameInput.value = "";
+                dipNameInput.readOnly = false;
+                dipNameInput.style.backgroundColor = "transparent";
+                dipNameInput.style.color = "";
+                dipNameInput.style.cursor = "text";
+            }
+            const modal = document.getElementById('save-load-modal');
+            if (modal) modal.classList.remove('active');
+
+            updatePlayerStatusUI();
+            loadNewProblem();
+            showLevelModal(1);
+        }
+
+        function updateCheatPanel() {
+            if (!gameState.currentProblem) return;
+            document.getElementById("cheat-ans-val").innerHTML = gameState.currentProblem.expectedAnswer;
+            document.getElementById("cheat-ans-step").innerHTML = gameState.currentProblem.explanation;
+            document.querySelectorAll(".cheat-lvl-btn[data-lvl]").forEach(btn => {
+                const lvl = parseInt(btn.getAttribute("data-lvl"));
+                if (lvl === gameState.currentLevel) btn.classList.add("active");
+                else btn.classList.remove("active");
+            });
+        }
+
+        function renderCircuit() {
+            const renderer = CIRCUIT_RENDERERS[gameState.currentProblem.circuitType];
+            const svgHtml = renderer(gameState.currentProblem.circuitParams);
+            document.getElementById("circuit-container").innerHTML = svgHtml;
+        }
+
+        function updateDirectionButtons() {
+            const dirSection = document.getElementById("direction-section");
+            const dirLabel = document.getElementById("direction-label");
+            const dirButtons = document.getElementById("direction-buttons");
+
+            if (gameState.currentLevel === 4) {
+                dirSection.classList.add("active");
+                dirLabel.innerHTML = "Velg strømretning for I<sub>m</sub> gjennom R<sub>m</sub>:";
+                dirButtons.innerHTML = `
+                    <button type="button" class="dir-btn" data-dir="down">⬇ Nedover (Fra A)</button>
+                    <button type="button" class="dir-btn" data-dir="up">⬆ Oppover (Til A)</button>
+                    <button type="button" class="dir-btn" data-dir="zero">⏺ Ingen strøm (0 A)</button>
+                `;
+            } else if (gameState.currentLevel === 5) {
+                dirSection.classList.add("active");
+                dirLabel.innerHTML = "Velg strømretning for tverrstrømmen I<sub>h</sub>:";
+                dirButtons.innerHTML = `
+                    <button type="button" class="dir-btn" data-dir="right">➔ Fra A til B (Høyre)</button>
+                    <button type="button" class="dir-btn" data-dir="left">⬅ Fra B til A (Venstre)</button>
+                    <button type="button" class="dir-btn" data-dir="zero">⏺ Ingen strøm (0 A)</button>
+                `;
+            } else {
+                dirSection.classList.remove("active");
+            }
+
+            document.querySelectorAll(".dir-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    document.querySelectorAll(".dir-btn").forEach(b => b.classList.remove("selected"));
+                    btn.classList.add("selected");
+                    gameState.selectedDirection = btn.getAttribute("data-dir");
+                    renderCircuit();
+                    document.getElementById("answer-input").focus();
+                });
+            });
+        }
+
+        function loadNewProblem() {
+            gameState.selectedDirection = null;
+            let problem, signature, attempts = 0;
+            do {
+                problem = generateProblemForLevel(gameState.currentLevel);
+                signature = getProblemSignature(problem);
+                attempts++;
+            } while (signature === gameState.lastProblemSignature && attempts < 15);
+            gameState.lastProblemSignature = signature;
+            gameState.currentProblem = problem;
+            const lvlData = LEVELS[gameState.currentLevel - 1];
+            document.getElementById("level-num").textContent = gameState.currentLevel;
+            document.getElementById("level-name").textContent = lvlData.name;
+            document.getElementById("topic-pill").textContent = lvlData.topic;
+            document.getElementById("problem-question").innerHTML = gameState.currentProblem.questionText;
+            document.getElementById("streak-num").textContent = gameState.streak;
+
+            updateDirectionButtons();
+            renderCircuit();
+            updateCheatPanel();
+        }
+
+        function showLevelModal(lvl) {
+            const data = LEVELS[lvl - 1];
+            document.getElementById("modal-title").textContent = `Beast Nivå ${lvl}: ${data.name}`;
+            
+            let stepsHtml = data.lessonSteps.map((step, idx) => `
+                <li class="lesson-step-item">
+                    <span class="step-num">${idx + 1}</span>
+                    <div>${step}</div>
+                </li>
+            `).join("");
+
+            let formulasHtml = data.formulas.map(f => `<div class="formula-item">▪ ${f}</div>`).join("");
+
+            let bridgeHtml = data.bridgeConcept ? `
+                <div style="background: rgba(56, 189, 248, 0.08); border-left: 3px solid #38bdf8; padding: 10px 14px; border-radius: 6px; font-size: 13px; color: #cbd5e1; margin-bottom: 12px; line-height: 1.55;">
+                    🚀 <strong style="color: #38bdf8;">Fra KretsMester til Beast Mode:</strong><br>${data.bridgeConcept}
+                </div>
+            ` : "";
+
+            let exampleHtml = data.example ? `
+                <div class="lesson-card" style="border-left: 3px solid #34d399;">
+                    <div class="lesson-card-header green">🔢 Praktisk regneeksempel</div>
+                    <div style="font-size: 13px; line-height: 1.55; color: #cbd5e1;">${data.example}</div>
+                </div>
+            ` : "";
+
+            document.getElementById("modal-body").innerHTML = `
+                ${bridgeHtml}
+                <div class="lesson-card">
+                    <div class="lesson-card-header gold">🎯 Konsept & Teori</div>
+                    <div style="font-size: 13.5px; line-height: 1.55; color: #cbd5e1;">${data.lessonConcept}</div>
+                </div>
+
+                <div class="lesson-card">
+                    <div class="lesson-card-header purple">🧠 Steg-for-steg løsningsmetode</div>
+                    <ol class="lesson-step-list">${stepsHtml}</ol>
+                </div>
+
+                ${exampleHtml}
+
+                <div class="formula-box">
+                    <div style="font-weight: 800; margin-bottom: 8px; color: #38bdf8; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px;">📐 Nøkkelformler & Kalkulatortriks</div>
+                    ${formulasHtml}
+                </div>
+
+                <div style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); padding: 10px 14px; border-radius: 8px; font-size: 13px; color: #fbbf24;">
+                    💡 <strong>Beast-Tip:</strong> ${data.tips}
+                </div>
+            `;
+
+            document.getElementById("modal-close-btn").textContent = gameState.streak === 0 ? "Start Beast-utfordring ➔" : "Forstått! Tilbake til oppgaven ➔";
+            document.getElementById("modal-overlay").classList.add("active");
+            const modalContent = document.querySelector("#modal-overlay .modal-content");
+            if (modalContent) modalContent.scrollTop = 0;
+            document.getElementById("modal-close-btn").focus({ preventScroll: true });
+        }
+
+        function closeModal() {
+            document.getElementById("modal-overlay").classList.remove("active");
+            document.getElementById("answer-input").focus();
+        }
+
+        function toggleCheatMenu() {
+            const panel = document.getElementById("cheat-panel");
+            panel.classList.toggle("active");
+            if (panel.classList.contains("active")) {
+                updateCheatPanel();
+            }
+        }
+
+        function handleSubmission(e) {
+            if (e) e.preventDefault();
+            const inputElement = document.getElementById("answer-input");
+            const submitBtn = document.getElementById("submit-btn");
+            const feedbackElement = document.getElementById("feedback");
+
+            if (gameState.isReviewing) {
+                gameState.isReviewing = false;
+                submitBtn.textContent = "Sjekk svar";
+                submitBtn.classList.remove("btn-next");
+                feedbackElement.innerHTML = "";
+                inputElement.value = "";
+                loadNewProblem();
+                inputElement.focus();
+                return;
+            }
+
+            const rawAnswer = inputElement.value;
+            const result = checkAnswer(rawAnswer);
+
+            if (result.correct) {
+                gameState.consecutiveWrong = 0;
+                gameState.streak++;
+
+                // Seiersfeiring på siste nivå
+                if (gameState.currentLevel === LEVELS.length && gameState.streak >= 3) {
+                    saveToLocalStorage();
+                    document.getElementById("streak-num").textContent = gameState.streak;
+                    feedbackElement.className = "feedback correct";
+                    feedbackElement.textContent = "🐉 BEAST MODE FULLFØRT! Du har behersket den mektigste elektro-utfordringen! 🎆";
+                    launchFireworks(3500, () => showDiploma());
+                    return;
+                }
+
+                feedbackElement.className = "feedback correct";
+                feedbackElement.textContent = result.message;
+
+                if (gameState.streak >= 3 && gameState.currentLevel < LEVELS.length) {
+                    gameState.currentLevel++;
+                    gameState.streak = 0;
+                    saveToLocalStorage();
+                    showLevelModal(gameState.currentLevel);
+                }
+                loadNewProblem();
+                inputElement.value = "";
+                inputElement.focus();
+            } else {
+                gameState.consecutiveWrong++;
+                gameState.streak = 0;
+                if (gameState.consecutiveWrong >= 3 && gameState.currentLevel > 1) {
+                    gameState.currentLevel--;
+                    gameState.consecutiveWrong = 0;
+                    showLevelModal(gameState.currentLevel);
+                }
+                document.getElementById("level-num").textContent = gameState.currentLevel;
+                document.getElementById("streak-num").textContent = gameState.streak;
+                gameState.isReviewing = true;
+                submitBtn.textContent = "Neste Beast-oppgave ➔";
+                submitBtn.classList.add("btn-next");
+
+                let dirInfo = "";
+                if (gameState.currentLevel === 4 || gameState.currentLevel === 5) {
+                    const dirNames = { right: "Fra A til B (Høyre)", left: "Fra B til A (Venstre)", down: "Nedover (Fra A)", up: "Oppover (Til A)", zero: "Ingen strøm (0 A)" };
+                    dirInfo = `<div class="review-row"><span class="label">Valgt retning:</span><span class="val">${gameState.selectedDirection ? dirNames[gameState.selectedDirection] : "(ingen valgt)"}</span></div>`;
+                }
+                const safeAnswer = rawAnswer ? escapeHtml(rawAnswer) : "(ingenting skrevet)";
+                feedbackElement.className = "feedback";
+                feedbackElement.innerHTML = `<div class="review-card"><div class="review-title">❌ ${escapeHtml(result.message)}</div><div class="review-grid"><div class="review-row"><span class="label">Spørsmål:</span><span class="val">${gameState.currentProblem.questionText}</span></div>${dirInfo}<div class="review-row wrong-row"><span class="label">Ditt svar:</span><span class="val">${safeAnswer}</span></div><div class="review-row correct-row"><span class="label">Riktig svar:</span><span class="val">${gameState.currentProblem.expectedAnswer}</span></div></div><div class="review-explanation"><strong>Steg-for-steg løsning:</strong> ${gameState.currentProblem.explanation}</div></div>`;
+            }
+        }
+
+        document.getElementById("game-form").addEventListener("submit", handleSubmission);
+        document.querySelectorAll(".shortcut-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const char = btn.getAttribute("data-char");
+                const input = document.getElementById("answer-input");
+                input.value += char;
+                input.focus();
+            });
+        });
+
+        document.getElementById("help-btn").addEventListener("click", () => { showLevelModal(gameState.currentLevel); });
+        document.getElementById("modal-close-btn").addEventListener("click", closeModal);
+        document.getElementById("modal-overlay").addEventListener("click", (e) => { if (e.target.id === "modal-overlay") closeModal(); });
+        document.getElementById("diploma-close-btn").addEventListener("click", closeDiploma);
+
+        // Skjult aktivering av cheat menu
+        let secretClickCount = 0;
+        let secretClickTimer = null;
+        const secretTrigger = document.getElementById("secret-trigger-area");
+        if (secretTrigger) {
+            secretTrigger.addEventListener("click", () => {
+                secretClickCount++;
+                clearTimeout(secretClickTimer);
+                if (secretClickCount >= 7) {
+                    toggleCheatMenu();
+                    secretClickCount = 0;
+                } else {
+                    secretClickTimer = setTimeout(() => { secretClickCount = 0; }, 1800);
+                }
+            });
+        }
+
+        // Lagre / Hent modal hendelser
+        document.getElementById("save-load-btn").addEventListener("click", () => openSaveLoadModal('save'));
+        document.getElementById("save-load-close-btn").addEventListener("click", () => document.getElementById("save-load-modal").classList.remove("active"));
+        document.getElementById("save-load-close-x").addEventListener("click", () => document.getElementById("save-load-modal").classList.remove("active"));
+        document.getElementById("save-load-modal").addEventListener("click", (e) => {
+            if (e.target.id === "save-load-modal") document.getElementById("save-load-modal").classList.remove("active");
+        });
+        document.getElementById("tab-btn-save").addEventListener("click", () => switchSaveTab('save'));
+        document.getElementById("tab-btn-load").addEventListener("click", () => switchSaveTab('load'));
+
+        document.getElementById("btn-save-progress").addEventListener("click", () => {
+            gameState.playerName = document.getElementById("save-player-name-input").value.trim();
+            updatePlayerStatusUI();
+            saveToLocalStorage();
+            document.getElementById("save-current-status").textContent = `Lagret: Nivå ${gameState.currentLevel} (${gameState.streak}/3)`;
+        });
+
+        document.getElementById("btn-load-progress").addEventListener("click", () => {
+            try {
+                const saved = JSON.parse(localStorage.getItem("kretsMesterBM_progress"));
+                if (!saved) return;
+                gameState.currentLevel = Math.min(Math.max(saved.level || 1, 1), LEVELS.length);
+                gameState.streak = Math.min(Math.max(saved.streak || 0, 0), 3);
+                gameState.playerName = saved.playerName || "";
+                gameState.isReviewing = false;
+                updatePlayerStatusUI();
+                loadNewProblem();
+                document.getElementById("save-load-modal").classList.remove("active");
+            } catch (e) {
+                document.getElementById("load-status").textContent = "Den lagrede fremdriften kunne ikke leses.";
+            }
+        });
+
+        const btnLogoutTag = document.getElementById("btn-logout-tag");
+        if (btnLogoutTag) btnLogoutTag.addEventListener("click", (e) => { e.stopPropagation(); logoutPlayer(); });
+        const btnLogoutModal = document.getElementById("btn-logout-modal");
+        if (btnLogoutModal) btnLogoutModal.addEventListener("click", () => logoutPlayer());
+
+        const studentNameInput = document.getElementById("student-name-input");
+        if (studentNameInput) {
+            studentNameInput.addEventListener("input", () => {
+                gameState.playerName = studentNameInput.value.trim();
+            });
+        }
+
+        window.addEventListener("beforeprint", () => {
+            if (gameState.playerName) {
+                const inp = document.getElementById("student-name-input");
+                if (inp) inp.value = gameState.playerName;
+            }
+        });
+
+        // Hemmelig hurtigtast for lærer: Ctrl + Alt + K eller Ctrl + Shift + K
+        document.addEventListener("keydown", (e) => {
+            if (((e.ctrlKey && e.altKey) || (e.ctrlKey && e.shiftKey)) && (e.key === "K" || e.key === "k" || e.key === "I" || e.key === "i")) {
+                e.preventDefault();
+                toggleCheatMenu();
+            } else if (e.key === "Escape") {
+                if (document.getElementById("save-load-modal") && document.getElementById("save-load-modal").classList.contains("active")) {
+                    document.getElementById("save-load-modal").classList.remove("active");
+                } else if (document.getElementById("modal-overlay").classList.contains("active")) {
+                    closeModal();
+                } else if (document.getElementById("diploma-overlay").classList.contains("active")) {
+                    closeDiploma();
+                } else if (document.getElementById("cheat-panel").classList.contains("active")) {
+                    toggleCheatMenu();
+                }
+            }
+        });
+
+        document.getElementById("cheat-close").addEventListener("click", toggleCheatMenu);
+        document.querySelectorAll(".cheat-lvl-btn[data-lvl]").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const lvl = parseInt(btn.getAttribute("data-lvl"));
+                saveToLocalStorage();
+                gameState.currentLevel = lvl;
+                gameState.streak = 0;
+                gameState.consecutiveWrong = 0;
+                gameState.isReviewing = false;
+                document.getElementById("submit-btn").textContent = "Sjekk svar";
+                document.getElementById("submit-btn").classList.remove("btn-next");
+                document.getElementById("feedback").innerHTML = "";
+                document.getElementById("answer-input").value = "";
+                loadNewProblem();
+                document.getElementById("answer-input").focus();
+            });
+        });
+        document.getElementById("cheat-intro-btn").addEventListener("click", () => {
+            showLevelModal(gameState.currentLevel);
+        });
+        document.getElementById("cheat-fill-btn").addEventListener("click", () => {
+            if (gameState.currentProblem) {
+                if ((gameState.currentLevel === 4 || gameState.currentLevel === 5) && gameState.currentProblem.expectedDir) {
+                    gameState.selectedDirection = gameState.currentProblem.expectedDir;
+                    document.querySelectorAll(".dir-btn").forEach(b => {
+                        if (b.getAttribute("data-dir") === gameState.selectedDirection) b.classList.add("selected");
+                        else b.classList.remove("selected");
+                    });
+                    renderCircuit();
+                }
+                document.getElementById("answer-input").value = `${gameState.currentProblem.expectedValue} ${gameState.currentProblem.expectedUnit}`;
+                document.getElementById("answer-input").focus();
+            }
+        });
+        document.getElementById("cheat-skip-btn").addEventListener("click", () => {
+            gameState.isReviewing = false;
+            document.getElementById("submit-btn").textContent = "Sjekk svar";
+            document.getElementById("submit-btn").classList.remove("btn-next");
+            document.getElementById("feedback").innerHTML = "";
+            document.getElementById("answer-input").value = "";
+            loadNewProblem();
+            document.getElementById("answer-input").focus();
+        });
+        document.getElementById("cheat-streak-btn").addEventListener("click", () => {
+            gameState.streak++;
+            document.getElementById("streak-num").textContent = gameState.streak;
+            if (gameState.currentLevel === LEVELS.length && gameState.streak >= 3) {
+                launchFireworks(3500, () => showDiploma());
+            } else if (gameState.streak >= 3 && gameState.currentLevel < LEVELS.length) {
+                gameState.currentLevel++;
+                gameState.streak = 0;
+                showLevelModal(gameState.currentLevel);
+                loadNewProblem();
+            }
+        });
+        document.getElementById("cheat-diploma-btn").addEventListener("click", () => {
+            showDiploma();
+        });
+
+        // Gjenopprett lokal progresjon ved oppstart
+        try {
+            const saved = JSON.parse(localStorage.getItem("kretsMesterBM_progress"));
+            if (saved) {
+                gameState.currentLevel = Math.min(Math.max(saved.level || 1, 1), LEVELS.length);
+                gameState.streak = Math.min(Math.max(saved.streak || 0, 0), 3);
+                gameState.playerName = saved.playerName || "";
+                updatePlayerStatusUI();
+            }
+        } catch(e) {}
+
+        loadNewProblem();
+        showLevelModal(gameState.currentLevel);
+    </script>
+</body>
+</html>
